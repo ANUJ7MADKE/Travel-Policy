@@ -1,12 +1,9 @@
 import jwt from 'jsonwebtoken';
 
-function generateToken(user) {
+function generateToken(tokenObject) {
 
     return jwt.sign(
-        {
-            profileId: user.profileId,
-            designation: user.designation
-        },
+        tokenObject,
         process.env.JWT_SECRET,
         { expiresIn: '1h' }
     );
