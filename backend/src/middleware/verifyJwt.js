@@ -1,27 +1,59 @@
 import jwt from 'jsonwebtoken';
 
-const verifyToken = (req, res, next) => {
-    const authHeader = req.header('Authorization');
+const verifyApplicantToken = (req, res, next) => {
 
-    if (!authHeader) {
-        return res.status(401).json({
-            message: "Unauthorized access",
-            data:{}
-        });
+    const token = req.cookies.access_token;
+    
+    if (!token) {
+        return res.status(401).json("No token found");
     }
 
-    const token = authHeader.replace('Bearer ', '');
+    jwt.verify(token, process.env.JWT_SECRET, (err,payload)=>{
+        
+        if (err) {
+            return res.status(403).json("Invalid Token");
+        }
 
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = decoded;
-        next();
-    } catch (error) {
-        return res.status(401).json({
-            message: "Unauthorized access",
-            data: {}
-        });
-    }
+        req.user = {
+            id : payload.id,
+            designation : payload.designation
+        }
+    
+        if (req.user && req.user.designation === 'applicant') {
+            next();
+        } else {
+            return res.json("Access denied. Not a applicant.");
+        }
+
+    })
 };
 
-export default verifyToken;
+const verifyValidatorToken = (req, res, next) => {
+
+    const token = req.cookies.access_token;
+    
+    if (!token) {
+        return res.status(401).json("No token found");
+    }
+
+    jwt.verify(token, process.env.JWT_SECRET, (err,payload)=>{
+        
+        if (err) {
+            return res.status(403).json("Invalid Token");
+        }
+
+        req.user = {
+            id : payload.id,
+            designation : payload.designation
+        }
+
+        if (req.user && req.user.designation === "validator") {
+            next();
+        } else {
+            return res.json("Access denied. Not a validator.");
+        }
+
+    })
+};
+
+export { verifyApplicantToken, verifyValidatorToken} ;

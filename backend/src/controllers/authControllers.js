@@ -72,7 +72,7 @@ const validatorLogin = async (req, res) => {
     
     const tokenObject = {
       profileId: validProfile.profileId,
-      designation: validProfile.designation
+      designation: "validator"
     }
 
     const token = generateToken(tokenObject);
@@ -85,4 +85,9 @@ const validatorLogin = async (req, res) => {
   
 };
 
-export { applicantLogin, validatorLogin };
+const logout = async (req, res) => {
+  res.clearCookie("access_token");
+  res.status(200).json("Logout Succesful");
+};
+
+export { applicantLogin, validatorLogin, logout };
