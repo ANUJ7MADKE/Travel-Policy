@@ -1,39 +1,52 @@
 import prisma from '../config/prismaConfig.js';
 
-const getApplicatons = async (req,res)=>{
-  const designation = req.body.designation;
-
+const validatorRoot = async (req, res) => {
   try {
-    const validator = await prisma.validator.findFirst({
-      where:{
-        profileId: req.params.id
-      },
-      include:{
-        applications:true
-      }
-    })
+    const user = req.user; // Contains all user info (id, designation, department, etc.)
+    const userId = user.id;
 
+    // Fetch validator information and associated applications
+    const validator = await prisma.validator.findUnique({
+      where: { profileId: userId },
+      include: {
+        applications: true // Include related applications in the query
+      }
+    });
+
+    // Check if the validator exists
     if (!validator) {
-      return res.status(404).send("validator doesn't exist")
+      return res.status(404).send("Validator doesn't exist");
     }
 
-    const allApplications = validator.applications;
 
-    const applications = {"PENDING":[],"REJECTED":[],"ACCEPTED":[]};
-    
-    allApplications.forEach((application)=>{
+    // Initialize the applications object to categorize by status
+    const applications = { "PENDING": [], "REJECTED": [], "ACCEPTED": [] };
+
+    // Categorize applications based on the validator's designation
+    validator.applications.forEach((application) => {
       const status = application[`${validator.designation.toLowerCase()}Validation`];
       if (applications[status]) {
         applications[status].push(application);
       }
-    })
-    
-    return res.status(200).send(applications);
+    });
+
+    // Remove the password & applications before sending user info
+    delete validator.password;
+    delete validator.applications;
+
+    // Return the response with the validator's info and categorized applications
+    return res.status(200).json({
+      message: "Validator Authorized",
+      user: validator,
+      applications: applications
+    });
 
   } catch (error) {
+    // Handle any errors that occur during the process
+    console.log(error);
     res.status(500).send(error.message);
   }
-}
+};
 
 const applicationAction = async (req, res) => {
   try {
@@ -107,6 +120,6 @@ const applicationAction = async (req, res) => {
 
 
 export {
-  getApplicatons,
+  validatorRoot,
   applicationAction
 }

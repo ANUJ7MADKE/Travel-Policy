@@ -1,7 +1,6 @@
-import { React, useState } from 'react';
-import { Link, Outlet } from 'react-router-dom';
-import logo from '/images/logo.jpeg'; 
-import { IoNotifications } from 'react-icons/io5';
+import { React } from 'react';
+import { Outlet, useLoaderData } from 'react-router-dom';
+import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 
 
@@ -18,65 +17,74 @@ const studentIcon = (
 
 const DashboardRoot = ({ role }) => {
   // DATA
-  const [studentData] = useState({
-    name: "Raunak Kumar Gupta",
-    university: "Somaiya Vidyavihar University",
-    role: "Student", 
-  });
+  const userData = useLoaderData().data.user;
+  console.log(useLoaderData());
+  const userDesignation = userData.designation || "Student";
 
-  const links = [
-    { label: "Home", path: "dashboard" },
-    { label: "Dashboard", path: "dashboard" },
-  ];
+  
 
   return (
     <>
-      <header>
-        <nav className="bg-white shadow-lg border-b-4 w-full border-gray-300">
-          <div className="w-full flex items-center justify-between px-4 h-20">
-            <div className="flex items-center">
-              <Link to="/" className="flex items-center">
-                <img src={logo} alt="Somaiya" className="object-contain w-48" />
-              </Link>
-            </div>
-            <div className="flex items-center text-1xl font-medium justify-end space-x-3">
-              {links.map((link, index) => (
-                <div key={index} className="flex flex-row items-center gap-2">
-                  <Link to={link.path} className="text-gray-700 hover:bg-red-700 hover:text-white p-1 rounded-md">
-                    {link.label}
-                  </Link>
-                  <span>|</span>
-                </div>
-              ))}
-              <div className="flex flex-row items-center gap-2">
-                <div className="p-1 bg-neutral-200 rounded-md">
-                  <IoNotifications size={18}/> 
-                </div>
-                <span>|</span>
-              </div>
-              {studentData.name && studentData.role && (
-                <div className="text-gray-700 text-sm font-semibold">
-                  <div className="bg-gray-200 p-1 px-3 rounded flex flex-row gap-2 items-center">
-                    {studentIcon}
-                    <div className="flex flex-col">
-                      {studentData.name} <span className="text-xs text-gray-500 ml-1">{studentData.role}</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </nav>
-      </header>
-    
+      <Navbar role={ role }/>
       <div className="flex min-h-screen bg-gray-100">
         <Sidebar role={role} />
         <Outlet />
       </div>
-
-      <footer></footer>
     </>
-  );
+  )
+  
 };
 
 export default DashboardRoot;
+
+export async function applicantLoader() {
+  try {
+    const res = await fetch(`http://localhost:3000/applicant/root`, {
+      method: 'GET',
+      credentials: 'include',  // Important to include cookies
+    });
+    
+    if (res.status === 401) {
+      throw new Response(JSON.stringify({message: 'Unauthorized access'}), {status: res.status});
+    }
+
+    if (!res.ok) {
+      throw new Response(`Error: ${res.status} - ${res.statusText}`, {
+        status: res.status,
+        statusText: res.statusText,
+      });
+    }
+
+    const data = await res.json();
+    return { data } ;
+  } catch (error) {
+    console.error('Fetch error:', error);
+    throw error;
+  }
+}
+
+export async function validatorLoader() {
+  try {
+    const res = await fetch(`http://localhost:3000/validator/root`, {
+      method: 'GET',
+      credentials: 'include',  // Important to include cookies
+    });
+    
+    if (res.status === 401) {
+      throw new Response(JSON.stringify({message: 'Unauthorized access'}), {status: res.status});
+    }
+
+    if (!res.ok) {
+      throw new Response(`Error: ${res.status} - ${res.statusText}`, {
+        status: res.status,
+        statusText: res.statusText,
+      });
+    }
+
+    const data = await res.json();
+    return { data };
+  } catch (error) {
+    console.error('Fetch error:', error);
+    throw error;
+  }
+}

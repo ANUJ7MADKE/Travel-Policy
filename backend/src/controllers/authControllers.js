@@ -29,8 +29,9 @@ const applicantLogin = async (req, res) => {
     
     
     const tokenObject = {
-      profileId: validProfile.profileId,
-      designation: "applicant"
+      id: validProfile.profileId,
+      designation: "applicant",
+      department: validProfile.department
     }
 
     const token = generateToken(tokenObject);
@@ -71,8 +72,9 @@ const validatorLogin = async (req, res) => {
     
     
     const tokenObject = {
-      profileId: validProfile.profileId,
-      designation: "validator"
+      id: validProfile.profileId,
+      designation: "validator",
+      department: validProfile.department
     }
 
     const token = generateToken(tokenObject);

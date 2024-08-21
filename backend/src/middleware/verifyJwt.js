@@ -5,24 +5,25 @@ const verifyApplicantToken = (req, res, next) => {
     const token = req.cookies.access_token;
     
     if (!token) {
-        return res.status(401).json("No token found");
+        return res.status(401).json({message: "No token found"});
     }
 
     jwt.verify(token, process.env.JWT_SECRET, (err,payload)=>{
         
         if (err) {
-            return res.status(403).json("Invalid Token");
+            return res.status(403).json({message:"Invalid Token"});
         }
 
         req.user = {
             id : payload.id,
-            designation : payload.designation
-        }
+            designation : payload.designation,
+            department : payload.department
+        };
     
         if (req.user && req.user.designation === 'applicant') {
             next();
         } else {
-            return res.json("Access denied. Not a applicant.");
+            return res.status(401).json({message : "Access denied. Not a applicant."});
         }
 
     })
@@ -33,24 +34,25 @@ const verifyValidatorToken = (req, res, next) => {
     const token = req.cookies.access_token;
     
     if (!token) {
-        return res.status(401).json("No token found");
+        return res.status(401).json({message: "No token found"});
     }
 
     jwt.verify(token, process.env.JWT_SECRET, (err,payload)=>{
         
         if (err) {
-            return res.status(403).json("Invalid Token");
+            return res.status(403).json({message:"Invalid Token"});
         }
 
         req.user = {
             id : payload.id,
-            designation : payload.designation
+            designation : payload.designation,
+            department : payload.department
         }
 
         if (req.user && req.user.designation === "validator") {
             next();
         } else {
-            return res.json("Access denied. Not a validator.");
+            return res.status(401).json({message:"Access denied. Not a validator."});
         }
 
     })

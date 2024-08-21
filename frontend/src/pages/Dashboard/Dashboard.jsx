@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
-import { useParams } from 'react-router-dom';
+import { useLoaderData, useParams } from 'react-router-dom';
 import ApplicationTable from './components/ApplicationTable';
   
 const Dashboard = ({ role }) => {
+
   const [studentData] = useState({
     name: "Ritwik",
     university: "Somaiya Vidyavihar University",
@@ -52,6 +53,7 @@ const Dashboard = ({ role }) => {
   };
 
   return (
+
     <main className="flex-1 p-6">
       <div className="bg-white shadow rounded-lg p-6">
         <div className="bg-gray-200 p-4 rounded-lg mb-8">
@@ -84,6 +86,9 @@ const Dashboard = ({ role }) => {
         {renderContent()}
       </div>
     </main>
+  
+  
+    
   );
 };
 

@@ -1,5 +1,51 @@
 import prisma from '../config/prismaConfig.js';
 
+const applicantRoot = async (req, res) => {
+  try {
+    const user = req.user; // Contains all user info (id, designation, department, etc.)
+
+    // Fetch applicant information based on the user's profile ID
+    const applicant = await prisma.applicant.findUnique({
+      where: { profileId: user.id },
+      include: {
+        applications: true, // Include related applications in the query
+      }
+    });
+
+    // Check if the applicant exists
+    if (!applicant) {
+      return res.status(404).send("Applicant doesn't exist");
+    }
+
+    // Categorize applications based on their validation status
+    let applications = { "PENDING": [], "REJECTED": [], "ACCEPTED": [] };
+
+    applicant.applications.forEach((application) => {
+      let status = application.hoiValidation || application.hodValidation || application.supervisorValidation;
+
+      if (applications[status]) {
+        applications[status].push(application);
+      }
+    });
+
+    // Remove the password & applications before sending user info
+    delete applicant.password;
+    delete applicant.applications;
+    
+    // Return the response with the user's info and categorized applications
+    return res.status(200).json({
+      message: "Applicant Authorized",
+      user: applicant,
+      applications: applications
+    });
+
+  } catch (error) {
+    // Handle any errors
+    console.log(error);
+    res.status(500).send(error.message);
+  }
+};
+
 const createApplication = async (req, res) => {
   let applicantId = req.params.id;
   let department = req.params.department;
@@ -95,49 +141,8 @@ const createApplication = async (req, res) => {
   }
 }
 
-const getApplicatons = async (req,res)=>{
-  try {
-    let applicant = await prisma.applicant.findFirst({
-      where:{
-        profileId: req.params.id
-      },
-      include:{
-        applications:true
-      }
-    })
-
-    if (!applicant) {
-      return res.status(404).send("applicant doesn't exist")
-    }
-    
-    let allApplications = applicant.applications;
-
-    let applications = {"PENDING":[],"REJECTED":[],"ACCEPTED":[]};
-
-    allApplications.forEach((application)=>{
-      let status = '';
-
-      if (application.hoiValidation) {
-        status = application.hoiValidation;
-      } else if (application.hodValidation) {
-        status = application.hodValidation;
-      } else {
-        status = application.supervisorValidation;
-      }
-
-      if (applications[status]) {
-        applications[status].push(application);
-      }
-    })
-
-    return res.status(200).send(applications);
-    
-  } catch (error) {
-    res.status(500).send(error.message);
-  }
-}
 
 export {
-  createApplication,
-  getApplicatons
+  applicantRoot,
+  createApplication
 }
