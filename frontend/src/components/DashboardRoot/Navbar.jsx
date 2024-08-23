@@ -1,5 +1,5 @@
-import { React, useState, useEffect } from 'react';
-import { Link, Outlet, useLoaderData } from 'react-router-dom';
+import { React, useState } from 'react';
+import { Link } from 'react-router-dom';
 import logo from '/images/logo.jpeg'; 
 import { IoNotifications } from 'react-icons/io5';
 
@@ -14,18 +14,18 @@ const studentIcon = (
   </svg>
 );
 
-const Navbar = ({ role }) => {
-  // DATA
-  // const userData = useLoaderData().data.user;
-  // console.log(useLoaderData());
-  // const userDesignation = userData.designation || "Student";
+const Navbar = ({ userData , role }) => {
+  
+  const userDesignation = userData.designation || "Student";
+  const userName = userData.userName;
 
   const [profileData] = useState({
-    name: "Ritwik",
+    name: userName,
     university: "Somaiya Vidyavihar University",
-    role: "Student", 
+    role: userDesignation, 
   });
 
+  //Navbar Links for Role should be different
   const links = [
     { label: "Home", path: "dashboard" },
     { label: "Dashboard", path: "dashboard" },
