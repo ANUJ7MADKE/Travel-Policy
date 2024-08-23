@@ -3,54 +3,45 @@ import { useLoaderData, useParams } from 'react-router-dom';
 import ApplicationTable from './components/ApplicationTable';
   
 const Dashboard = ({ role }) => {
-
-  const [studentData] = useState({
-    name: "Ritwik",
-    university: "Somaiya Vidyavihar University",
-    role: "Student", 
-  });
-
-  const applicationData = [
-    {
-      status: "Pending Applications",
-      details: [
-        { topic: "Astronomy", submitted: "10-01-23", branch: "I.T.", status: "Pending" },
-        { topic: "Astronomy", submitted: "10-01-23", branch: "I.T.", status: "Pending" },
-        { topic: "Astronomy", submitted: "10-01-23", branch: "I.T.", status: "Pending" },
-        { topic: "Astronomy", submitted: "10-01-23", branch: "I.T.", status: "Pending" },
-      ],
-    },
-    {
-      status: "Approved Applications",
-      details: [
-        { topic: "Physics", submitted: "05-01-23", branch: "Science", status: "Approved" },
-        { topic: "Astronomy", submitted: "10-01-23", branch: "I.T.", status: "Pending" },
-        { topic: "Astronomy", submitted: "10-01-23", branch: "I.T.", status: "Pending" },
-        { topic: "Astronomy", submitted: "10-01-23", branch: "I.T.", status: "Pending" },
-      ],
-    },
-  ];
+  console.log(useLoaderData().data)
+  const { applications } = useLoaderData().data
 
   const { status } = useParams();
 
   const getApplicationsByStatus = (status) => {
-    const appData = applicationData.find(app => app.status.toLowerCase().includes(status));
-    return appData ? (
-      <ApplicationTable title={appData.status} applications={appData.details} studentName={studentData.name} />
+    const appData = applications[status.toUpperCase()];
+    return appData.length > 0 ? (
+      <ApplicationTable 
+        title={`${status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()} Applications`} 
+        applications={appData} 
+      />
     ) : (
-      <p className="text-gray-600">No {status} applications found.</p>
+      <p className="text-gray-600">No {status.toLowerCase()} applications found.</p>
     );
   };
+  
 
   const renderContent = () => {
     if (status) {
       return getApplicationsByStatus(status);
     }
-
-    return applicationData.map((app, index) => (
-      <ApplicationTable key={index} title={app.status} applications={app.details} studentName={studentData.name} />
-    ));
+  
+    return (
+      <>
+        {Object.keys(applications).map((statusKey) => {
+          const appData = applications[statusKey];
+          return appData.length > 0 ? (
+            <ApplicationTable 
+              key={statusKey} 
+              title={`${statusKey.charAt(0).toUpperCase() + statusKey.slice(1).toLowerCase()} Applications`} 
+              applications={appData}
+            />
+          ) : null;
+        })}
+      </>
+    );
   };
+  
 
   return (
 

@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ApplicationTable = ({ title, applications, studentName }) => (
+const ApplicationTable = ({ title, applications}) => (
   <div className="mb-6">
     <h2 className="text-xl font-bold mb-2">{title}</h2>
     <table className="w-full text-left border-collapse">
@@ -16,11 +16,11 @@ const ApplicationTable = ({ title, applications, studentName }) => (
       <tbody>
         {applications.map((app, index) => (
           <tr key={index} className="odd:bg-gray-50 even:bg-white" style={{ height: '50px' }}>
-            <td className="p-4">{app.topic}</td>
-            <td className="p-4">{studentName}</td>
-            <td className="p-4">{app.submitted}</td>
-            <td className="p-4">{app.branch}</td>
-            <td className="p-4 text-green-500">{app.status}</td>
+            <td className="p-4">{app.formData.title}</td>
+            <td className="p-4">{}</td>
+            <td className="p-4">{formatDateToDDMMYYYY(app.createdAt)}</td>
+            <td className="p-4">{}</td>
+            <td className="p-4 text-green-500">{title.split(" ")[0]}</td>
           </tr>
         ))}
       </tbody>
@@ -28,3 +28,19 @@ const ApplicationTable = ({ title, applications, studentName }) => (
   </div>
 );
 export default ApplicationTable;
+
+
+
+
+function formatDateToDDMMYYYY(dateString) {
+  // Convert the ISO string to a Date object
+  const date = new Date(dateString);
+
+  // Extract the day, month, and year
+  const day = String(date.getDate()).padStart(2, '0'); // Ensures two-digit format
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based, so add 1
+  const year = date.getFullYear();
+
+  // Format the date as dd/mm/yyyy
+  return `${day}/${month}/${year}`;
+}
