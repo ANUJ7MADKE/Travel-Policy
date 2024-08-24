@@ -50,6 +50,11 @@ const createApplication = async (req, res) => {
   let department = req.user.department;
   let formData = req.body.formData;
 
+
+  if (formData.department !== department) {
+    return res.status(422).send("Department does not match.");
+  }
+
   try {
     let applicant = await prisma.applicant.findUnique({
       where: {

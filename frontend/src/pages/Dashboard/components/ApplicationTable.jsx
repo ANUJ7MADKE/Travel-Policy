@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ApplicationTable = ({ title, applications }) => {
+const ApplicationTable = ({ title, applications, onRowClick }) => {
   
   const getExactStatus = (title,app) => {
     if (title.split(" ")[0] === "Pending") {
@@ -38,10 +38,8 @@ const ApplicationTable = ({ title, applications }) => {
           {applications.map((app, index) => (
             <tr
               key={index}
-              onClick={() => {
-                /* Display The Form */
-              }}
-              className="odd:bg-gray-50 even:bg-white"
+              onClick={() => onRowClick(app)} 
+              className="odd:bg-gray-50 even:bg-white hover:bg-gray-200 cursor-pointer"
               style={{ height: '50px' }}
             >
               <td className="p-4">{app.formData.eventName}</td>
