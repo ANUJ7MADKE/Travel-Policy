@@ -1,4 +1,6 @@
-export async function fetchUserData(url) {
+import { json } from "react-router-dom";
+
+async function fetchUserData(url) {
   try {
     const res = await fetch(url, {
       method: 'GET',
@@ -6,14 +8,16 @@ export async function fetchUserData(url) {
     });
 
     if (res.status === 401) {
-      throw new Response(JSON.stringify({ message: 'Unauthorized access' }), { status: res.status });
+      throw json({ message: 'Unauthorized access' }, { status: res.status });
     }
 
     if (!res.ok) {
-      throw new Response(`Error: ${res.status} - ${res.statusText}`, {
-        status: res.status,
-        statusText: res.statusText,
-      });
+      throw json(
+        {
+          status: res.status,
+          statusText: res.statusText,
+        }
+      );
     }
 
     const data = await res.json();

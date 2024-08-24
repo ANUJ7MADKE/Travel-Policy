@@ -40,21 +40,20 @@ const applicantRoot = async (req, res) => {
     });
 
   } catch (error) {
-    // Handle any errors
     console.log(error);
     res.status(500).send(error.message);
   }
 };
 
 const createApplication = async (req, res) => {
-  let applicantId = req.params.id;
-  let department = req.params.department;
+  let applicantId = req.user.id;
+  let department = req.user.department;
   let formData = req.body.formData;
 
   try {
     let supervisor = await prisma.validator.findUnique({
       where: {
-        email: formData.supervisorEmail,
+        email: formData.primarySupervisorEmail,
       }
     });
 
@@ -68,10 +67,10 @@ const createApplication = async (req, res) => {
 
     let additionalSupervisor = null;
 
-    if (formData.additionalSupervisorEmail!=null) {
+    if (formData.anotherSupervisorEmail!=null) {
       additionalSupervisor = await prisma.validator.findUnique({
         where: {
-          email: formData.additionalSupervisorEmail,
+          email: formData.anotherSupervisorEmail,
         }
       });
     }

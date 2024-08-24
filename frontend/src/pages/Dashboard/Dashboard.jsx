@@ -1,10 +1,11 @@
-import React, { useState } from 'react'
-import { useLoaderData, useParams } from 'react-router-dom';
+import React from 'react'
+import { useRouteLoaderData, useParams, useNavigate } from 'react-router-dom';
 import ApplicationTable from './components/ApplicationTable';
   
 const Dashboard = ({ role }) => {
-  console.log(useLoaderData().data)
-  const { applications } = useLoaderData().data
+  const navigate = useNavigate()
+  console.log(useRouteLoaderData(`${role}-Root`).data)
+  const { applications } = useRouteLoaderData(`${role}-Root`).data
 
   const { status } = useParams();
 
@@ -51,7 +52,7 @@ const Dashboard = ({ role }) => {
           <div className="flex justify-between items-center mb-4">
             <h1 className="text-2xl font-bold">{status ? `${status.toUpperCase()} APPLICATIONS` : "DASHBOARD"}</h1>
             {role === "Applicant" && (
-              <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded">
+              <button onClick={()=>navigate("../form")} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-6 w-6 inline-block mr-2"

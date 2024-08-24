@@ -4,6 +4,6 @@ const router = express.Router();
 
 router.get("/root", applicantRoot);
 
-router.post("/:id/:department/create-application", createApplication);
+router.post("/create-application", createApplication);
 
 export default router;
