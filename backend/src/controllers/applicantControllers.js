@@ -51,6 +51,18 @@ const createApplication = async (req, res) => {
   let formData = req.body.formData;
 
   try {
+    let applicant = await prisma.applicant.findUnique({
+      where: {
+        profileId: applicantId
+      }
+    });
+
+    if (!applicant) {
+      return res.status(404).send("Applicant invalid");
+    }
+    let applicantName = applicant.userName;
+
+
     let supervisor = await prisma.validator.findUnique({
       where: {
         email: formData.primarySupervisorEmail,
@@ -122,6 +134,7 @@ const createApplication = async (req, res) => {
 
     let applicationData = {
       applicantId,
+      applicantName,
       formData
     };
 

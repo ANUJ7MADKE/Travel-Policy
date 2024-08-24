@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './ApplicationForm.css';
 import LabelAndInputField from './components/LabelAndInputField';
 import SelectField from './components/SelectField';
-import { useNavigation, useSubmit } from 'react-router-dom';
+import { useActionData, useNavigation, useSubmit } from 'react-router-dom';
 
 const ApplicationForm = () => {
     const [formData, setFormData] = useState({
@@ -131,7 +131,6 @@ const ApplicationForm = () => {
                 }
 
             case "file":
-                console.log("file ayagi re");
                 break;
             default:
                 break;
@@ -154,11 +153,17 @@ const ApplicationForm = () => {
         submit(formDataObject, { method: "POST" });
     }
 
-    const navigation = useNavigation()
+    const navigation = useNavigation();
     const isSubmitting = navigation.state == "submitting"
+
+    const errorData = useActionData();
+     
 
     return (
         <div className='topLevelFormContainer'>
+            {errorData && errorData.error 
+
+            }
             <form className='mainForm'>
                 <div className={`generalFormContainer personalAndAcademicFormContainer ${currentForm === 'PersonalAndAcademicFormContainer' ? 'min-height-100vh' : 'hiddenForm'}`}>
                     <div className='header' data-form-name='PersonalAndAcademicFormContainer' onClick={openAForm}>

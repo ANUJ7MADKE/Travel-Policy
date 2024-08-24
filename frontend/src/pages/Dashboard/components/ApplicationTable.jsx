@@ -1,6 +1,26 @@
 import React from 'react';
 
-const ApplicationTable = ({ title, applications}) => {
+const ApplicationTable = ({ title, applications }) => {
+  
+  const getExactStatus = (title,app) => {
+    if (title.split(" ")[0] === "Pending") {
+
+      if (app.hoiValidation === "PENDING") {
+        return "HOI Validation PENDING"
+      }
+      if (app.hodValidation === "PENDING") {
+        return "HOD Validation PENDING"
+      }
+      if (app.supervisorValidation === "PENDING") {
+        return "Supervisor Validation PENDING"
+      }
+    
+    } else {
+      return title.split(" ")[0];
+    }
+  };
+
+  console.log(applications)
   return (
     <div className="mb-6">
       <h2 className="text-xl font-bold mb-2">{title}</h2>
@@ -16,23 +36,28 @@ const ApplicationTable = ({ title, applications}) => {
         </thead>
         <tbody>
           {applications.map((app, index) => (
-            <tr key={index} onClick={()=>{/*Display The Form*/}} className="odd:bg-gray-50 even:bg-white" style={{ height: '50px' }}>
+            <tr
+              key={index}
+              onClick={() => {
+                /* Display The Form */
+              }}
+              className="odd:bg-gray-50 even:bg-white"
+              style={{ height: '50px' }}
+            >
               <td className="p-4">{app.formData.eventName}</td>
-              <td className="p-4">{app.formData.applicantFullName}</td>
+              <td className="p-4">{app.applicantName}</td>
               <td className="p-4">{formatDateToDDMMYYYY(app.createdAt)}</td>
               <td className="p-4">{app.formData.applicantDepartment}</td>
-              <td className="p-4 text-green-500">{title.split(" ")[0]}</td>
+              <td className="p-4 text-green-500">{title.split(" ")[0] }</td>
             </tr>
           ))}
         </tbody>
       </table>
     </div>
-  )
+  );
 };
+
 export default ApplicationTable;
-
-
-
 
 function formatDateToDDMMYYYY(dateString) {
   // Convert the ISO string to a Date object

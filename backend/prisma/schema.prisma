@@ -48,6 +48,8 @@ model Application {
   applicantId String
   applicant   Applicant @relation(fields: [applicantId], references: [profileId], onDelete: Cascade)
 
+  applicantName String
+
   formData Json
 
   supervisorValidation ApplicationStatus @default(PENDING)
