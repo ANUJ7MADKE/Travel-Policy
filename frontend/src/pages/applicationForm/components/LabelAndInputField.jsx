@@ -57,6 +57,13 @@ const LabelAndInputField = (props) => {
         }));
     }
 
+    function handleChangeOther(event){
+        props.setFormData((prevData) => ({
+            ...prevData,
+            [props.name]: event.target.value
+        }));
+    }
+
     useEffect(() => {
         if (almostFullRowNeeded.includes(props.name) || fullRowNeeded.includes(props.name)) {
             const textareas = document.querySelectorAll('.labelAndInputField textarea');
@@ -79,7 +86,7 @@ const LabelAndInputField = (props) => {
                     <textarea className='input' onChange={handleChange} name={props.name} />
                 </div>
             ) : (
-                <input className='justInputElement' type="text" placeholder='If Other then Specify' onChange={handleChange} name={props.name} />
+                <input className='justInputElement' type="text" placeholder='If Other then Specify' onChange={handleChangeOther} name={props.name} />
             )}
         </>
     );
