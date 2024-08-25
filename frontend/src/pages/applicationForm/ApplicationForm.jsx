@@ -3,6 +3,7 @@ import './ApplicationForm.css';
 import LabelAndInputField from './components/LabelAndInputField';
 import SelectField from './components/SelectField';
 import { useActionData, useNavigation, useSubmit } from 'react-router-dom';
+import DropDown from './components/DropDown';
 
 const ApplicationForm = () => {
     const [formData, setFormData] = useState({
@@ -56,24 +57,28 @@ const ApplicationForm = () => {
         }
     }
 
-    const personalAndAcademicFormFields = [
+    const personalFormFields = [
         { label: 'Full Name', type: 'text', dependsOn: null, name: "applicantFullName", options: null, ifOtherThenSpecify: false, responsibleForRendering: false, formData: formData, setFormData: setFormData },
         { label: 'Contact', type: 'text', dependsOn: null, name: "applicantContact", options: null, ifOtherThenSpecify: false, responsibleForRendering: false, formData: formData, setFormData: setFormData },
         { label: 'Age', type: 'text', dependsOn: null, name: "applicantAge", options: null, ifOtherThenSpecify: false, responsibleForRendering: false, formData: formData, setFormData: setFormData },
         { label: 'Residential Address', type: 'text', dependsOn: null, name: "applicantAddress", options: null, ifOtherThenSpecify: false, responsibleForRendering: false, formData: formData, setFormData: setFormData },
         { label: 'Somaiya Email Id', type: 'text', dependsOn: null, name: "applicantEmail", options: null, ifOtherThenSpecify: false, responsibleForRendering: false, formData: formData, setFormData: setFormData },
         { label: 'Roll No', type: 'text', dependsOn: null, name: "applicantRollNo", options: null, ifOtherThenSpecify: false, responsibleForRendering: false, formData: formData, setFormData: setFormData },
-        { label: 'Department', type: 'text', dependsOn: null, name: "applicantDepartment", options: null, ifOtherThenSpecify: false, responsibleForRendering: false, formData: formData, setFormData: setFormData },
+    ];
+
+    const academicFormFields = [
+        { label: 'Department', type: 'dropdown', dependsOn: null, name: 'applicantDepartment', options: ['COMPS', 'IT', 'MECH', 'AIDS', 'EXTC', 'ETRX', 'RAI'], ifOtherThenSpecify: false, responsibleForRendering: false, formData: formData, setFormData: setFormData },
         { label: 'Supervisor\'s Full Name', type: 'text', dependsOn: null, name: "primarySupervisorFullName", options: null, ifOtherThenSpecify: false, responsibleForRendering: false, formData: formData, setFormData: setFormData },
         { label: 'Supervisor\'s Somaiya Email Id', type: 'text', dependsOn: null, name: "primarySupervisorEmail", options: null, ifOtherThenSpecify: false, responsibleForRendering: false, formData: formData, setFormData: setFormData },
         { label: 'Supervisor\'s Contact', type: 'text', dependsOn: null, name: "primarySupervisorContact", options: null, ifOtherThenSpecify: false, responsibleForRendering: false, formData: formData, setFormData: setFormData },
-        { label: 'Supervisor\'s Department', type: 'text', dependsOn: null, name: "primarySupervisorDepartment", options: null, ifOtherThenSpecify: false, responsibleForRendering: false, formData: formData, setFormData: setFormData },
+        { label: 'Supervisor\'s Department', type: 'dropdown', dependsOn: null, name: 'primarySupervisorDepartment', options: ['COMPS', 'IT', 'MECH', 'AIDS', 'EXTC', 'ETRX', 'RAI'], ifOtherThenSpecify: false, responsibleForRendering: false, formData: formData, setFormData: setFormData },
         { label: 'Do you have another supervisor?', type: 'selectOne', dependsOn: null, name: 'anotherSupervisor', options: ['yes', 'no'], ifOtherThenSpecify: false, responsibleForRendering: true, formData: formData, setFormData: setFormData },
         { label: 'Other Supervisor\'s Full Name', type: 'text', dependsOn: 'anotherSupervisor', name: "anotherSupervisorFullName", options: null, ifOtherThenSpecify: false, responsibleForRendering: false, formData: formData, setFormData: setFormData },
         { label: 'Other Supervisor\'s Somaiya Email Id', type: 'text', dependsOn: 'anotherSupervisor', name: "anotherSupervisorEmail", options: null, ifOtherThenSpecify: false, responsibleForRendering: false, formData: formData, setFormData: setFormData },
         { label: 'Other Supervisor\'s Contact', type: 'text', dependsOn: 'anotherSupervisor', name: "anotherSupervisorContact", options: null, ifOtherThenSpecify: false, responsibleForRendering: false, formData: formData, setFormData: setFormData },
-        { label: 'Other Supervisor\'s Department', type: 'text', dependsOn: 'anotherSupervisor', name: "anotherSupervisorDepartment", options: null, ifOtherThenSpecify: false, responsibleForRendering: false, formData: formData, setFormData: setFormData },
+        { label: 'Other Supervisor\'s Department', type: 'dropdown', dependsOn: 'anotherSupervisor', name: 'anotherSupervisorDepartment', options: ['COMPS', 'IT', 'MECH', 'AIDS', 'EXTC', 'ETRX', 'RAI'], ifOtherThenSpecify: false, responsibleForRendering: false, formData: formData, setFormData: setFormData }
     ];
+
 
     const travelFormFields = [
         { label: "Purpose of Travel", type: "selectOne", dependsOn: null, name: 'purposeOfTravel', options: ['Academic', 'Personal', 'Research', 'Other'], ifOtherThenSpecify: true, responsibleForRendering: false, formData: formData, setFormData: setFormData },
@@ -132,18 +137,35 @@ const ApplicationForm = () => {
 
             case "file":
                 break;
+            case "dropdown":
+                if (dependsOn === null || formData[dependsOn]) {
+                    return (
+                        <DropDown
+                            key={index}
+                            label={label}
+                            dependsOn={dependsOn}
+                            name={name}
+                            options={options}
+                            ifOtherThenSpecify={ifOtherThenSpecify}
+                            responsibleForRendering={responsibleForRendering}
+                            formData={formData}
+                            setFormData={setFormData}
+                        />
+                    );
+                }
+                break;
             default:
                 break;
         }
     }
 
-    const submit = useSubmit(); 
+    const submit = useSubmit();
 
     function handleSubmit(event) {
         event.preventDefault();
 
         const formDataObject = new FormData();
-        
+
         // Append all fields from formData to FormData object
         Object.entries(formData).forEach(([key, value]) => {
             formDataObject.append(key, value);
@@ -157,20 +179,26 @@ const ApplicationForm = () => {
     const isSubmitting = navigation.state == "submitting"
 
     const errorData = useActionData();
-     
+
 
     return (
         <div className='topLevelFormContainer'>
-            {errorData && errorData.error 
-
-            }
+            {errorData && errorData.error}
             <form className='mainForm'>
-                <div className={`generalFormContainer personalAndAcademicFormContainer ${currentForm === 'PersonalAndAcademicFormContainer' ? 'min-height-100vh' : 'hiddenForm'}`}>
-                    <div className='header' data-form-name='PersonalAndAcademicFormContainer' onClick={openAForm}>
-                        Personal And Academic
+                <div className={`generalFormContainer personalFormContainer ${currentForm === 'PersonalFormContainer' ? 'min-height-60vh' : 'hiddenForm'}`}>
+                    <div className='header' data-form-name='PersonalFormContainer' onClick={openAForm}>
+                        Personal Information
                     </div>
                     <div className='form'>
-                        {personalAndAcademicFormFields.map((field, index) => renderInputFields(field, index))}
+                        {personalFormFields.map((field, index) => renderInputFields(field, index))}
+                    </div>
+                </div>
+                <div className={`generalFormContainer academicFormContainer ${currentForm === 'AcademicFormContainer' ? 'min-height-60vh' : 'hiddenForm'}`}>
+                    <div className='header' data-form-name='AcademicFormContainer' onClick={openAForm}>
+                        Academic Information
+                    </div>
+                    <div className='form'>
+                        {academicFormFields.map((field, index) => renderInputFields(field, index))}
                     </div>
                 </div>
                 <div className={`generalFormContainer travelFormContainer ${currentForm === 'TravelFormContainer' ? 'min-height-60vh ' : 'hiddenForm'}`}>
@@ -190,8 +218,8 @@ const ApplicationForm = () => {
                     </div>
                 </div>
                 <div className={`generalFormContainer parentAndConsentFormContainer ${currentForm === 'ParentAndConsentFormContainer'
-                        ? (formData.parentalConsent ? 'min-height-60vh' : 'min-height-25vh')
-                        : 'hiddenForm'
+                    ? (formData.parentalConsent ? 'min-height-60vh' : 'min-height-25vh')
+                    : 'hiddenForm'
                     }`}>
                     <div className='header' data-form-name='ParentAndConsentFormContainer' onClick={openAForm}>
                         Parental Consent
@@ -208,10 +236,13 @@ const ApplicationForm = () => {
                         {additionalFields.map((field, index) => renderInputFields(field, index))}
                     </div>
                 </div>
-                <button className='submitFormButton' disabled={isSubmitting} type='submit' onClick={handleSubmit} >{isSubmitting?'Submitting...':'Submit'}</button>
+                <button className='submitFormButton' disabled={isSubmitting} type='submit' onClick={handleSubmit}>
+                    {isSubmitting ? 'Submitting...' : 'Submit'}
+                </button>
             </form>
         </div>
     );
+
 };
 
 export default ApplicationForm;
