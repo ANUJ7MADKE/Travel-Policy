@@ -4,6 +4,7 @@ import LabelAndInputField from './components/LabelAndInputField';
 import SelectField from './components/SelectField';
 import { useActionData, useNavigation, useSubmit } from 'react-router-dom';
 import DropDown from './components/DropDown';
+import axios from 'axios';
 
 const ApplicationForm = () => {
     const [formData, setFormData] = useState({
@@ -159,31 +160,39 @@ const ApplicationForm = () => {
         }
     }
 
-    const submit = useSubmit();
+    // const submit = useSubmit();
 
-    function handleSubmit(event) {
-        event.preventDefault();
+    // function handleSubmit(event) {
+    //     event.preventDefault();
 
-        const formDataObject = new FormData();
+    //     const formDataObject = new FormData();
 
-        // Append all fields from formData to FormData object
-        Object.entries(formData).forEach(([key, value]) => {
-            formDataObject.append(key, value);
-        });
+    //     // Append all fields from formData to FormData object
+    //     Object.entries(formData).forEach(([key, value]) => {
+    //         formDataObject.append(key, value);
+    //     });
 
-        // Submit the FormData object
-        submit(formDataObject, { method: "POST" });
+    //     // Submit the FormData object
+    //     submit(formDataObject, { method: "POST" });
+    // }
+
+    // const navigation = useNavigation();
+    // const isSubmitting = navigation.state == "submitting"
+
+    // const errorData = useActionData();
+
+    function handleSubmit(event){
+        axios.post('/submit', formData)
+        .then((response) => {
+            console.log(response);
+        })
+        .catch((error) => {
+            console.log(error);
+        })
     }
-
-    const navigation = useNavigation();
-    const isSubmitting = navigation.state == "submitting"
-
-    const errorData = useActionData();
-
 
     return (
         <div className='topLevelFormContainer'>
-            {errorData && errorData.error}
             <form className='mainForm'>
                 <div className={`generalFormContainer personalFormContainer ${currentForm === 'PersonalFormContainer' ? 'min-height-60vh' : 'hiddenForm'}`}>
                     <div className='header' data-form-name='PersonalFormContainer' onClick={openAForm}>
@@ -236,8 +245,8 @@ const ApplicationForm = () => {
                         {additionalFields.map((field, index) => renderInputFields(field, index))}
                     </div>
                 </div>
-                <button className='submitFormButton' disabled={isSubmitting} type='submit' onClick={handleSubmit}>
-                    {isSubmitting ? 'Submitting...' : 'Submit'}
+                <button className='submitFormButton' type='submit' onClick={handleSubmit}>
+                    submit
                 </button>
             </form>
         </div>

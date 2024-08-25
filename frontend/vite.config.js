@@ -10,6 +10,7 @@ export default defineConfig({
       '/validator-login': 'http://localhost:3000/',
       '/verify-applicant': 'http://localhost:3000/',
       '/verify-validator': 'http://localhost:3000/',
+      '/submit': 'http://localhost:3000/',
     }
   },
 })
