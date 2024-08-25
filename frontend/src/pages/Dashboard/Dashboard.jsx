@@ -1,6 +1,7 @@
-import React from 'react'
+import React, { useState }from 'react'
 import { useRouteLoaderData, useParams, useNavigate } from 'react-router-dom';
 import ApplicationTable from './components/ApplicationTable';
+import Modal from '../../components/Modal/Modal';
   
 const Dashboard = ({ role }) => {
   const navigate = useNavigate()
@@ -9,12 +10,23 @@ const Dashboard = ({ role }) => {
 
   const { status } = useParams();
 
+  const [applicationDisplay, setApplicationDisplay] = useState(null);
+
+  const handleRowClick = (application) => {
+    setApplicationDisplay(application);
+  };
+
+  const closeModal = () => {
+    setApplicationDisplay( null );
+  };
+
   const getApplicationsByStatus = (status) => {
     const appData = applications[status.toUpperCase()];
     return appData.length > 0 ? (
       <ApplicationTable 
         title={`${status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()} Applications`} 
         applications={appData} 
+        onRowClick={handleRowClick}
       />
     ) : (
       <p className="text-gray-600">No {status.toLowerCase()} applications found.</p>
@@ -36,12 +48,14 @@ const Dashboard = ({ role }) => {
               key={statusKey} 
               title={`${statusKey.charAt(0).toUpperCase() + statusKey.slice(1).toLowerCase()} Applications`} 
               applications={appData}
+              onRowClick={handleRowClick}
             />
           ) : null;
         })}
       </>
     );
   };
+  
   
 
   return (
@@ -76,6 +90,30 @@ const Dashboard = ({ role }) => {
           </p>
         </div>
         {renderContent()}
+
+        {applicationDisplay && (<Modal onClose={closeModal}>
+          {/* keep componet whihch displays form data here*/}
+          <h2>{applicationDisplay.formData.eventName}</h2>
+          <p>{applicationDisplay.applicationId}</p>
+          
+          
+          <div className="flex justify-between mt-4">
+          {role === "Validator" && 
+            <div className="flex space-x-4">
+              <button className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                Accept
+              </button>
+              <button className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                Reject
+              </button>
+            </div>
+          }
+            <button onClick={closeModal} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+              Close
+            </button>
+          </div>
+        </Modal>)}
+
       </div>
     </main>
   
