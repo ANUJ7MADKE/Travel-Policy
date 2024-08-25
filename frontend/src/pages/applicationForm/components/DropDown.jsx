@@ -1,14 +1,12 @@
 import React from 'react'
 
 const DropDown = ({ label, dependsOn, name, options, ifOtherThenSpecify, responsibleForRendering, formData, setFormData }) => {
-
     function handleChange(event) {
-        setFormData((prevData) => {
-            return {
-                ...prevData,
-                [name]: event.target.value
-            };
-        });
+        const { name, value } = event.target;
+        setFormData((prevData) => ({
+            ...prevData,
+            [name]: value
+        }));
     }
 
     return (
@@ -17,8 +15,9 @@ const DropDown = ({ label, dependsOn, name, options, ifOtherThenSpecify, respons
             <select
                 name={name}
                 onChange={handleChange}
-                value={formData[name]}
+                value={formData[name] || ''}
             >
+                <option value="">Select {label}</option>
                 {options.map((option, index) => (
                     <option key={index} value={option}>
                         {option}
@@ -31,6 +30,7 @@ const DropDown = ({ label, dependsOn, name, options, ifOtherThenSpecify, respons
                     placeholder="Please specify"
                     name={`${name}Other`}
                     onChange={handleChange}
+                    value={formData[`${name}Other`] || ''}
                 />
             )}
         </div>
