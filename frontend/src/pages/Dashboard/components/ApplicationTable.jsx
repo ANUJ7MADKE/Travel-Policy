@@ -20,7 +20,6 @@ const ApplicationTable = ({ title, applications, onRowClick }) => {
     }
   };
 
-  console.log(applications)
   return (
     <div className="mb-6">
       <h2 className="text-xl font-bold mb-2">{title}</h2>
@@ -38,7 +37,7 @@ const ApplicationTable = ({ title, applications, onRowClick }) => {
           {applications.map((app, index) => (
             <tr
               key={index}
-              onClick={() => onRowClick(app)} 
+              onClick={() => onRowClick({...app, currentStatus : title.split(" ")[0]})} 
               className="odd:bg-gray-50 even:bg-white hover:bg-gray-200 cursor-pointer"
               style={{ height: '50px' }}
             >

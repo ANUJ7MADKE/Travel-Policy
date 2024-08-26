@@ -49,8 +49,11 @@ const validatorRoot = async (req, res) => {
 };
 
 const applicationAction = async (req, res) => {
+
+  let profileId = req.user.id;
+
   try {
-    const { id: profileId, applicationId, action } = req.params; // actions = 'accepted' or 'rejected'
+    const { applicationId, action } = req.params; // actions = 'accepted' or 'rejected'
 
     const validator = await prisma.validator.findFirst({
       where: { profileId },

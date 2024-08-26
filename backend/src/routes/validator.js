@@ -5,6 +5,6 @@ const router = express.Router();
 
 router.get("/root",validatorRoot);
 
-router.put("/:id/:applicationId/:action", applicationAction)
+router.put("/:applicationId/:action", applicationAction)
 
 export default router;

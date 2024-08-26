@@ -1,10 +1,11 @@
 import React, { useState }from 'react'
-import { useRouteLoaderData, useParams, useNavigate } from 'react-router-dom';
+import { useRouteLoaderData, useParams, useNavigate, useSubmit } from 'react-router-dom';
 import ApplicationTable from './components/ApplicationTable';
 import Modal from '../../components/Modal/Modal';
   
 const Dashboard = ({ role }) => {
   const navigate = useNavigate()
+  const submit = useSubmit()
   console.log(useRouteLoaderData(`${role}-Root`).data)
   const { applications } = useRouteLoaderData(`${role}-Root`).data
 
@@ -56,7 +57,16 @@ const Dashboard = ({ role }) => {
     );
   };
   
-  
+  const handleSubmit = (applicationId,action) => {
+
+    const formData = new FormData();
+    formData.append('applicationId', applicationId);
+    formData.append('action', action);
+
+    // Use the submit function to send a PUT request with the form data
+    submit(formData, { method: "POST" }); 
+
+  }
 
   return (
 
@@ -98,12 +108,12 @@ const Dashboard = ({ role }) => {
           
           
           <div className="flex justify-between mt-4">
-          {role === "Validator" && 
+          {(role === "Validator" && applicationDisplay.currentStatus === "Pending") && 
             <div className="flex space-x-4">
-              <button className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+              <button onClick={()=> handleSubmit(applicationDisplay.applicationId, "accepted")}  className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
                 Accept
               </button>
-              <button className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+              <button onClick={()=> handleSubmit(applicationDisplay.applicationId, "rejected")}  className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
                 Reject
               </button>
             </div>

@@ -51,7 +51,7 @@ const createApplication = async (req, res) => {
   let formData = req.body.formData;
 
 
-  if (formData.department !== department) {
+  if (formData.applicantDepartment !== department) {
     return res.status(422).send("Department does not match.");
   }
 

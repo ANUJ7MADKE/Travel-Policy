@@ -7,6 +7,7 @@ import ErrorComponent from '../src/components/ErrorComponent';
 import DashboardRoot from './components/DashboardRoot/DashboardRoot'
 import { applicantLoader, validatorLoader } from './services/userDataLoader';
 import { createApplicationAction } from './services/createApplicationAction';
+import { applicationStatusAction } from './services/applicationStatusAction';
 
 const router = createBrowserRouter([
   {path:'/',element: <LoginRoot/>, children:[
@@ -27,7 +28,7 @@ const router = createBrowserRouter([
     
   {path:'/validator',element: <DashboardRoot role="Validator"/>, id: "Validator-Root", loader: validatorLoader, errorElement: <ErrorComponent/>,
     children:[
-    {path:'dashboard',element: <Dashboard role="Validator"/>,
+    {path:'dashboard',element: <Dashboard role="Validator"/>, action: applicationStatusAction,
       children:[
       {path:':status',element: <Dashboard role="Validator"/> }
     ]},
