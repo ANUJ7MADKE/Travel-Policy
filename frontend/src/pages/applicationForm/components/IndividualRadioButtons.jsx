@@ -2,7 +2,7 @@ import React from 'react';
 
 const IndividualRadioButtons = ({ label, value, name, formData, onChange ,checked }) => {
   return (
-    <>
+    <div className='individualRadioButtons'>
       <input 
         type="radio" 
         value={value}
@@ -11,7 +11,7 @@ const IndividualRadioButtons = ({ label, value, name, formData, onChange ,checke
         onChange={onChange}
       />
       {label}
-    </>
+    </div>
   );
 }
 

@@ -1,20 +1,19 @@
 .topLevelFormContainer {
-    height: 100%;
-    width: 80%;
+    height: 100%;  /* Consider removing or changing */
+    overflow-y: auto; /* To handle scrolling */
+    width: 100%;
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    overflow-y: auto;
 }
 
 .mainForm {
-    height: 90%;
     width: 97%;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
-    overflow-y: auto;
+    height: fit-content;  /* Let content determine the height */
 }
 
 .mainForm::-webkit-scrollbar {
@@ -36,7 +35,8 @@
 .generalFormContainer{
     background-color: white;
     min-height:13%;
-    max-height: 90vh;
+    /* max-height: 90vh; */
+    height: fit-content;
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -72,16 +72,29 @@
 .generalFormContainer > .form {
     margin-left: 30px;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(3, 1fr); /* Set to 3 columns */
     row-gap: 5px;
     column-gap: 20px;
     width: 100%; 
     max-width: 1200px; 
     justify-content: center;
     align-content: center;
-    min-height: auto;
-    max-height: 700px;
+    height: fit-content;
 }
+
+/* Responsive grid layout */
+@media (max-width: 1200px) {
+    .generalFormContainer > .form {
+        grid-template-columns: repeat(2, 1fr); /* Two columns for medium screens */
+    }
+}
+
+@media (max-width: 768px) {
+    .generalFormContainer > .form {
+        grid-template-columns: 1fr; /* One column for small screens */
+    }
+}
+
 
 .hiddenForm>.form{
     height: 0;
@@ -115,6 +128,27 @@
     justify-content: flex-start;
 }
 
+.fullRowFieldForFileUpload {
+    height:60px;
+    grid-column: 1 / -1;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.fullRowFieldForFileUpload label {
+    font-size: 18px;
+    height:100%;
+    width:40%;
+    justify-self: flex-start;
+    margin-right: 10px; 
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
 .optionsAndOtherInput {
     height: 100%;
     width: 60%;
@@ -124,62 +158,6 @@
     justify-content: flex-end;
     gap:10px;
     margin-right: 40px;
-}
-
-.min-height-auto{
-    min-height: auto;
-}
-
-.min-height-100vh{
-    min-height: 100vh;
-}
-
-.min-height-90vh{
-    min-height: 90vh;
-}
-
-.min-height-80vh{
-    min-height: 80vh;
-}
-
-.min-height-70vh{
-    min-height: 70vh;
-}
-
-.min-height-60vh{
-    min-height: 60vh;
-}
-
-.min-height-50vh{
-    min-height: 50vh;
-}
-
-.min-height-40vh{
-    min-height: 40vh;
-}
-
-.min-height-30vh{
-    min-height: 30vh;
-}
-
-.min-height-25vh{
-    min-height: 25vh;
-}
-
-.min-height-20vh{
-    min-height: 20vh;
-}
-
-.min-height-10vh{
-    min-height: 10vh;
-}
-
-.max-height-auto{
-    max-height: auto;
-}
-
-.height-auto{
-    height: auto;
 }
 
 .submitFormButton{
@@ -209,32 +187,13 @@
     margin-bottom: 0.2rem;
 }
 
-.labelAndInputField>textarea {
+.labelAndInputField input {
     height: 45px;
-    /* max-height: 100px; */
     background-color: #E5E7EB;
     padding: 0.5rem;
     border-radius: 0.5rem;
     margin-bottom: 1rem;
     width: 100%;
-    overflow-y: auto; 
-    resize: none; 
-}
-
-.labelAndInputField>textarea::-webkit-scrollbar {
-    width: 0px;
-}
-
-.labelAndInputField>textarea::-webkit-scrollbar-track {
-    background: #f1f1f1;
-}
-
-.labelAndInputField>textarea::-webkit-scrollbar-thumb {
-    background: #888;
-}
-
-.labelAndInputField>textarea::-webkit-scrollbar-thumb:hover {
-    background: #555;
 }
 
 .labelAndInputField.isWide {
@@ -325,4 +284,15 @@
     border-radius: 0.5rem;
     margin-bottom: 1rem;
     width: 70%;
+}
+
+.individualRadioButtons{
+    display: flex;
+    flex-direction: column;
+    margin: 0px 17px;
+}
+
+.fileUploadIcon{
+    display: flex;
+    flex-direction: column;
 }
