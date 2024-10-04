@@ -49,27 +49,9 @@ const createApplication = async (req, res) => {
 
   let applicantId = req.user.id; 
   let department = req.user.department;
-
-  console.log(req.body); // Add this line to check what's coming in the request
-  console.log(req.files);
-
-  
   // Access form data and files from the request
   let formData = req.body;
   const { proofOfTravel, proofOfAccommodation, proofOfAttendance } = req.files;
-
- 
-
-  // Ensure that the files are provided
-  if (!proofOfTravel || !proofOfAccommodation || !proofOfAttendance) {
-    return res.status(422).send("All proof documents must be uploaded."
-    );
-  }
-
-  // Validate department match
-  if (formData.applicantDepartment !== department) {
-    return res.status(422).send("Department does not match.");
-  }
 
   try {
     let applicant = await prisma.applicant.findUnique({
@@ -150,9 +132,11 @@ const createApplication = async (req, res) => {
     ];
     
     // Convert file buffers into Bytes for Prisma
-    const proofOfTravelBuffer = proofOfTravel[0]?.buffer;
-    const proofOfAccommodationBuffer = proofOfAccommodation[0]?.buffer;
-    const proofOfAttendanceBuffer = proofOfAttendance[0]?.buffer;
+    const proofOfTravelBuffer = proofOfTravel?.[0]?.buffer || null;
+    const proofOfAccommodationBuffer = proofOfAccommodation?.[0]?.buffer || null;
+    const proofOfAttendanceBuffer = proofOfAttendance?.[0]?.buffer || null;
+  
+    
 
     let applicationData = {
       applicantId,

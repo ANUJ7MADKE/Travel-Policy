@@ -3,15 +3,11 @@ import { json, redirect } from 'react-router-dom';
 export async function createApplicationAction({ request }) {
   const formData = await request.formData();
 
-  for (let [key, value] of formData.entries()) {
-    console.log(`${key}: ${value instanceof File ? 'File' : value}`);
-  }
-
   try {
     const res = await fetch('http://localhost:3000/applicant/create-application', {
       method: 'POST',
       credentials: 'include',
-      body: formData,
+      body: formData
     });
 
     if (res.status === 401) {

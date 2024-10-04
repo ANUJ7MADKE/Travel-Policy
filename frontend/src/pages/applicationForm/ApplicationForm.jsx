@@ -83,18 +83,8 @@ const ApplicationForm = () => {
             }
           });
         
-          for (let [key, value] of formDataToSend.entries()) {
-            console.log(`${key}: ${value instanceof File ? 'File' : value}`);
-          }
-        
           try {
-            // await submit(formDataToSend, { method: 'POST' });
-            const response = await axios.post("http://localhost:3000/applicant/create-application", formDataToSend, {
-              headers: {
-                      "Content-Type": "multipart/form-data",
-              },
-              withCredentials: true
-            });;
+            submit(formDataToSend, { method: 'POST', encType: "multipart/form-data" });
           } catch (error) {
             console.error('Fetch error:', error);
           }
@@ -913,7 +903,7 @@ const ApplicationForm = () => {
                                                 className="submit"
                                                 onClick={handleSubmit}
                                                 disabled={isSubmitting}>
-                                                Submit
+                                                {isSubmitting? "Submitting" : "Submit" }
                                         </button>
                                 </div>
                         </form>
