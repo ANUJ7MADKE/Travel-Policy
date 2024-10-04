@@ -47,18 +47,21 @@ const applicantRoot = async (req, res) => {
 
 const createApplication = async (req, res) => {
 
-
-  let applicantId = req.user.id; // Assuming user data is attached to the request
+  let applicantId = req.user.id; 
   let department = req.user.department;
+
+  console.log(req.body); // Add this line to check what's coming in the request
+  console.log(req.files);
+
   
   // Access form data and files from the request
   let formData = req.body;
-  const { proofOfTravel, proofOfAccomodation, proofOfAttendance } = req.files;
+  const { proofOfTravel, proofOfAccommodation, proofOfAttendance } = req.files;
 
-  console.log(formData);
+ 
 
   // Ensure that the files are provided
-  if (!proofOfTravel || !proofOfAccomodation || !proofOfAttendance) {
+  if (!proofOfTravel || !proofOfAccommodation || !proofOfAttendance) {
     return res.status(422).send("All proof documents must be uploaded."
     );
   }
@@ -148,7 +151,7 @@ const createApplication = async (req, res) => {
     
     // Convert file buffers into Bytes for Prisma
     const proofOfTravelBuffer = proofOfTravel[0]?.buffer;
-    const proofOfAccomodationBuffer = proofOfAccomodation[0]?.buffer;
+    const proofOfAccommodationBuffer = proofOfAccommodation[0]?.buffer;
     const proofOfAttendanceBuffer = proofOfAttendance[0]?.buffer;
 
     let applicationData = {
@@ -156,7 +159,7 @@ const createApplication = async (req, res) => {
       applicantName,
       formData: JSON.parse(JSON.stringify(formData)), // Convert formData to JSON
       proofOfTravel: proofOfTravelBuffer,        
-      proofOfAccomodation: proofOfAccomodationBuffer,  
+      proofOfAccommodation: proofOfAccommodationBuffer,  
       proofOfAttendance: proofOfAttendanceBuffer  
     };
 

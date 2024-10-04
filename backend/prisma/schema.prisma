@@ -57,7 +57,7 @@ model Application {
   hoiValidation        ApplicationStatus?
 
   proofOfTravel        Bytes 
-  proofOfAccomodation  Bytes
+  proofOfAccommodation  Bytes
   proofOfAttendance    Bytes
 
   createdAt DateTime @default(now())

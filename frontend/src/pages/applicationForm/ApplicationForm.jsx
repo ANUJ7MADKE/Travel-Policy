@@ -76,22 +76,30 @@ const ApplicationForm = () => {
         
           const formDataToSend = new FormData();
           Object.entries(formData).forEach(([key, value]) => {
-            formDataToSend.append(key, value);
+            if (value instanceof File) {
+              formDataToSend.append(key, value, value.name);
+            } else {
+              formDataToSend.append(key, value);
+            }
           });
-
-          // formDataToSend.append("proofOfTravel", formData.proofOfTravel);
-          // formDataToSend.append("proofOfAccommodation", formData.proofOfAccommodation);
-          // formDataToSend.append("proofOfAttendance", formData.proofOfAttendance);
-
+        
+          for (let [key, value] of formDataToSend.entries()) {
+            console.log(`${key}: ${value instanceof File ? 'File' : value}`);
+          }
+        
           try {
-            submit(formDataToSend, { method: "POST" });
-    
+            // await submit(formDataToSend, { method: 'POST' });
+            const response = await axios.post("http://localhost:3000/applicant/create-application", formDataToSend, {
+              headers: {
+                      "Content-Type": "multipart/form-data",
+              },
+              withCredentials: true
+            });;
           } catch (error) {
-              console.error('Fetch error:', error);
+            console.error('Fetch error:', error);
           }
         };
         
-
         const navigation = useNavigation();
         const isSubmitting = navigation.state === "submitting";
 
