@@ -46,11 +46,24 @@ const applicantRoot = async (req, res) => {
 };
 
 const createApplication = async (req, res) => {
-  let applicantId = req.user.id;
+
+
+  let applicantId = req.user.id; // Assuming user data is attached to the request
   let department = req.user.department;
-  let formData = req.body.formData;
+  
+  // Access form data and files from the request
+  let formData = req.body;
+  const { proofOfTravel, proofOfAccomodation, proofOfAttendance } = req.files;
 
+  console.log(formData);
 
+  // Ensure that the files are provided
+  if (!proofOfTravel || !proofOfAccomodation || !proofOfAttendance) {
+    return res.status(422).send("All proof documents must be uploaded."
+    );
+  }
+
+  // Validate department match
   if (formData.applicantDepartment !== department) {
     return res.status(422).send("Department does not match.");
   }
@@ -67,24 +80,23 @@ const createApplication = async (req, res) => {
     }
     let applicantName = applicant.userName;
 
-
     let supervisor = await prisma.validator.findUnique({
       where: {
         email: formData.primarySupervisorEmail,
       }
     });
 
-    if (!supervisor || supervisor.designation != "Supervisor") {
+    if (!supervisor || supervisor.designation !== "Supervisor") {
       return res.status(404).send("Supervisor email invalid");
     }
 
-    if (supervisor.department != department) {
-      return res.status(404).send("Supervisor doesn't belong to your department")
+    if (supervisor.department !== department) {
+      return res.status(404).send("Supervisor doesn't belong to your department");
     }
 
     let additionalSupervisor = null;
 
-    if (formData.anotherSupervisorEmail!=null) {
+    if (formData.anotherSupervisorEmail) {
       additionalSupervisor = await prisma.validator.findUnique({
         where: {
           email: formData.anotherSupervisorEmail,
@@ -92,17 +104,15 @@ const createApplication = async (req, res) => {
       });
     }
 
-    if (additionalSupervisor){
+    if (additionalSupervisor) {
       if (additionalSupervisor.profileId === supervisor.profileId) {
-        return res.status(404).send("Additonal Supervisor's email can't be same as Supervisor's");
+        return res.status(404).send("Additional Supervisor's email can't be the same as Supervisor's");
       }
-  
-      if (additionalSupervisor.designation != "Supervisor") {
-        return res.status(404).send("Additonal Supervisor email invalid");
+
+      if (additionalSupervisor.designation !== "Supervisor") {
+        return res.status(404).send("Additional Supervisor email invalid");
       }
     }
-
-    
 
     let hod = await prisma.validator.findFirst({
       where: {
@@ -133,14 +143,21 @@ const createApplication = async (req, res) => {
       { profileId: supervisor.profileId },
       { profileId: hod.profileId },
       ...(additionalSupervisor ? [{ profileId: additionalSupervisor.profileId }] : []),
-      {profileId: hoi.profileId}
+      { profileId: hoi.profileId }
     ];
     
+    // Convert file buffers into Bytes for Prisma
+    const proofOfTravelBuffer = proofOfTravel[0]?.buffer;
+    const proofOfAccomodationBuffer = proofOfAccomodation[0]?.buffer;
+    const proofOfAttendanceBuffer = proofOfAttendance[0]?.buffer;
 
     let applicationData = {
       applicantId,
       applicantName,
-      formData
+      formData: JSON.parse(JSON.stringify(formData)), // Convert formData to JSON
+      proofOfTravel: proofOfTravelBuffer,        
+      proofOfAccomodation: proofOfAccomodationBuffer,  
+      proofOfAttendance: proofOfAttendanceBuffer  
     };
 
     let newApplication = await prisma.application.create({
@@ -154,10 +171,10 @@ const createApplication = async (req, res) => {
 
     res.status(201).send(newApplication);
   } catch (error) {
+    console.error('Error creating application:', error);
     res.status(500).send(error.message);
   }
 }
-
 
 export {
   applicantRoot,
