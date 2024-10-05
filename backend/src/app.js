@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser';
 import router from './routes/auth.js';
 import applicantRoute from './routes/applicant.js'
 import validatorRoute from './routes/validator.js'
+import generalRoute from './routes/general.js'
 import { verifyApplicantToken, verifyValidatorToken } from './middleware/verifyJwt.js';
 
 
@@ -16,8 +17,8 @@ app.use(cors({
         credentials: true              // Allows cookies to be sent
 }));
 
-app.use('/applicant', verifyApplicantToken, applicantRoute);
-app.use('/validator', verifyValidatorToken, validatorRoute);
+app.use('/applicant', verifyApplicantToken ,applicantRoute, generalRoute);
+app.use('/validator', verifyValidatorToken ,validatorRoute, generalRoute);
 
 app.use(router);
 
