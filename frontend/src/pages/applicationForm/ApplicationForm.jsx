@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useSubmit, useNavigation } from "react-router-dom";
 import "./ApplicationForm.css";
-import axios from "axios";
+// import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const ApplicationForm = () => {
         const [formData, setFormData] = useState({
@@ -27,17 +28,17 @@ const ApplicationForm = () => {
                 purposeOfTravelOther: "",
                 modeOfTravel: "",
                 modeOfTravelOther: "",
-                // proofOfTravel: "",
-                accomodationOpted: false,
-                typeOfAccomodation: "",
+                proofOfTravel: "",
+                accommodationOpted: false,
+                typeOfAccommodation: "",
                 durationOfStay: "",
-                accomodationAddress: "",
-                // proofOfAccomodation: "",
+                accommodationAddress: "",
+                proofOfAccommodation: "",
                 eventName: "",
                 eventDate: "",
                 eventVenue: "",
                 eventWebsite: "",
-                // proofOfAttendance: "",
+                proofOfAttendance: "",
                 parentalConsent: false,
                 fatherFullName: "",
                 fatherContact: "",
@@ -71,27 +72,24 @@ const ApplicationForm = () => {
 
         const submit = useSubmit();
 
+        const navigation = useNavigation();
+        const isSubmitting = navigation.state === "submitting";
+
         const handleSubmit = async (event) => {
           event.preventDefault();
-        
+
           const formDataToSend = new FormData();
-          Object.entries(formData).forEach(([key, value]) => {
-            if (value instanceof File) {
-              formDataToSend.append(key, value, value.name);
-            } else {
-              formDataToSend.append(key, value);
-            }
-          });
-        
+
+          for (const key in formData) {
+            formDataToSend.append(key, formData[key]);
+          }
+
           try {
             submit(formDataToSend, { method: 'POST', encType: "multipart/form-data" });
           } catch (error) {
-            console.error('Fetch error:', error);
+            console.error("Error uploading form:", error.message);
           }
         };
-        
-        const navigation = useNavigation();
-        const isSubmitting = navigation.state === "submitting";
 
         return (
                 <div className="topLevelFormContainer">
@@ -167,42 +165,55 @@ const ApplicationForm = () => {
                                                         <label>Select Course</label>
                                                         <select
                                                                 name="applicantCourse"
-                                                                value={formData.applicantCourse}
-                                                                onChange={(event) =>
+                                                                value={formData.applicantCourse} // Must match state
+                                                                onChange={(event) => {
+                                                                        console.log("Selected course:", event.target.value); // Debugging log
                                                                         setFormData({
                                                                                 ...formData,
-                                                                                applicantCourse: event.target.value,
-                                                                        })
-                                                                }>
+                                                                                applicantCourse: event.target.value, // Update state
+                                                                        });
+                                                                }}
+                                                        >
+                                                                <option value="">Select Course</option> {/* Default option */}
                                                                 <option value="BTECH">Bachelor Of Technology</option>
                                                                 <option value="MTECH">Master Of Technology</option>
                                                                 <option value="PHD">PHD</option>
                                                         </select>
                                                 </div>
 
+
                                                 <div className="dropDownField">
                                                         <label>Select Year of Study</label>
                                                         <select
                                                                 name="applicantYearOfStudy"
-                                                                value={formData.applicantYearOfStudy}
+                                                                value={formData.applicantYearOfStudy} // Controlled component
                                                                 onChange={(event) =>
                                                                         setFormData({
                                                                                 ...formData,
                                                                                 applicantYearOfStudy: event.target.value,
                                                                         })
-                                                                }>
-
-                                                                {formData.applicantCourse == "BTECH" ? (
+                                                                }
+                                                        >
+                                                                {formData.applicantCourse === "BTECH" ? (
                                                                         <>
+                                                                                <option value="">Select Year</option>
                                                                                 <option value="FY">First Year</option>
                                                                                 <option value="SY">Second Year</option>
                                                                                 <option value="TY">Third Year</option>
                                                                                 <option value="LY">Fourth Year</option>
                                                                         </>
-                                                                ) : formData.applicantCourse == "MTECH" ? (
+                                                                ) : formData.applicantCourse === "MTECH" ? (
                                                                         <>
+                                                                                <option value="">Select Year</option>
                                                                                 <option value="FY">First Year</option>
                                                                                 <option value="SY">Second Year</option>
+                                                                        </>
+                                                                ) : formData.applicantCourse === "PHD" ? (
+                                                                        <>
+                                                                                <option value="">Select Year</option>
+                                                                                <option value="Y1">Year 1</option>
+                                                                                <option value="Y2">Year 2</option>
+                                                                                <option value="Y3">Year 3</option>
                                                                         </>
                                                                 ) : null}
                                                         </select>
@@ -211,14 +222,15 @@ const ApplicationForm = () => {
                                                         <label>Select Department</label>
                                                         <select
                                                                 name="applicantDepartment"
-                                                                value={formData.applicantDepartment}
+                                                                value={formData.applicantDepartment} // This should match the state
                                                                 onChange={(event) =>
                                                                         setFormData({
                                                                                 ...formData,
-                                                                                applicantDepartment: event.target.value,
+                                                                                applicantDepartment: event.target.value, // Update the state
                                                                         })
-                                                                }>
-                                                                {/* <option value="">Select Department</option> */}
+                                                                }
+                                                        >
+                                                                <option value="">Select Department</option> {/* Default option */}
                                                                 <option value="COMPS">COMPS</option>
                                                                 <option value="IT">IT</option>
                                                                 <option value="MECH">MECH</option>
@@ -228,6 +240,7 @@ const ApplicationForm = () => {
                                                                 <option value="RAI">RAI</option>
                                                         </select>
                                                 </div>
+
 
                                                 <div className="labelAndInputField">
                                                         <label>Somaiya Email Id</label>
@@ -309,14 +322,15 @@ const ApplicationForm = () => {
                                                         <label>Supervisor's Department</label>
                                                         <select
                                                                 name="primarySupervisorDepartment"
-                                                                value={formData.primarySupervisorDepartment}
+                                                                value={formData.primarySupervisorDepartment} // Controlled component
                                                                 onChange={(event) =>
                                                                         setFormData({
                                                                                 ...formData,
-                                                                                primarySupervisorDepartment: event.target.value,
+                                                                                primarySupervisorDepartment: event.target.value, // Update department
                                                                         })
-                                                                }>
-                                                                {/* <option value="">Select Department</option> */}
+                                                                }
+                                                        >
+                                                                <option value="">Select Department</option> {/* Default option */}
                                                                 <option value="COMPS">COMPS</option>
                                                                 <option value="IT">IT</option>
                                                                 <option value="MECH">MECH</option>
@@ -326,6 +340,7 @@ const ApplicationForm = () => {
                                                                 <option value="RAI">RAI</option>
                                                         </select>
                                                 </div>
+
 
                                                 <div className="radioField fullRow">
                                                         <label>Do you have another supervisor?</label>
@@ -414,14 +429,15 @@ const ApplicationForm = () => {
                                                                 <label>Other Supervisor's Department</label>
                                                                 <select
                                                                         name="anotherSupervisorDepartment"
-                                                                        value={formData.anotherSupervisorDepartment}
+                                                                        value={formData.anotherSupervisorDepartment} // Controlled component
                                                                         onChange={(event) =>
                                                                                 setFormData({
                                                                                         ...formData,
-                                                                                        anotherSupervisorDepartment: event.target.value,
+                                                                                        anotherSupervisorDepartment: event.target.value, // Correctly updating state
                                                                                 })
-                                                                        }>
-                                                                        {/* <option value="">Select Department</option> */}
+                                                                        }
+                                                                >
+                                                                        <option value="">Select Department</option> {/* Added default option */}
                                                                         <option value="COMPS">COMPS</option>
                                                                         <option value="IT">IT</option>
                                                                         <option value="MECH">MECH</option>
@@ -431,6 +447,7 @@ const ApplicationForm = () => {
                                                                         <option value="RAI">RAI</option>
                                                                 </select>
                                                         </div>
+
                                                 )}
                                         </div>
                                 </div>
@@ -651,23 +668,26 @@ const ApplicationForm = () => {
                                                                 </div>
                                                         </div>
                                                 </div>
-                                                {formData.accommodationOpted && (<div className="dropDownField">
-                                                        <label>Type of Accommodation</label>
-                                                        <select
-                                                                name="typeOfAccommodation"
-                                                                value={formData.typeOfAccommodation}
-                                                                onChange={(event) =>
-                                                                        setFormData({
-                                                                                ...formData,
-                                                                                typeOfAccommodation: event.target.value,
-                                                                        })
-                                                                }>
-                                                                {/* <option value="">Select Department</option> */}
-                                                                <option value="Hotel">Hotel</option>
-                                                                <option value="Guest House">Guest House</option>
-                                                                <option value="Other">Other</option>
-                                                        </select>
-                                                </div>)}
+                                                {formData.accommodationOpted && (
+                                                        <div className="dropDownField">
+                                                                <label>Type of Accommodation</label>
+                                                                <select
+                                                                        name="typeOfAccommodation"
+                                                                        value={formData.typeOfAccommodation} // Controlled component
+                                                                        onChange={(event) =>
+                                                                                setFormData({
+                                                                                        ...formData,
+                                                                                        typeOfAccommodation: event.target.value, // Update state correctly
+                                                                                })
+                                                                        }
+                                                                >
+                                                                        <option value="">Select Accommodation Type</option> {/* Default option */}
+                                                                        <option value="Hotel">Hotel</option>
+                                                                        <option value="Guest House">Guest House</option>
+                                                                        <option value="Other">Other</option>
+                                                                </select>
+                                                        </div>
+                                                )}
                                                 {formData.accommodationOpted && (<div className="labelAndInputField">
                                                         <label>Duration of Stay</label>
                                                         <input
@@ -903,7 +923,7 @@ const ApplicationForm = () => {
                                                 className="submit"
                                                 onClick={handleSubmit}
                                                 disabled={isSubmitting}>
-                                                {isSubmitting? "Submitting" : "Submit" }
+                                                {isSubmitting ? "Submitting" : "Submit"}
                                         </button>
                                 </div>
                         </form>
