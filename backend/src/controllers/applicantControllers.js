@@ -20,11 +20,29 @@ const applicantRoot = async (req, res) => {
     // Categorize applications based on their validation status
     let applications = { "PENDING": [], "REJECTED": [], "ACCEPTED": [] };
 
+
+
     applicant.applications.forEach((application) => {
       let status = application.hoiValidation || application.hodValidation || application.supervisorValidation;
 
+      let applicationData = {
+        applicantId: application.applicantId,
+        applicantName: application.applicantName,
+        applicationId: application.applicationId,
+        createdAt: application.createdAt,
+
+        formData : {
+          eventName: application.formData.eventName,
+          applicantDepartment: application.formData.applicantDepartment
+        },
+
+        supervisorValidation: application.supervisorValidation,
+        hodValidation: application.hodValidation,
+        hoiValidation: application.hoiValidation,
+      }
+
       if (applications[status]) {
-        applications[status].push(application);
+        applications[status].push(applicationData);
       }
     });
 
