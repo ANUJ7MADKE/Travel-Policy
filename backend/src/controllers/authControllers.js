@@ -30,7 +30,7 @@ const applicantLogin = async (req, res) => {
     
     const tokenObject = {
       id: validProfile.profileId,
-      designation: "applicant",
+      designation: validProfile.designation,
       department: validProfile.department
     }
 
@@ -73,7 +73,7 @@ const validatorLogin = async (req, res) => {
     
     const tokenObject = {
       id: validProfile.profileId,
-      designation: "validator",
+      designation: validProfile.designation,
       department: validProfile.department
     }
 

@@ -14,7 +14,7 @@ const studentIcon = (
   </svg>
 );
 
-const Navbar = ({ userData , role }) => {
+const Navbar = ({ userData }) => {
 
   const handleLogout = async() => {
       let res = await fetch("http://localhost:3000/logout", {
@@ -25,7 +25,7 @@ const Navbar = ({ userData , role }) => {
       return res;
   }
   
-  const userDesignation = userData.designation || "Student";
+  const userDesignation = userData.designation;
   const userName = userData.userName;
 
   const [profileData] = useState({

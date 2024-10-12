@@ -1,4 +1,4 @@
-import React, { useEffect, useState }from 'react'
+import React, { useState }from 'react'
 import { useRouteLoaderData, useParams, useNavigate, useSubmit } from 'react-router-dom';
 import ApplicationTable from './components/ApplicationTable';
 import Modal from '../../components/Modal/Modal';
@@ -12,7 +12,7 @@ const Dashboard = ({ role }) => {
 
   const [applicationDisplay, setApplicationDisplay] = useState(null);
 
-  const getFullApplication = async (applicationId) => {
+  const getFullApplication = async (applicationId, currentStatus) => {
     try {
       const response = await fetch(`http://localhost:3000/${role.toLowerCase()}/getApplicationData/${applicationId}`, {
         method: 'GET',
@@ -25,16 +25,15 @@ const Dashboard = ({ role }) => {
   
       const fullApplication = await response.json();
       
-      setApplicationDisplay(fullApplication); 
+      setApplicationDisplay({...fullApplication, currentStatus}); 
     } catch (error) {
       console.error('Error fetching application data:', error);
       return null; 
     }
   };
   
-
   const handleRowClick = (application) => {
-    getFullApplication(application.applicationId)
+    getFullApplication(application.applicationId, application.currentStatus)
   };
 
   const closeModal = () => {
@@ -125,6 +124,7 @@ const Dashboard = ({ role }) => {
           {/* keep componet whihch displays form data here*/}
           <h2>{applicationDisplay.formData.eventName}</h2>
           <p>{applicationDisplay.applicationId}</p>
+          {console.log(applicationDisplay)}
           
           <div className="flex justify-between mt-4">
           {(role === "Validator" && applicationDisplay.currentStatus === "Pending") && 
