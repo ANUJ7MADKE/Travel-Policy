@@ -2,6 +2,8 @@ import React, { useState }from 'react'
 import { useRouteLoaderData, useParams, useNavigate, useSubmit } from 'react-router-dom';
 import ApplicationTable from './components/ApplicationTable';
 import Modal from '../../components/Modal/Modal';
+import ApplicationDisplay from '../ApplicationDisplay/ApplicationDisplay';
+
   
 const Dashboard = ({ role }) => {
   const navigate = useNavigate()
@@ -14,7 +16,7 @@ const Dashboard = ({ role }) => {
 
   const getFullApplication = async (applicationId, currentStatus) => {
     try {
-      const response = await fetch(`http://localhost:3000/${role.toLowerCase()}/getApplicationData/${applicationId}`, {
+      const response = await fetch(`http://localhost:3000/general/getApplicationData/${applicationId}`, {
         method: 'GET',
         credentials: 'include',
       });
@@ -120,11 +122,9 @@ const Dashboard = ({ role }) => {
         </div>
         {renderContent()}
 
-        {applicationDisplay && (<Modal onClose={closeModal}>
-          {/* keep componet whihch displays form data here*/}
-          <h2>{applicationDisplay.formData.eventName}</h2>
-          <p>{applicationDisplay.applicationId}</p>
-          {console.log(applicationDisplay)}
+        {applicationDisplay && (
+        <Modal onClose={closeModal} title={applicationDisplay.formData.eventName}>
+          <ApplicationDisplay applicationId={applicationDisplay.applicationId} formData={applicationDisplay.formData}/>
           
           <div className="flex justify-between mt-4">
           {(role === "Validator" && applicationDisplay.currentStatus === "Pending") && 

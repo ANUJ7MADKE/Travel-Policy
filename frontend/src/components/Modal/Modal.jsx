@@ -2,13 +2,18 @@ import React from 'react';
 import './Modal.css'
 
 
-const Modal = ({onClose, children }) => {
-    
+const Modal = ({onClose, title, children }) => {
     return (
-    <div className="modal-overlay">
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <button className="modal-close" onClick={onClose}>X</button>
-        {children}
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-display" onClick={(e) => e.stopPropagation()}>
+        <div className='modal-header'>
+          {title??<h1>{title}</h1>}
+          <button className="modal-close" onClick={onClose}>X</button>
+        </div>
+        <div className='modal-content'>
+          {children}
+        </div>
+        
       </div>
     </div>
        
