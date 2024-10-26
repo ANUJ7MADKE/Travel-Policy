@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 
 const Sidebar = ({role}) => (
-  <aside className="w-64 bg-white p-6 shadow-lg">
+  <aside className="w-64 h-screen bg-white p-6 shadow-lg">
     <div className="mb-8 text-center border-b-2 border-gray-200 pb-4">
       <div className="bg-gray-100 border border-gray-300 rounded-lg py-3 ">
         <h2 className=" text-2xl font-bold text-red-700">{`${role} Portal`}</h2>
