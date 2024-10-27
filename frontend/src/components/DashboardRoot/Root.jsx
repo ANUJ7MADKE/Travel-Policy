@@ -3,7 +3,7 @@ import { Outlet, useLoaderData } from "react-router-dom";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 
-const DashboardRoot = ({ role }) => {
+const Root = ({ role }) => {
   const { user } = useLoaderData().data;
 
   return (
@@ -19,4 +19,4 @@ const DashboardRoot = ({ role }) => {
   );
 };
 
-export default DashboardRoot;
+export default Root;

@@ -2,25 +2,6 @@ import React from 'react';
 
 const ApplicationTable = ({ title, applications, onRowClick }) => {
   
-  const getExactStatus = (title,app) => {
-    if (title.split(" ")[0] === "Pending") {
-
-      if (app.hoiValidation === "PENDING") {
-        return "HOI Validation PENDING"
-      }
-      if (app.hodValidation === "PENDING") {
-        return "HOD Validation PENDING"
-      }
-      if (app.supervisorValidation === "PENDING") {
-        return "Supervisor Validation PENDING"
-      }
-    
-    } else {
-      return title.split(" ")[0];
-    }
-  };
-
-
   return (
     <div className="mb-6">
       <h2 className="text-xl font-bold mb-2">{title}</h2>

@@ -4,10 +4,10 @@ import {Login,Dashboard,ApplicationForm,About,Policy, ApplicationDisplay} from '
 import './App.css'
 import LoginRoot from './components/LoginRoot/LoginRoot'
 import ErrorComponent from '../src/components/ErrorComponent';
-import DashboardRoot from './components/DashboardRoot/DashboardRoot'
 import userDataLoader from './services/userDataLoader';
 import { createApplicationAction } from './services/createApplicationAction';
 import { applicationStatusAction } from './services/applicationStatusAction';
+import Root from './components/DashboardRoot/Root';
 
 const router = createBrowserRouter([
   {path:'/',element: <LoginRoot/>, children:[
@@ -15,7 +15,7 @@ const router = createBrowserRouter([
     {path:'about',element: <About/> },
     {path:'policy',element: <Policy/>}
   ]},
-  {path:'/applicant',element: <DashboardRoot role="Applicant"/>, id: "Applicant-Root", loader: userDataLoader, /*errorElement: <ErrorComponent/>,*/
+  {path:'/applicant',element: <Root role="Applicant"/>, id: "Applicant-Root", loader: userDataLoader, /*errorElement: <ErrorComponent/>,*/
     children:[
     {path:'dashboard',element: <Dashboard role="Applicant"/>,
       children:[
@@ -27,7 +27,7 @@ const router = createBrowserRouter([
     {path:'contact-us',element: <h1>contact-us</h1> },
   ]},
     
-  {path:'/validator',element: <DashboardRoot role="Validator"/>, id: "Validator-Root", loader: userDataLoader, errorElement: <ErrorComponent/>,
+  {path:'/validator',element: <Root role="Validator"/>, id: "Validator-Root", loader: userDataLoader, errorElement: <ErrorComponent/>,
     children:[
     {path:'dashboard',element: <Dashboard role="Validator"/>, action: applicationStatusAction,
       children:[
