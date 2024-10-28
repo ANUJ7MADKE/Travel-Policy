@@ -1,5 +1,5 @@
 import {createBrowserRouter, RouterProvider} from 'react-router-dom'
-import {Login,Dashboard,ApplicationForm,About,Policy, ApplicationDisplay} from './pages'
+import {Login,Dashboard,ApplicationForm,About,Policy, ApplicationDisplay, Applications} from './pages'
 
 import './App.css'
 import LoginRoot from './components/LoginRoot/LoginRoot'
@@ -10,32 +10,28 @@ import { applicationStatusAction } from './services/applicationStatusAction';
 import Root from './components/DashboardRoot/Root';
 
 const router = createBrowserRouter([
-  {path:'/',element: <LoginRoot/>, children:[
-    {index:true,element: <Login/> },
-    {path:'about',element: <About/> },
-    {path:'policy',element: <Policy/>}
-  ]},
-  {path:'/applicant',element: <Root role="Applicant"/>, id: "Applicant-Root", loader: userDataLoader, /*errorElement: <ErrorComponent/>,*/
-    children:[
-    {path:'dashboard',element: <Dashboard role="Applicant"/>,
-      children:[
-      {path:':status',element: <Dashboard role="Applicant"/> }
-    ]},
-    {path:'form',element: <ApplicationForm/>, action: createApplicationAction },
-    {path:'display', element: <ApplicationDisplay/>},
-    {path:'faqs',element: <h1>FAQs</h1> },
-    {path:'contact-us',element: <h1>contact-us</h1> },
-  ]},
-    
-  {path:'/validator',element: <Root role="Validator"/>, id: "Validator-Root", loader: userDataLoader, errorElement: <ErrorComponent/>,
-    children:[
-    {path:'dashboard',element: <Dashboard role="Validator"/>, action: applicationStatusAction,
-      children:[
-      {path:':status',element: <Dashboard role="Validator"/> }
-    ]},
-    {path:'display', element: <ApplicationDisplay/>},
-  ]},
-])
+  { path: "/", element: <LoginRoot />, children: [
+      { index: true, element: <Login /> },
+      { path: "about", element: <About /> },
+      { path: "policy", element: <Policy /> }
+    ]
+  },
+  { path: "/applicant", element: <Root/>, id: "Applicant-Root", loader: userDataLoader, 
+    children: [
+      { path: "dashboard", element: <Dashboard/> },
+      { path: "dashboard/:status", element: <Applications/> },
+      { path: "form", element: <ApplicationForm />, action: createApplicationAction },
+      { path: "faqs", element: <h1>FAQs</h1> },
+      { path: "contact-us", element: <h1>Contact Us</h1> },
+    ]
+  },
+  { path: "/validator", element: <Root/>, id: "Validator-Root", loader: userDataLoader,
+    children: [
+      { path: "dashboard", element: <Dashboard/> },
+      { path: "dashboard/:status", element: <Applications />, action: applicationStatusAction },
+    ]
+  },
+]);
 
 function App() {
   return <RouterProvider router={router}/>

@@ -3,8 +3,8 @@ import { Outlet, useLoaderData } from "react-router-dom";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 
-const Root = ({ role }) => {
-  const { user } = useLoaderData().data;
+const Root = () => {
+  const { user, role } = useLoaderData().data;
 
   return (
     <div className="overflow-hidden h-screen">

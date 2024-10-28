@@ -2,7 +2,7 @@ import React from "react";
 import PdfActions from "./PdfActions";
 
 
-function ApplicationDisplay({ applicationId, formData }) {
+function FormDisplay({ applicationId, formData }) {
   return (
     <div className="p-6 border border-gray-300 rounded-lg bg-white">
       {/* Personal and Academic Section */}
@@ -126,4 +126,4 @@ const Field = ({
   </div>
 );
 
-export default ApplicationDisplay;
+export default FormDisplay;

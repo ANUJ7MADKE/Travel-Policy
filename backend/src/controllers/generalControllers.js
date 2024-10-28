@@ -31,6 +31,7 @@ const dataRoot = async (req, res) => {
       return res.status(200).json({
         message: "Applicant Authorized",
         user: applicant,
+        role: "Applicant"
       });
 
     } else if (['Supervisor', 'HOD', 'HOI'].includes(user.designation)) {
@@ -57,6 +58,7 @@ const dataRoot = async (req, res) => {
       return res.status(200).json({
         message: "Validator Authorized",
         user: validator,
+        role: "Validator"
       });
     } else {
       return res.status(403).send("Unauthorized");
@@ -108,7 +110,7 @@ const getPendingApplications = async (req, res) => {
         take: take,
         skip: skip,
         orderBy: {
-          createdAt: "asc",
+          createdAt: "desc",
         },
       });
 
@@ -136,7 +138,7 @@ const getPendingApplications = async (req, res) => {
         take: take,
         skip: skip,
         orderBy: {
-          createdAt: "asc",
+          createdAt: "desc",
         },
       });
     } else {
@@ -204,7 +206,7 @@ const getAcceptedApplications = async (req, res) => {
         take: take,
         skip: skip,
         orderBy: {
-          createdAt: "asc",
+          createdAt: "desc",
         },
       });
 
@@ -232,7 +234,7 @@ const getAcceptedApplications = async (req, res) => {
         take: take,
         skip: skip,
         orderBy: {
-          createdAt: "asc",
+          createdAt: "desc",
         },
       });
     } else {
@@ -300,7 +302,7 @@ const getRejectedApplications = async (req, res) => {
         take: take,
         skip: skip,
         orderBy: {
-          createdAt: "asc",
+          createdAt: "desc",
         },
       });
 
@@ -328,7 +330,7 @@ const getRejectedApplications = async (req, res) => {
         take: take,
         skip: skip,
         orderBy: {
-          createdAt: "asc",
+          createdAt: "desc",
         },
       });
     } else {

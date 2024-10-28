@@ -1,68 +1,5 @@
 import prisma from '../config/prismaConfig.js';
 
-const applicantRoot = async (req, res) => {
-  try {
-    const user = req.user; // Contains all user info (id, designation, department, etc.)
-
-    // Fetch applicant information based on the user's profile ID
-    const applicant = await prisma.applicant.findUnique({
-      where: { profileId: user.id },
-      include: {
-        applications: true, // Include related applications in the query
-      }
-    });
-
-    // Check if the applicant exists
-    if (!applicant) {
-      return res.status(404).send("Applicant doesn't exist");
-    }
-
-    // Categorize applications based on their validation status
-    let applications = { "PENDING": [], "REJECTED": [], "ACCEPTED": [] };
-
-
-
-    applicant.applications.forEach((application) => {
-      let status = application.hoiValidation || application.hodValidation || application.supervisorValidation;
-
-      let applicationData = {
-        applicantId: application.applicantId,
-        applicantName: application.applicantName,
-        applicationId: application.applicationId,
-        createdAt: application.createdAt,
-
-        formData : {
-          eventName: application.formData.eventName,
-          applicantDepartment: application.formData.applicantDepartment
-        },
-
-        supervisorValidation: application.supervisorValidation,
-        hodValidation: application.hodValidation,
-        hoiValidation: application.hoiValidation,
-      }
-
-      if (applications[status]) {
-        applications[status].push(applicationData);
-      }
-    });
-
-    // Remove the password & applications before sending user info
-    delete applicant.password;
-    delete applicant.applications;
-    
-    // Return the response with the user's info and categorized applications
-    return res.status(200).json({
-      message: "Applicant Authorized",
-      user: applicant,
-      applications: applications
-    });
-
-  } catch (error) {
-    console.log(error);
-    res.status(500).send(error.message);
-  }
-};
-
 const createApplication = async (req, res) => {
 
   let applicantId = req.user.id; 
@@ -182,6 +119,5 @@ const createApplication = async (req, res) => {
 }
 
 export {
-  applicantRoot,
   createApplication
 }
