@@ -1,7 +1,7 @@
-import prisma from '../config/prismaConfig.js';
+import { application } from "express";
+import prisma from "../config/prismaConfig.js";
 
 const applicationAction = async (req, res) => {
-
   let profileId = req.user.id;
 
   try {
@@ -9,21 +9,22 @@ const applicationAction = async (req, res) => {
 
     const validator = await prisma.validator.findFirst({
       where: { profileId },
-      include: { applications: true }
+      include: { applications: true },
     });
 
     if (!validator) {
       return res.status(404).send("Validator doesn't exist");
     }
 
-    const application = validator.applications.find(app => app.applicationId === applicationId);
+    const application = validator.applications.find(
+      (app) => app.applicationId === applicationId
+    );
 
     if (!application) {
       return res.status(404).send("Application not available");
-
     }
 
-    const validationStatus = action.toUpperCase();  
+    const validationStatus = action.toUpperCase();
 
     if (validationStatus !== "ACCEPTED" && validationStatus !== "REJECTED") {
       return res.status(400).send("Invalid status");
@@ -34,7 +35,9 @@ const applicationAction = async (req, res) => {
     switch (validator.designation) {
       case "Supervisor":
         if (application.supervisorValidation != "PENDING") {
-          return res.status(400).send("Already performed an action, can't change status again")
+          return res
+            .status(400)
+            .send("Already performed an action, can't change status again");
         }
         validationData.supervisorValidation = validationStatus;
         if (validationStatus === "ACCEPTED") {
@@ -43,7 +46,9 @@ const applicationAction = async (req, res) => {
         break;
       case "HOD":
         if (application.hodValidation != "PENDING") {
-          return res.status(400).send("Already performed an action, can't change status again")
+          return res
+            .status(400)
+            .send("Already performed an action, can't change status again");
         }
         validationData.hodValidation = validationStatus;
         if (validationStatus === "ACCEPTED") {
@@ -52,7 +57,9 @@ const applicationAction = async (req, res) => {
         break;
       case "HOI":
         if (application.hoiValidation != "PENDING") {
-          return res.status(400).send("Already performed an action, can't change status again")
+          return res
+            .status(400)
+            .send("Already performed an action, can't change status again");
         }
         validationData.hoiValidation = validationStatus;
         break;
@@ -61,10 +68,10 @@ const applicationAction = async (req, res) => {
     }
 
     const response = await prisma.application.update({
-      where: { 
-        applicationId: applicationId
+      where: {
+        applicationId: applicationId,
       },
-      data: validationData
+      data: validationData,
     });
 
     res.status(200).send(response);
@@ -73,7 +80,30 @@ const applicationAction = async (req, res) => {
   }
 };
 
+const getApplicantNames = async (req, res) => {
+  const profileId = req.user.id;
 
-export {
-  applicationAction
-}
+  try {
+    const applicants = await prisma.application.findMany({
+      where: { validators: { some: { profileId } } },
+      select: {
+        applicantName: true,
+      },
+      distinct: ['applicantName'],
+    });
+
+    const ApplicantNames = applicants.map((application) => ({
+      key: application.applicantName.toLowerCase(),
+      value: application.applicantName,
+    }));
+
+    res.status(200).send(ApplicantNames);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send(error.message);
+  }
+};
+
+
+
+export { applicationAction, getApplicantNames };

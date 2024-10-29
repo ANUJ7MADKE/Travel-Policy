@@ -71,177 +71,110 @@ const dataRoot = async (req, res) => {
   }
 };
 
-const getPendingApplications = async (req, res) => {
+const getApplicationsByStatus = async (req, res) => {
   try {
-    const user = req.user; 
+    const user = req.user;
     const userId = user.id;
     const take = parseInt(req.query.take) || 5;
     const skip = parseInt(req.query.skip) || 0;
+    const status = req.params.status.toUpperCase(); // "PENDING", "ACCEPTED", or "REJECTED"
+    const sortBy = req.query?.sortBy
+    const sortValue = req.query?.sortValue; // This will be used for case-insensitive search
 
-    let pendingApplications, totalApplications;
+    const validStatuses = ["PENDING", "ACCEPTED", "REJECTED"];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).send("Invalid status");
+    }
 
+    let applications, totalApplications;
+
+    // Conditions based on designation and status
     if (['Student', 'Faculty'].includes(user.designation)) {
-      totalApplications = await prisma.application.count({
-        where: {
-          applicantId: userId,
+      const baseWhere = {
+        applicantId: userId,
+        ...(status === "PENDING" && {
           OR: [
             { supervisorValidation: "PENDING" },
             { hodValidation: "PENDING" },
             { hoiValidation: "PENDING" },
           ],
-        },
-      });
-
-      pendingApplications = await prisma.application.findMany({
-        where: {
-          applicantId: userId,
-          OR: [
-            { supervisorValidation: "PENDING" },
-            { hodValidation: "PENDING" },
-            { hoiValidation: "PENDING" },
-          ],
-        },
-        select: {
-          applicationId: true,
-          applicantName: true,
-          formData: true,
-          createdAt: true,
-        },
-        take: take,
-        skip: skip,
-        orderBy: {
-          createdAt: "desc",
-        },
-      });
-
-    } else if (['Supervisor', 'HOD', 'HOI'].includes(user.designation)) {
-      const validationField = `${user.designation.toLowerCase()}Validation`;
-
-      totalApplications = await prisma.application.count({
-        where: {
-          validators: { some: { profileId: userId } },
-          [validationField]: "PENDING",
-        },
-      });
-
-      pendingApplications = await prisma.application.findMany({
-        where: {
-          validators: { some: { profileId: userId } },
-          [validationField]: "PENDING",
-        },
-        select: {
-          applicationId: true,
-          applicantName: true,
-          formData: true,
-          createdAt: true,
-        },
-        take: take,
-        skip: skip,
-        orderBy: {
-          createdAt: "desc",
-        },
-      });
-    } else {
-      return res.status(403).send("Unauthorized");
-    }
-
-    const responseApplications = pendingApplications.map(application => ({
-      applicationId: application.applicationId,
-      applicantName: application.applicantName,
-      formData: {
-        eventName: application.formData.eventName,
-        applicantDepartment: application.formData.applicantDepartment,
-      },
-      createdAt: application.createdAt,
-    }));
-
-    return res.status(200).json({
-      message: "Pending Applications Fetched Successfully",
-      totalApplications,
-      applications: responseApplications,
-    });
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).send(error.message);
-  }
-};
-
-const getAcceptedApplications = async (req, res) => {
-  try {
-    const user = req.user; 
-    const userId = user.id;
-    const take = parseInt(req.query.take) || 5;
-    const skip = parseInt(req.query.skip) || 0;
-
-    let acceptedApplications, totalApplications;
-
-    if (['Student', 'Faculty'].includes(user.designation)) {
-      totalApplications = await prisma.application.count({
-        where: {
-          applicantId: userId,
+        }),
+        ...(status === "ACCEPTED" && {
           AND: [
             { supervisorValidation: "ACCEPTED" },
             { hodValidation: "ACCEPTED" },
             { hoiValidation: "ACCEPTED" },
           ],
-        },
-      });
-
-      acceptedApplications = await prisma.application.findMany({
-        where: {
-          applicantId: userId,
-          AND: [
-            { supervisorValidation: "ACCEPTED" },
-            { hodValidation: "ACCEPTED" },
-            { hoiValidation: "ACCEPTED" },
+        }),
+        ...(status === "REJECTED" && {
+          OR: [
+            { supervisorValidation: "REJECTED" },
+            { hodValidation: "REJECTED" },
+            { hoiValidation: "REJECTED" },
           ],
-        },
+        }),
+      };
+
+      // If sorting by applicantName, use case-insensitive filter
+      if (sortBy && sortValue) {
+        baseWhere[sortBy] = {
+          contains: sortValue, // Use contains for substring matching
+          mode: 'insensitive', // Case insensitive
+        };
+      }
+
+      totalApplications = await prisma.application.count({ where: baseWhere });
+      applications = await prisma.application.findMany({
+        where: baseWhere,
         select: {
           applicationId: true,
           applicantName: true,
           formData: true,
           createdAt: true,
         },
-        take: take,
-        skip: skip,
-        orderBy: {
-          createdAt: "desc",
-        },
+        take,
+        skip,
+        orderBy: { createdAt: "desc" },
       });
 
     } else if (['Supervisor', 'HOD', 'HOI'].includes(user.designation)) {
       const validationField = `${user.designation.toLowerCase()}Validation`;
 
+      // Setup where condition for validators
+      const baseWhere = {
+        validators: { some: { profileId: userId } },
+        [validationField]: status,
+      };
+
+      // If sorting by applicantName, apply case-insensitive filter
+      if (sortBy && sortValue) {
+        baseWhere[sortBy] = {
+          contains: sortValue, // Use contains for substring matching
+          mode: 'insensitive', // Case insensitive
+        };
+      }
+
       totalApplications = await prisma.application.count({
-        where: {
-          validators: { some: { profileId: userId } },
-          [validationField]: "ACCEPTED",
-        },
+        where: baseWhere,
       });
 
-      acceptedApplications = await prisma.application.findMany({
-        where: {
-          validators: { some: { profileId: userId } },
-          [validationField]: "ACCEPTED",
-        },
+      applications = await prisma.application.findMany({
+        where: baseWhere,
         select: {
           applicationId: true,
           applicantName: true,
           formData: true,
           createdAt: true,
         },
-        take: take,
-        skip: skip,
-        orderBy: {
-          createdAt: "desc",
-        },
+        take,
+        skip,
+        orderBy: { createdAt: "desc" },
       });
     } else {
       return res.status(403).send("Unauthorized");
     }
 
-    const responseApplications = acceptedApplications.map(application => ({
+    const responseApplications = applications.map(application => ({
       applicationId: application.applicationId,
       applicantName: application.applicantName,
       formData: {
@@ -252,103 +185,7 @@ const getAcceptedApplications = async (req, res) => {
     }));
 
     return res.status(200).json({
-      message: "Accepted Applications Fetched Successfully",
-      totalApplications,
-      applications: responseApplications,
-    });
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).send(error.message);
-  }
-};
-
-const getRejectedApplications = async (req, res) => {
-  try {
-    const user = req.user; 
-    const userId = user.id;
-    const take = parseInt(req.query.take) || 5;
-    const skip = parseInt(req.query.skip) || 0;
-
-    let rejectedApplications, totalApplications;
-
-    if (['Student', 'Faculty'].includes(user.designation)) {
-      totalApplications = await prisma.application.count({
-        where: {
-          applicantId: userId,
-          OR: [
-            { supervisorValidation: "REJECTED" },
-            { hodValidation: "REJECTED" },
-            { hoiValidation: "REJECTED" },
-          ],
-        },
-      });
-
-      rejectedApplications = await prisma.application.findMany({
-        where: {
-          applicantId: userId,
-          OR: [
-            { supervisorValidation: "REJECTED" },
-            { hodValidation: "REJECTED" },
-            { hoiValidation: "REJECTED" },
-          ],
-        },
-        select: {
-          applicationId: true,
-          applicantName: true,
-          formData: true,
-          createdAt: true,
-        },
-        take: take,
-        skip: skip,
-        orderBy: {
-          createdAt: "desc",
-        },
-      });
-
-    } else if (['Supervisor', 'HOD', 'HOI'].includes(user.designation)) {
-      const validationField = `${user.designation.toLowerCase()}Validation`;
-
-      totalApplications = await prisma.application.count({
-        where: {
-          validators: { some: { profileId: userId } },
-          [validationField]: "REJECTED",
-        },
-      });
-
-      rejectedApplications = await prisma.application.findMany({
-        where: {
-          validators: { some: { profileId: userId } },
-          [validationField]: "REJECTED",
-        },
-        select: {
-          applicationId: true,
-          applicantName: true,
-          formData: true,
-          createdAt: true,
-        },
-        take: take,
-        skip: skip,
-        orderBy: {
-          createdAt: "desc",
-        },
-      });
-    } else {
-      return res.status(403).send("Unauthorized");
-    }
-
-    const responseApplications = rejectedApplications.map(application => ({
-      applicationId: application.applicationId,
-      applicantName: application.applicantName,
-      formData: {
-        eventName: application.formData.eventName,
-        applicantDepartment: application.formData.applicantDepartment,
-      },
-      createdAt: application.createdAt,
-    }));
-
-    return res.status(200).json({
-      message: "Rejected Applications Fetched Successfully",
+      message: `${status} Applications Fetched Successfully`,
       totalApplications,
       applications: responseApplications,
     });
@@ -446,4 +283,4 @@ const getFile = async (req, res) => {
 };
 
 
-export { getApplicationData, getFile, dataRoot, getPendingApplications, getAcceptedApplications, getRejectedApplications };
+export { getApplicationData, getFile, dataRoot, getApplicationsByStatus };

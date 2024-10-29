@@ -1,9 +1,7 @@
 import {createBrowserRouter, RouterProvider} from 'react-router-dom'
-import {Login,Dashboard,ApplicationForm,About,Policy, ApplicationDisplay, Applications} from './pages'
-
+import {Login,Dashboard,ApplicationForm,About,Policy, Applications} from './pages'
 import './App.css'
 import LoginRoot from './components/LoginRoot/LoginRoot'
-import ErrorComponent from '../src/components/ErrorComponent';
 import userDataLoader from './services/userDataLoader';
 import { createApplicationAction } from './services/createApplicationAction';
 import { applicationStatusAction } from './services/applicationStatusAction';
