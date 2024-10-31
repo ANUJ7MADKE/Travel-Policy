@@ -1,17 +1,9 @@
-import React from 'react'
+import React from 'react';
 
-const PersonalAndAcademicFormComponent = ({ currentForm, openAForm, formData, setFormData }) => {
+const PersonalAndAcademicFormComponent = ({ currentForm, openAForm, formData, setFormData, designation }) => {
         return (
-                <div className={`generalFormContainer personalAndAcademicFormContainer ${currentForm === "personalAndAcademicFormContainer"
-                        ? ""
-                        : "hiddenForm"
-                        }`}
-                >
-                        <div
-                                className="header"
-                                data-form-name="personalAndAcademicFormHeader"
-                                onClick={openAForm}
-                        >
+                <div className={`generalFormContainer personalAndAcademicFormContainer ${currentForm === "personalAndAcademicFormContainer" ? "" : "hiddenForm"}`}>
+                        <div className="header" data-form-name="personalAndAcademicFormHeader" onClick={openAForm}>
                                 Personal And Academic
                         </div>
                         <div className="personalAndAcademicForm form">
@@ -70,71 +62,75 @@ const PersonalAndAcademicFormComponent = ({ currentForm, openAForm, formData, se
                                         />
                                 </div>
 
-                                <div className="dropDownField">
-                                        <label>Select Course</label>
-                                        <select
-                                                name="applicantCourse"
-                                                value={formData.applicantCourse} // Must match state
-                                                onChange={(event) => {
-                                                        console.log("Selected course:", event.target.value); // Debugging log
-                                                        setFormData({
-                                                                ...formData,
-                                                                applicantCourse: event.target.value, // Update state
-                                                        });
-                                                }}
-                                        >
-                                                <option value="">Select Course</option> {/* Default option */}
-                                                <option value="BTECH">Bachelor Of Technology</option>
-                                                <option value="MTECH">Master Of Technology</option>
-                                                <option value="PHD">PHD</option>
-                                        </select>
-                                </div>
+                                {designation === "Student" && (
+                                        <>
+                                                <div className="dropDownField">
+                                                        <label>Select Course</label>
+                                                        <select
+                                                                name="applicantCourse"
+                                                                value={formData.applicantCourse}
+                                                                onChange={(event) => {
+                                                                        console.log("Selected course:", event.target.value);
+                                                                        setFormData({
+                                                                                ...formData,
+                                                                                applicantCourse: event.target.value,
+                                                                        });
+                                                                }}
+                                                        >
+                                                                <option value="">Select Course</option>
+                                                                <option value="BTECH">Bachelor Of Technology</option>
+                                                                <option value="MTECH">Master Of Technology</option>
+                                                                <option value="PHD">PHD</option>
+                                                        </select>
+                                                </div>
 
-                                <div className="dropDownField">
-                                        <label>Select Year of Study</label>
-                                        <select
-                                                name="applicantYearOfStudy"
-                                                value={formData.applicantYearOfStudy} // Controlled component
-                                                onChange={(event) =>
-                                                        setFormData({
-                                                                ...formData,
-                                                                applicantYearOfStudy: event.target.value,
-                                                        })
-                                                }
-                                        >
-                                                {formData.applicantCourse === "BTECH" ? (
-                                                        <>
-                                                                <option value="">Select Year</option>
-                                                                <option value="FY">First Year</option>
-                                                                <option value="SY">Second Year</option>
-                                                                <option value="TY">Third Year</option>
-                                                                <option value="LY">Fourth Year</option>
-                                                        </>
-                                                ) : formData.applicantCourse === "MTECH" ? (
-                                                        <>
-                                                                <option value="">Select Year</option>
-                                                                <option value="FY">First Year</option>
-                                                                <option value="SY">Second Year</option>
-                                                        </>
-                                                ) : formData.applicantCourse === "PHD" ? (
-                                                        <></>
-                                                ) : null}
-                                        </select>
-                                </div>
+                                                <div className="dropDownField">
+                                                        <label>Select Year of Study</label>
+                                                        <select
+                                                                name="applicantYearOfStudy"
+                                                                value={formData.applicantYearOfStudy}
+                                                                onChange={(event) =>
+                                                                        setFormData({
+                                                                                ...formData,
+                                                                                applicantYearOfStudy: event.target.value,
+                                                                        })
+                                                                }
+                                                        >
+                                                                {formData.applicantCourse === "BTECH" && (
+                                                                        <>
+                                                                                <option value="">Select Year</option>
+                                                                                <option value="FY">First Year</option>
+                                                                                <option value="SY">Second Year</option>
+                                                                                <option value="TY">Third Year</option>
+                                                                                <option value="LY">Fourth Year</option>
+                                                                        </>
+                                                                )}
+                                                                {formData.applicantCourse === "MTECH" && (
+                                                                        <>
+                                                                                <option value="">Select Year</option>
+                                                                                <option value="FY">First Year</option>
+                                                                                <option value="SY">Second Year</option>
+                                                                        </>
+                                                                )}
+                                                                {formData.applicantCourse === "PHD" && <></>}
+                                                        </select>
+                                                </div>
+                                        </>
+                                )}
+
                                 <div className="dropDownField">
                                         <label>Select Department</label>
                                         <select
                                                 name="applicantDepartment"
-                                                value={formData.applicantDepartment} // This should match the state
+                                                value={formData.applicantDepartment}
                                                 onChange={(event) =>
                                                         setFormData({
                                                                 ...formData,
-                                                                applicantDepartment: event.target.value, // Update the state
+                                                                applicantDepartment: event.target.value,
                                                         })
                                                 }
                                         >
-                                                <option value="">Select Department</option>{" "}
-                                                {/* Default option */}
+                                                <option value="">Select Department</option>
                                                 <option value="COMPS">COMPS</option>
                                                 <option value="IT">IT</option>
                                                 <option value="MECH">MECH</option>
@@ -175,185 +171,186 @@ const PersonalAndAcademicFormComponent = ({ currentForm, openAForm, formData, se
                                         />
                                 </div>
 
-                                <div className="labelAndInputField">
-                                        <label>Supervisor's Full Name</label>
-                                        <input
-                                                type="text"
-                                                name="primarySupervisorFullName"
-                                                value={formData.primarySupervisorFullName}
-                                                onChange={(event) =>
-                                                        setFormData({
-                                                                ...formData,
-                                                                primarySupervisorFullName: event.target.value,
-                                                        })
-                                                }
-                                        />
-                                </div>
-
-                                <div className="labelAndInputField">
-                                        <label>Supervisor's Somaiya Email Id</label>
-                                        <input
-                                                type="text"
-                                                name="primarySupervisorEmail"
-                                                value={formData.primarySupervisorEmail}
-                                                onChange={(event) =>
-                                                        setFormData({
-                                                                ...formData,
-                                                                primarySupervisorEmail: event.target.value,
-                                                        })
-                                                }
-                                        />
-                                </div>
-
-                                <div className="labelAndInputField">
-                                        <label>Supervisor's Contact</label>
-                                        <input
-                                                type="text"
-                                                name="primarySupervisorContact"
-                                                value={formData.primarySupervisorContact}
-                                                onChange={(event) =>
-                                                        setFormData({
-                                                                ...formData,
-                                                                primarySupervisorContact: event.target.value,
-                                                        })
-                                                }
-                                        />
-                                </div>
-
-                                <div className="dropDownField">
-                                        <label>Supervisor's Department</label>
-                                        <select
-                                                name="primarySupervisorDepartment"
-                                                value={formData.primarySupervisorDepartment} // Controlled component
-                                                onChange={(event) =>
-                                                        setFormData({
-                                                                ...formData,
-                                                                primarySupervisorDepartment: event.target.value, // Update department
-                                                        })
-                                                }
-                                        >
-                                                <option value="">Select Department</option>{" "}
-                                                {/* Default option */}
-                                                <option value="COMPS">COMPS</option>
-                                                <option value="IT">IT</option>
-                                                <option value="MECH">MECH</option>
-                                                <option value="AIDS">AIDS</option>
-                                                <option value="EXTC">EXTC</option>
-                                                <option value="ETRX">ETRX</option>
-                                                <option value="RAI">RAI</option>
-                                        </select>
-                                </div>
-
-                                <div className="radioField fullRow">
-                                        <label>Do you have another supervisor?</label>
-                                        <div className="radioOptions">
-                                                <div className="individualRadioOption">
+                                {designation === "Student" && (
+                                        <>
+                                                <div className="labelAndInputField">
+                                                        <label>Supervisor's Full Name</label>
                                                         <input
-                                                                type="radio"
-                                                                name="anotherSupervisor"
-                                                                value="yes"
+                                                                type="text"
+                                                                name="primarySupervisorFullName"
+                                                                value={formData.primarySupervisorFullName}
                                                                 onChange={(event) =>
                                                                         setFormData({
                                                                                 ...formData,
-                                                                                anotherSupervisor: event.target.value === "yes",
+                                                                                primarySupervisorFullName: event.target.value,
                                                                         })
                                                                 }
                                                         />
-                                                        <label>Yes</label>
                                                 </div>
-                                                <div className="individualRadioOption">
+
+                                                <div className="labelAndInputField">
+                                                        <label>Supervisor's Somaiya Email Id</label>
                                                         <input
-                                                                type="radio"
-                                                                name="anotherSupervisor"
-                                                                value="no"
+                                                                type="text"
+                                                                name="primarySupervisorEmail"
+                                                                value={formData.primarySupervisorEmail}
                                                                 onChange={(event) =>
                                                                         setFormData({
                                                                                 ...formData,
-                                                                                anotherSupervisor: event.target.value === "yes",
+                                                                                primarySupervisorEmail: event.target.value,
                                                                         })
                                                                 }
                                                         />
-                                                        <label>No</label>
                                                 </div>
-                                        </div>
-                                </div>
 
-                                {formData.anotherSupervisor && (
-                                        <div className="labelAndInputField">
-                                                <label>Other Supervisor's Full Name</label>
-                                                <input
-                                                        type="text"
-                                                        name="anotherSupervisorFullName"
-                                                        value={formData.anotherSupervisorFullName}
-                                                        onChange={(event) =>
-                                                                setFormData({
-                                                                        ...formData,
-                                                                        anotherSupervisorFullName: event.target.value,
-                                                                })
-                                                        }
-                                                />
-                                        </div>
-                                )}
-                                {formData.anotherSupervisor && (
-                                        <div className="labelAndInputField">
-                                                <label>Other Supervisor's Somaiya Email Id</label>
-                                                <input
-                                                        type="text"
-                                                        name="anotherSupervisorEmail"
-                                                        value={formData.anotherSupervisorEmail}
-                                                        onChange={(event) =>
-                                                                setFormData({
-                                                                        ...formData,
-                                                                        anotherSupervisorEmail: event.target.value,
-                                                                })
-                                                        }
-                                                />
-                                        </div>
-                                )}
-                                {formData.anotherSupervisor && (
-                                        <div className="labelAndInputField">
-                                                <label>Other Supervisor's Contact</label>
-                                                <input
-                                                        type="text"
-                                                        name="anotherSupervisorContact"
-                                                        value={formData.anotherSupervisorContact}
-                                                        onChange={(event) =>
-                                                                setFormData({
-                                                                        ...formData,
-                                                                        anotherSupervisorContact: event.target.value,
-                                                                })
-                                                        }
-                                                />
-                                        </div>
-                                )}
-                                {formData.anotherSupervisor && (
-                                        <div className="dropDownField">
-                                                <label>Other Supervisor's Department</label>
-                                                <select
-                                                        name="anotherSupervisorDepartment"
-                                                        value={formData.anotherSupervisorDepartment} // Controlled component
-                                                        onChange={(event) =>
-                                                                setFormData({
-                                                                        ...formData,
-                                                                        anotherSupervisorDepartment: event.target.value, // Correctly updating state
-                                                                })
-                                                        }
-                                                >
-                                                        <option value="">Select Department</option>{" "}
-                                                        {/* Added default option */}
-                                                        <option value="COMPS">COMPS</option>
-                                                        <option value="IT">IT</option>
-                                                        <option value="MECH">MECH</option>
-                                                        <option value="AIDS">AIDS</option>
-                                                        <option value="EXTC">EXTC</option>
-                                                        <option value="ETRX">ETRX</option>
-                                                        <option value="RAI">RAI</option>
-                                                </select>
-                                        </div>
+                                                <div className="labelAndInputField">
+                                                        <label>Supervisor's Contact</label>
+                                                        <input
+                                                                type="text"
+                                                                name="primarySupervisorContact"
+                                                                value={formData.primarySupervisorContact}
+                                                                onChange={(event) =>
+                                                                        setFormData({
+                                                                                ...formData,
+                                                                                primarySupervisorContact: event.target.value,
+                                                                        })
+                                                                }
+                                                        />
+                                                </div>
+
+                                                <div className="dropDownField">
+                                                        <label>Supervisor's Department</label>
+                                                        <select
+                                                                name="primarySupervisorDepartment"
+                                                                value={formData.primarySupervisorDepartment}
+                                                                onChange={(event) =>
+                                                                        setFormData({
+                                                                                ...formData,
+                                                                                primarySupervisorDepartment: event.target.value,
+                                                                        })
+                                                                }
+                                                        >
+                                                                <option value="">Select Department</option>
+                                                                <option value="COMPS">COMPS</option>
+                                                                <option value="IT">IT</option>
+                                                                <option value="MECH">MECH</option>
+                                                                <option value="AIDS">AIDS</option>
+                                                                <option value="EXTC">EXTC</option>
+                                                                <option value="ETRX">ETRX</option>
+                                                                <option value="RAI">RAI</option>
+                                                        </select>
+                                                </div>
+
+                                                <div className="radioField fullRow">
+                                                        <label>Do you have another supervisor?</label>
+                                                        <div className="radioOptions">
+                                                                <div className="individualRadioOption">
+                                                                        <input
+                                                                                type="radio"
+                                                                                name="anotherSupervisor"
+                                                                                value="yes"
+                                                                                onChange={(event) =>
+                                                                                        setFormData({
+                                                                                                ...formData,
+                                                                                                anotherSupervisor: event.target.value === "yes",
+                                                                                        })
+                                                                                }
+                                                                        />
+                                                                        <label>Yes</label>
+                                                                </div>
+                                                                <div className="individualRadioOption">
+                                                                        <input
+                                                                                type="radio"
+                                                                                name="anotherSupervisor"
+                                                                                value="no"
+                                                                                onChange={(event) =>
+                                                                                        setFormData({
+                                                                                                ...formData,
+                                                                                                anotherSupervisor: event.target.value === "yes",
+                                                                                        })
+                                                                                }
+                                                                        />
+                                                                        <label>No</label>
+                                                                </div>
+                                                        </div>
+                                                </div>
+
+                                                {formData.anotherSupervisor && (
+                                                        <>
+                                                                <div className="labelAndInputField">
+                                                                        <label>Other Supervisor's Full Name</label>
+                                                                        <input
+                                                                                type="text"
+                                                                                name="anotherSupervisorFullName"
+                                                                                value={formData.anotherSupervisorFullName}
+                                                                                onChange={(event) =>
+                                                                                        setFormData({
+                                                                                                ...formData,
+                                                                                                anotherSupervisorFullName: event.target.value,
+                                                                                        })
+                                                                                }
+                                                                        />
+                                                                </div>
+
+                                                                <div className="labelAndInputField">
+                                                                        <label>Other Supervisor's Somaiya Email Id</label>
+                                                                        <input
+                                                                                type="text"
+                                                                                name="anotherSupervisorEmail"
+                                                                                value={formData.anotherSupervisorEmail}
+                                                                                onChange={(event) =>
+                                                                                        setFormData({
+                                                                                                ...formData,
+                                                                                                anotherSupervisorEmail: event.target.value,
+                                                                                        })
+                                                                                }
+                                                                        />
+                                                                </div>
+
+                                                                <div className="labelAndInputField">
+                                                                        <label>Other Supervisor's Contact</label>
+                                                                        <input
+                                                                                type="text"
+                                                                                name="anotherSupervisorContact"
+                                                                                value={formData.anotherSupervisorContact}
+                                                                                onChange={(event) =>
+                                                                                        setFormData({
+                                                                                                ...formData,
+                                                                                                anotherSupervisorContact: event.target.value,
+                                                                                        })
+                                                                                }
+                                                                        />
+                                                                </div>
+
+                                                                <div className="dropDownField">
+                                                                        <label>Other Supervisor's Department</label>
+                                                                        <select
+                                                                                name="anotherSupervisorDepartment"
+                                                                                value={formData.anotherSupervisorDepartment}
+                                                                                onChange={(event) =>
+                                                                                        setFormData({
+                                                                                                ...formData,
+                                                                                                anotherSupervisorDepartment: event.target.value,
+                                                                                        })
+                                                                                }
+                                                                        >
+                                                                                <option value="">Select Department</option>
+                                                                                <option value="COMPS">COMPS</option>
+                                                                                <option value="IT">IT</option>
+                                                                                <option value="MECH">MECH</option>
+                                                                                <option value="AIDS">AIDS</option>
+                                                                                <option value="EXTC">EXTC</option>
+                                                                                <option value="ETRX">ETRX</option>
+                                                                                <option value="RAI">RAI</option>
+                                                                        </select>
+                                                                </div>
+                                                        </>
+                                                )}
+                                        </>
                                 )}
                         </div>
                 </div>
-        )
-}
+        );
+};
 
-export default PersonalAndAcademicFormComponent
+export default PersonalAndAcademicFormComponent;

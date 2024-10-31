@@ -1,6 +1,6 @@
 import React from 'react'
 
-const EventDetailsFormComponent = ({ formData, setFormData, currentForm, setCurrentForm, openAForm, handleFileChange }) => {
+const EventDetailsFormComponent = ({ formData, setFormData, currentForm, openAForm, handleFileChange }) => {
         return (
                 <div
                         className={`generalFormContainer eventConferenceFormContainer ${currentForm === "eventConferenceFormContainer" ? "" : "hiddenForm"

@@ -107,13 +107,13 @@ const ApplicationForm = () => {
                 <div className="topLevelFormContainer">
                         <form className="mainForm">
 
-                                <PersonalAndAcademicFormComponent formData={formData} setFormData={setFormData} openAForm={openAForm} currentForm={currentForm} />
+                                <PersonalAndAcademicFormComponent formData={formData} setFormData={setFormData} openAForm={openAForm} currentForm={currentForm} designation={designation} />
 
                                 <TravelFormComponent formData={formData} setFormData={setFormData} openAForm={openAForm} currentForm={currentForm} handleFileChange={handleFileChange} />
 
                                 <EventDetailsFormComponent formData={formData} setFormData={setFormData} openAForm={openAForm} currentForm={currentForm} />
 
-                                <ParentalConsentFormComponent formData={formData} setFormData={setFormData} openAForm={openAForm} currentForm={currentForm} />
+                                {designation === "Student" && <ParentalConsentFormComponent formData={formData} setFormData={setFormData} openAForm={openAForm} currentForm={currentForm} />}
 
                                 <AdditionalFieldsFormComponent formData={formData} setFormData={setFormData} openAForm={openAForm} currentForm={currentForm} />
 

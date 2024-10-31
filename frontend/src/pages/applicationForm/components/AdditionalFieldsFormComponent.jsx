@@ -1,6 +1,6 @@
 import React from 'react'
 
-const AdditionalFieldsFormComponent = ({ formData, setFormData, currentForm, openAForm }) => {
+const AdditionalFieldsFormComponent = ({ formData, setFormData, currentForm, openAForm, designation }) => {
         return (
                 <div
                         className={`generalFormContainer additionalFormContainer ${currentForm === "additionalFormContainer" ? "" : "hiddenForm"
