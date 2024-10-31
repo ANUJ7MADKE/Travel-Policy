@@ -4,7 +4,7 @@ import axios from "axios";
 
 let applicantNamesCache = null;
 
-const Search = ({ value, setValue, onSelect }) => {
+const Search = ({ value, setValue }) => {
   const [applicantNames, setApplicantNames] = useState([
     { key: "", value: "" },
   ]);
@@ -39,9 +39,9 @@ const Search = ({ value, setValue, onSelect }) => {
       <div className="flex flex-row items-start justify-start">
         <div className="w-10/12">
           <ReactSearchBox
-            placeholder={`Applicant Name ${value === ""?"": `= ${value}`}`}
+            placeholder={`Applicant Name`}
             data={applicantNames}
-            onSelect={(record) => onSelect(record.item.value)}
+            onSelect={(record) => setValue(record.item.value)}
             clearOnSelect={false}
             inputFontSize="large"
             fuseConfigs={{ ignoreLocation: true, threshold: 0.3 }}
@@ -51,6 +51,7 @@ const Search = ({ value, setValue, onSelect }) => {
           Clear
         </button>
       </div>
+      {value !== "" && <p className="text-gray-600 mt-3 ml-2 text-left">{`Showing Results for ${value}`}</p>}
     </div>
   );
 };

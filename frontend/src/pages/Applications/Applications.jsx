@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useRouteLoaderData } from 'react-router-dom';
 import ApplicationTable from '../Applications/components/ApplicationTable';
 import Pagination from '../../components/Pagination';
 import axios from 'axios';
@@ -7,8 +7,10 @@ import ApplicationView from '../ApplicationView/ApplicationView';
 import ApplicationsStatusDescription from './components/ApplicationsStatusDescription';
 import Search from './components/Search';
 import Modal from '../../components/Modal/Modal';
+import Root from '../../components/DashboardRoot/Root';
 
 const Applications = () => {
+  const { role } = useRouteLoaderData("Applicant-Root")?.data || useRouteLoaderData("Validator-Root")?.data 
   const [numOfApplications, setNumOfApplications] = useState(0);
   const [applications, setApplications] = useState([]);
   const [applicantName, setApplicantName] = useState('');
@@ -78,7 +80,7 @@ const Applications = () => {
       <div className="bg-white shadow rounded-lg p-6 mb-20">
         <ApplicationsStatusDescription />
 
-        <Search value={applicantName} setValue={setApplicantName} onSelect={handleSelect} />
+        {role === "Validator" && <Search value={applicantName} setValue={handleSelect} />}
         {renderTable()}
         <Pagination
           numOfItems={numOfApplications}

@@ -101,7 +101,7 @@ const getApplicationsByStatus = async (req, res) => {
         }),
         ...(status === "ACCEPTED" && {
           AND: [
-            { supervisorValidation: "ACCEPTED" },
+            { supervisorValidation: user.designation === "Student" ? "ACCEPTED" : null },
             { hodValidation: "ACCEPTED" },
             { hoiValidation: "ACCEPTED" },
           ],

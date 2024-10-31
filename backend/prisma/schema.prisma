@@ -58,7 +58,7 @@ model Application {
 
   formData Json
 
-  supervisorValidation ApplicationStatus @default(PENDING)
+  supervisorValidation ApplicationStatus?
   hodValidation        ApplicationStatus? 
   hoiValidation        ApplicationStatus?
 
