@@ -34,7 +34,7 @@ const dataRoot = async (req, res) => {
         role: "Applicant"
       });
 
-    } else if (['Supervisor', 'HOD', 'HOI'].includes(user.designation)) {
+    } else if (['Supervisor', 'HOD', 'HOI', "FDCcoordinator"].includes(user.designation)) {
       // Validator Logic
       const validator = await prisma.validator.findUnique({
         where: { profileId: userId },
@@ -77,9 +77,9 @@ const getApplicationsByStatus = async (req, res) => {
     const userId = user.id;
     const take = parseInt(req.query.take) || 5;
     const skip = parseInt(req.query.skip) || 0;
-    const status = req.params.status.toUpperCase(); // "PENDING", "ACCEPTED", or "REJECTED"
-    const sortBy = req.query?.sortBy
-    const sortValue = req.query?.sortValue; // This will be used for case-insensitive search
+    const status = req.params.status.toUpperCase(); // Expected: "PENDING", "ACCEPTED", or "REJECTED"
+    const sortBy = req.query?.sortBy;
+    const sortValue = req.query?.sortValue;
 
     const validStatuses = ["PENDING", "ACCEPTED", "REJECTED"];
     if (!validStatuses.includes(status)) {
@@ -88,12 +88,13 @@ const getApplicationsByStatus = async (req, res) => {
 
     let applications, totalApplications;
 
-    // Conditions based on designation and status
+    // Filter conditions for Student and Faculty
     if (['Student', 'Faculty'].includes(user.designation)) {
       const baseWhere = {
         applicantId: userId,
         ...(status === "PENDING" && {
           OR: [
+            { fdccoordinatorValidation: "PENDING" },
             { supervisorValidation: "PENDING" },
             { hodValidation: "PENDING" },
             { hoiValidation: "PENDING" },
@@ -101,13 +102,20 @@ const getApplicationsByStatus = async (req, res) => {
         }),
         ...(status === "ACCEPTED" && {
           AND: [
-            { supervisorValidation: user.designation === "Student" ? "ACCEPTED" : null },
+            { fdccoordinatorValidation: user.designation === "Faculty" ? "ACCEPTED" : null },
+            {
+              OR: [
+                { supervisorValidation: "ACCEPTED" },
+                { supervisorValidation: user.designation === "Student" ? "ACCEPTED" : null }
+              ]
+            },
             { hodValidation: "ACCEPTED" },
             { hoiValidation: "ACCEPTED" },
           ],
         }),
         ...(status === "REJECTED" && {
           OR: [
+            { fdccoordinatorValidation: "REJECTED" },
             { supervisorValidation: "REJECTED" },
             { hodValidation: "REJECTED" },
             { hoiValidation: "REJECTED" },
@@ -115,14 +123,15 @@ const getApplicationsByStatus = async (req, res) => {
         }),
       };
 
-      // If sorting by applicantName, use case-insensitive filter
+      // Apply case-insensitive filter for search functionality
       if (sortBy && sortValue) {
         baseWhere[sortBy] = {
-          contains: sortValue, // Use contains for substring matching
-          mode: 'insensitive', // Case insensitive
+          contains: sortValue,
+          mode: 'insensitive',
         };
       }
 
+      // Count and fetch applications
       totalApplications = await prisma.application.count({ where: baseWhere });
       applications = await prisma.application.findMany({
         where: baseWhere,
@@ -137,20 +146,19 @@ const getApplicationsByStatus = async (req, res) => {
         orderBy: { createdAt: "desc" },
       });
 
-    } else if (['Supervisor', 'HOD', 'HOI'].includes(user.designation)) {
+    // Filter conditions for Validators (Supervisor, HOD, HOI, FDCcoordinator)
+    } else if (['Supervisor', 'HOD', 'HOI', "FDCcoordinator"].includes(user.designation)) {
       const validationField = `${user.designation.toLowerCase()}Validation`;
 
-      // Setup where condition for validators
       const baseWhere = {
         validators: { some: { profileId: userId } },
         [validationField]: status,
       };
 
-      // If sorting by applicantName, apply case-insensitive filter
       if (sortBy && sortValue) {
         baseWhere[sortBy] = {
-          contains: sortValue, // Use contains for substring matching
-          mode: 'insensitive', // Case insensitive
+          contains: sortValue,
+          mode: 'insensitive',
         };
       }
 
@@ -171,9 +179,11 @@ const getApplicationsByStatus = async (req, res) => {
         orderBy: { createdAt: "desc" },
       });
     } else {
+      // Unauthorized access for other user roles
       return res.status(403).send("Unauthorized");
     }
 
+    // Format response with selected fields
     const responseApplications = applications.map(application => ({
       applicationId: application.applicationId,
       applicantName: application.applicantName,

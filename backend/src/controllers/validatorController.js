@@ -12,6 +12,13 @@ const applicationAction = async (req, res) => {
       include: { applications: true },
     });
 
+    const applicant = await prisma.applicant.findFirst({
+      where: {profileId : validator.applications.applicantId },
+      select: {designation : true}
+    })
+
+    const applicantDesignation = applicant.designation
+
     if (!validator) {
       return res.status(404).send("Validator doesn't exist");
     }
@@ -40,8 +47,24 @@ const applicationAction = async (req, res) => {
             .send("Already performed an action, can't change status again");
         }
         validationData.supervisorValidation = validationStatus;
-        if (validationStatus === "ACCEPTED") {
+
+        if (validationStatus === "ACCEPTED" && applicantDesignation === "Student") {
           validationData.hodValidation = "PENDING";
+        }
+
+        if (validationStatus === "ACCEPTED" && applicantDesignation === "Faculty") {
+          validationData.fdccoordinatorValidation = "PENDING";
+        }
+        break;
+      case "FDCcoordinator":
+        if (application.fdccoordinatorValidation != "PENDING") {
+          return res
+            .status(400)
+            .send("Already performed an action, can't change status again");
+        }
+        validationData.fdccoordinatorValidation = validationStatus;
+        if (validationStatus === "ACCEPTED") {
+          validationData.hodValidation = "PENDING"
         }
         break;
       case "HOD":

@@ -22,7 +22,13 @@ const createApplication = async (req, res) => {
     let supervisor = null;
     let additionalSupervisor = null;
 
-    if (applicantDesignation === "Student") {
+    // Require a primary supervisor email for Students
+    if (!formData.primarySupervisorEmail && applicantDesignation === "Student") {
+      return res.status(404).send("Supervisor Email Required");
+    }
+
+    // Supervisor logic: Only apply if supervisor email fields are provided
+    if (formData.primarySupervisorEmail) {
       supervisor = await prisma.validator.findUnique({
         where: { email: formData.primarySupervisorEmail }
       });
@@ -30,22 +36,33 @@ const createApplication = async (req, res) => {
       if (!supervisor || supervisor.designation !== "Supervisor" || supervisor.department !== department) {
         return res.status(404).send("Invalid supervisor information");
       }
+    }
 
-      if (formData.anotherSupervisorEmail) {
-        additionalSupervisor = await prisma.validator.findUnique({
-          where: { email: formData.anotherSupervisorEmail }
-        });
+    if (formData.anotherSupervisorEmail) {
+      additionalSupervisor = await prisma.validator.findUnique({
+        where: { email: formData.anotherSupervisorEmail }
+      });
 
-        if (additionalSupervisor && additionalSupervisor.profileId === supervisor.profileId) {
-          return res.status(404).send("Additional Supervisor's email can't be the same as Supervisor's");
-        }
+      if (additionalSupervisor && additionalSupervisor.profileId === supervisor?.profileId) {
+        return res.status(404).send("Additional Supervisor's email can't be the same as Supervisor's");
+      }
 
-        if (additionalSupervisor && additionalSupervisor.designation !== "Supervisor") {
-          return res.status(404).send("Invalid additional supervisor email");
-        }
+      if (additionalSupervisor && additionalSupervisor.designation !== "Supervisor") {
+        return res.status(404).send("Invalid additional supervisor email");
       }
     }
 
+    let fdccoordinator = null;
+
+    // Retrieve FDC coordinator only for Faculty applicants
+    if (applicantDesignation === "Faculty") {
+      fdccoordinator = await prisma.validator.findFirst({
+        where: { department, designation: "FDCcoordinator" }
+      });
+      if (!fdccoordinator) return res.status(404).send("FDC coordinator not found");
+    }
+
+    // Retrieve HOD and HOI (required for all applicants)
     const hod = await prisma.validator.findFirst({
       where: { department, designation: 'HOD' }
     });
@@ -56,27 +73,32 @@ const createApplication = async (req, res) => {
     });
     if (!hoi) return res.status(404).send("HOI not found");
 
+    // Compile the validators list with available supervisors, FDC coordinator, HOD, and HOI
     const validators = [
       ...(supervisor ? [{ profileId: supervisor.profileId }] : []),
-      { profileId: hod.profileId },
       ...(additionalSupervisor ? [{ profileId: additionalSupervisor.profileId }] : []),
+      ...(fdccoordinator ? [{ profileId: fdccoordinator.profileId }] : []),
+      { profileId: hod.profileId },
       { profileId: hoi.profileId }
     ];
 
+    // Prepare file buffers
     const proofOfTravelBuffer = proofOfTravel?.[0]?.buffer || null;
     const proofOfAccommodationBuffer = proofOfAccommodation?.[0]?.buffer || null;
     const proofOfAttendanceBuffer = proofOfAttendance?.[0]?.buffer || null;
 
+    // Construct the application data object
     const applicationData = {
       applicantName,
       formData: JSON.parse(JSON.stringify(formData)),
       proofOfTravel: proofOfTravelBuffer,
       proofOfAccommodation: proofOfAccommodationBuffer,
       proofOfAttendance: proofOfAttendanceBuffer,
-      supervisorValidation: applicantDesignation === "Student" ? "PENDING" : undefined,
-      hodValidation: applicantDesignation !== "Student" ? "PENDING" : undefined
+      fdccoordinatorValidation: applicantDesignation === "Faculty" ? "PENDING" : undefined,
+      supervisorValidation: formData.primarySupervisorEmail ? "PENDING" : undefined,
     };
 
+    // Create new application entry with linked applicant and validators
     const newApplication = await prisma.application.create({
       data: {
         ...applicationData,
