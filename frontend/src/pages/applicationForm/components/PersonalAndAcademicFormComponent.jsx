@@ -185,8 +185,8 @@ const PersonalAndAcademicFormComponent = ({
           />
         </div>
 
-        {designation === "Student" && (
-          <>
+        {/* {designation === "Student" && ( */}
+          {/* <> */}
             <div className="labelAndInputField">
               <label>Supervisor's Full Name</label>
               <input
@@ -360,8 +360,8 @@ const PersonalAndAcademicFormComponent = ({
                 </div>
               </>
             )}
-          </>
-        )}
+          {/* </> */}
+        {/* )} */}
       </div>
     </div>
   );
