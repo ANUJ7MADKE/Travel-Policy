@@ -94,7 +94,7 @@ const createApplication = async (req, res) => {
       proofOfTravel: proofOfTravelBuffer,
       proofOfAccommodation: proofOfAccommodationBuffer,
       proofOfAttendance: proofOfAttendanceBuffer,
-      fdccoordinatorValidation: applicantDesignation === "Faculty" ? "PENDING" : undefined,
+      fdccoordinatorValidation: applicantDesignation === "Faculty" ? (supervisor || additionalSupervisor) ? undefined : "PENDING" : undefined,
       supervisorValidation: formData.primarySupervisorEmail ? "PENDING" : undefined,
     };
 

@@ -1,4 +1,3 @@
-import { application } from "express";
 import prisma from "../config/prismaConfig.js";
 
 const applicationAction = async (req, res) => {
@@ -9,15 +8,9 @@ const applicationAction = async (req, res) => {
 
     const validator = await prisma.validator.findFirst({
       where: { profileId },
-      include: { applications: true },
+      include: { applications: true, },
     });
 
-    const applicant = await prisma.applicant.findFirst({
-      where: {profileId : validator.applications.applicantId },
-      select: {designation : true}
-    })
-
-    const applicantDesignation = applicant.designation
 
     if (!validator) {
       return res.status(404).send("Validator doesn't exist");
@@ -30,6 +23,13 @@ const applicationAction = async (req, res) => {
     if (!application) {
       return res.status(404).send("Application not available");
     }
+
+    const applicant = await prisma.applicant.findFirst({
+      where: {profileId: application.applicantId},
+      select: {designation: true}
+    })
+
+    const applicantDesignation = applicant.designation
 
     const validationStatus = action.toUpperCase();
 
