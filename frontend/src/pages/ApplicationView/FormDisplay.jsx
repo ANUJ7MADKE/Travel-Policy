@@ -1,7 +1,6 @@
 import React from "react";
 import PdfActions from "./PdfActions";
 
-
 function FormDisplay({ applicationId, formData }) {
   return (
     <div className="p-6 border border-gray-300 rounded-lg bg-white">
@@ -108,20 +107,15 @@ const Field = ({
   <div className="flex flex-row mb-4 items-center">
     <label className="font-semibold mb-2 mr-4">{label}:</label>
     {downloadable ? (
-      <PdfActions applicationId={applicationId} fileName={fileName}/>
-    ) : textarea ? (
-      <textarea
-        value={value}
-        readOnly
-        className="p-2 border border-gray-300 rounded-md bg-gray-100 resize-vertical h-24 w-fit"
-      ></textarea>
+      <PdfActions applicationId={applicationId} fileName={fileName} />
     ) : (
-      <input
-        type="text"
-        value={value}
+      <div
+        // value={value}
         readOnly
-        className="p-2 border border-gray-300 rounded-md bg-gray-100 w-fit"
-      />
+        className="p-2 border border-gray-300 rounded-md bg-gray-100 resize-vertical min-w-[100px] w-auto max-w-[500px] overflow-auto"
+      >
+        {value}
+      </div>
     )}
   </div>
 );
