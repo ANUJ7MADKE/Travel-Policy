@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 const PersonalAndAcademicFormComponent = ({
   currentForm,
@@ -7,6 +7,11 @@ const PersonalAndAcademicFormComponent = ({
   setFormData,
   designation,
 }) => {
+  const [
+    facultyKeLiyeSpecialSupervisorConditionalRendering,
+    setFacultyKeLiyeSpecialSupervisorConditionalRendering,
+  ] = useState(false);
+
   return (
     <div
       className={`generalFormContainer personalAndAcademicFormContainer ${
@@ -185,8 +190,8 @@ const PersonalAndAcademicFormComponent = ({
           />
         </div>
 
-        {/* {designation === "Student" && ( */}
-          {/* <> */}
+        {designation === "Student" ? (
+          <>
             <div className="labelAndInputField">
               <label>Supervisor's Full Name</label>
               <input
@@ -254,97 +259,97 @@ const PersonalAndAcademicFormComponent = ({
                 <option value="RAI">RAI</option>
               </select>
             </div>
-
+          </>
+        ) : (
+          <>
             <div className="radioField fullRow">
-              <label>Do you have another supervisor?</label>
+              <label>Do you have a supervisor?</label>
               <div className="radioOptions">
                 <div className="individualRadioOption">
                   <input
                     type="radio"
-                    name="anotherSupervisor"
-                    value="yes"
-                    onChange={(event) =>
-                      setFormData({
-                        ...formData,
-                        anotherSupervisor: event.target.value === "yes",
-                      })
-                    }
+                    name="tempNoUseLater"
+                    onChange={(event) => {
+                      console.log("Yes clicked");
+                      setFacultyKeLiyeSpecialSupervisorConditionalRendering(
+                        true
+                      );
+                    }}
                   />
                   <label>Yes</label>
                 </div>
                 <div className="individualRadioOption">
                   <input
                     type="radio"
-                    name="anotherSupervisor"
-                    value="no"
-                    onChange={(event) =>
-                      setFormData({
-                        ...formData,
-                        anotherSupervisor: event.target.value === "yes",
-                      })
-                    }
+                    name="tempNoUseLater"
+                    onChange={(event) => {
+                      console.log("No clicked");
+                      setFacultyKeLiyeSpecialSupervisorConditionalRendering(
+                        false
+                      );
+                    }}
                   />
                   <label>No</label>
                 </div>
               </div>
             </div>
 
-            {formData.anotherSupervisor && (
+            {facultyKeLiyeSpecialSupervisorConditionalRendering && (
               <>
                 <div className="labelAndInputField">
-                  <label>Other Supervisor's Full Name</label>
+                  <label>Supervisor's Full Name</label>
                   <input
                     type="text"
-                    name="anotherSupervisorFullName"
-                    value={formData.anotherSupervisorFullName}
+                    name="primarySupervisorFullName"
+                    value={formData.primarySupervisorFullName}
                     onChange={(event) =>
                       setFormData({
                         ...formData,
-                        anotherSupervisorFullName: event.target.value,
+                        primarySupervisorFullName: event.target.value,
                       })
                     }
                   />
                 </div>
 
                 <div className="labelAndInputField">
-                  <label>Other Supervisor's Somaiya Email Id</label>
+                  <label>Supervisor's Somaiya Email Id</label>
                   <input
                     type="text"
-                    name="anotherSupervisorEmail"
-                    value={formData.anotherSupervisorEmail}
+                    name="primarySupervisorEmail"
+                    value={formData.primarySupervisorEmail}
                     onChange={(event) =>
                       setFormData({
                         ...formData,
-                        anotherSupervisorEmail: event.target.value,
+                        primarySupervisorEmail: event.target.value,
                       })
                     }
                   />
                 </div>
 
                 <div className="labelAndInputField">
-                  <label>Other Supervisor's Contact</label>
+                  <label>Supervisor's Contact</label>
                   <input
                     type="text"
-                    name="anotherSupervisorContact"
-                    value={formData.anotherSupervisorContact}
+                    name="primarySupervisorContact"
+                    value={formData.primarySupervisorContact}
                     onChange={(event) =>
                       setFormData({
                         ...formData,
-                        anotherSupervisorContact: event.target.value,
+                        primarySupervisorContact: event.target.value,
                       })
                     }
                   />
                 </div>
 
                 <div className="dropDownField">
-                  <label>Other Supervisor's Department</label>
+                  <label>Supervisor's Department</label>
                   <select
-                    name="anotherSupervisorDepartment"
-                    value={formData.anotherSupervisorDepartment}
+                    name="primarySupervisorDepartment"
+                    value={formData.primarySupervisorDepartment}
                     onChange={(event) =>
                       setFormData({
                         ...formData,
-                        anotherSupervisorDepartment: event.target.value,
+                        primarySupervisorDepartment: event.target.value,
                       })
                     }
                   >
@@ -360,7 +365,115 @@ const PersonalAndAcademicFormComponent = ({
                 </div>
               </>
             )}
-          {/* </> */}
+          </>
+        )}
+
+        <div className="radioField fullRow">
+          <label>Do you have another supervisor?</label>
+          <div className="radioOptions">
+            <div className="individualRadioOption">
+              <input
+                type="radio"
+                name="anotherSupervisor"
+                value="yes"
+                onChange={(event) =>
+                  setFormData({
+                    ...formData,
+                    anotherSupervisor: event.target.value === "yes",
+                  })
+                }
+              />
+              <label>Yes</label>
+            </div>
+            <div className="individualRadioOption">
+              <input
+                type="radio"
+                name="anotherSupervisor"
+                value="no"
+                onChange={(event) =>
+                  setFormData({
+                    ...formData,
+                    anotherSupervisor: event.target.value === "yes",
+                  })
+                }
+              />
+              <label>No</label>
+            </div>
+          </div>
+        </div>
+
+        {formData.anotherSupervisor && (
+          <>
+            <div className="labelAndInputField">
+              <label>Other Supervisor's Full Name</label>
+              <input
+                type="text"
+                name="anotherSupervisorFullName"
+                value={formData.anotherSupervisorFullName}
+                onChange={(event) =>
+                  setFormData({
+                    ...formData,
+                    anotherSupervisorFullName: event.target.value,
+                  })
+                }
+              />
+            </div>
+
+            <div className="labelAndInputField">
+              <label>Other Supervisor's Somaiya Email Id</label>
+              <input
+                type="text"
+                name="anotherSupervisorEmail"
+                value={formData.anotherSupervisorEmail}
+                onChange={(event) =>
+                  setFormData({
+                    ...formData,
+                    anotherSupervisorEmail: event.target.value,
+                  })
+                }
+              />
+            </div>
+
+            <div className="labelAndInputField">
+              <label>Other Supervisor's Contact</label>
+              <input
+                type="text"
+                name="anotherSupervisorContact"
+                value={formData.anotherSupervisorContact}
+                onChange={(event) =>
+                  setFormData({
+                    ...formData,
+                    anotherSupervisorContact: event.target.value,
+                  })
+                }
+              />
+            </div>
+
+            <div className="dropDownField">
+              <label>Other Supervisor's Department</label>
+              <select
+                name="anotherSupervisorDepartment"
+                value={formData.anotherSupervisorDepartment}
+                onChange={(event) =>
+                  setFormData({
+                    ...formData,
+                    anotherSupervisorDepartment: event.target.value,
+                  })
+                }
+              >
+                <option value="">Select Department</option>
+                <option value="COMPS">COMPS</option>
+                <option value="IT">IT</option>
+                <option value="MECH">MECH</option>
+                <option value="AIDS">AIDS</option>
+                <option value="EXTC">EXTC</option>
+                <option value="ETRX">ETRX</option>
+                <option value="RAI">RAI</option>
+              </select>
+            </div>
+          </>
+        )}
+        {/* </> */}
         {/* )} */}
       </div>
     </div>
