@@ -1,26 +1,28 @@
-import { json, redirect } from 'react-router-dom';
+import { json } from 'react-router-dom';
 
 export async function createApplicationAction({ request }) {
   const formData = await request.formData();
 
   try {
-    const res = await fetch('http://localhost:3000/applicant/create-application', {
+    const res = await fetch(`${import.meta.env.VITE_APP_API_URL}/applicant/create-application`, {
       method: 'POST',
       credentials: 'include',
       body: formData
     });
 
     if (res.status === 401) {
-      throw json({ message: 'Unauthorized access' }, { status: res.status });
+      return json({ message: 'Unauthorized access' }, { status: res.status });
     }
 
     if (!res.ok) {
-      throw json({ message: res.statusText }, { status: res.status });
+      const errorData = await res.text();
+      return json({ message: errorData }, { status: res.status });
     }
 
-    return redirect("../dashboard");
+    return null;
+
   } catch (error) {
     console.error('Fetch error:', error);
-    throw json({ message: error.message }, { status: error.status || 500 });
+    return json({ message: error.message || 'An unexpected error occurred' }, { status: error.status || 500 });
   }
 }

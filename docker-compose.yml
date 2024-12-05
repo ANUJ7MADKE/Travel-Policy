@@ -1,0 +1,34 @@
+name: travel-policy
+
+services:
+  postgres:
+    image: postgres
+    volumes:
+      - postgres_data:/data/db
+    networks:
+      - travel-policy
+    ports:
+      - 5432:5432
+  api:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    networks:
+      - travel-policy
+    ports:
+      - 3000:3000
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
+
+networks:
+  travel-policy:
+    driver: bridge

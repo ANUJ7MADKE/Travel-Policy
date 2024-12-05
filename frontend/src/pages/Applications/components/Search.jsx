@@ -16,7 +16,7 @@ const Search = ({ value, setValue }) => {
       if (!applicantNamesCache) {
         try {
           const res = await axios.get(
-            "http://localhost:3000/validator/getApplicantNames",
+            `${import.meta.env.VITE_APP_API_URL}/validator/getApplicantNames`,
             { withCredentials: true }
           );
           if (res.status === 200) {
@@ -37,7 +37,7 @@ const Search = ({ value, setValue }) => {
   return (
     <div className="mb-7 p-2 rounded bg-gray-200">
       <div className="flex flex-row items-start justify-start">
-        <div className="w-10/12">
+        <div className="w-[90%]">
           <ReactSearchBox
             placeholder={`Applicant Name`}
             data={applicantNames}

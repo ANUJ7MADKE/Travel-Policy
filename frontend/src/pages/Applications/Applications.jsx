@@ -33,7 +33,7 @@ const Applications = () => {
       try {
         const skip = (currentPage - 1) * itemsPerPage;
         const res = await axios.get(
-          `http://localhost:3000/general/getApplications/${status}?take=${itemsPerPage}&skip=${skip}${applicantName ? `&sortBy=applicantName&sortValue=${applicantName}` : ''}`,
+          `${import.meta.env.VITE_APP_API_URL}/general/getApplications/${status}?take=${itemsPerPage}&skip=${skip}${applicantName ? `&sortBy=applicantName&sortValue=${applicantName}` : ''}`,
           { withCredentials: true }
         );
         setNumOfApplications(res.data.totalApplications);
@@ -76,8 +76,8 @@ const Applications = () => {
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <main className="flex-1 p-6">
-      <div className="bg-white shadow rounded-lg p-6 mb-20">
+    <main className="flex flex-col p-6">
+      <div className="min-w-min bg-white shadow rounded-lg p-6 mb-20">
         <ApplicationsStatusDescription />
 
         {role === "Validator" && <Search value={applicantName} setValue={handleSelect} />}

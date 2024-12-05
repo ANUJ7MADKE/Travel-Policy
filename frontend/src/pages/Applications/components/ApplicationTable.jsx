@@ -5,7 +5,7 @@ const ApplicationTable = ({ title, applications, setApplicationDisplay }) => {
   // Fetch full application data on row click
   const getFullApplication = async (applicationId, currentStatus) => {
     try {
-      const response = await fetch(`http://localhost:3000/general/getApplicationData/${applicationId}`, {
+      const response = await fetch(`${import.meta.env.VITE_APP_API_URL}/general/getApplicationData/${applicationId}`, {
         method: 'GET',
         credentials: 'include',
       });
@@ -24,7 +24,7 @@ const ApplicationTable = ({ title, applications, setApplicationDisplay }) => {
   
   return (
     <div className="mb-6">
-      <h2 className="text-xl font-bold mb-2">{title}</h2>
+      {/* <h2 className="text-xl font-bold mb-2">{title}</h2> */}
       <table className="w-full text-left border-collapse">
         <thead>
           <tr>

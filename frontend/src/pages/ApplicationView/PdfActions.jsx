@@ -9,7 +9,7 @@ function PdfActions({ fileName, applicationId }) {
 
   const fetchFileBlob = async () => {
     try {
-      const response = await axios.get(`http://localhost:3000/general/getFile/${applicationId}/${fileName}`, {
+      const response = await axios.get(`${import.meta.env.VITE_APP_API_URL}/general/getFile/${applicationId}/${fileName}`, {
         responseType: 'blob',
         withCredentials: true,
       });
@@ -48,7 +48,7 @@ function PdfActions({ fileName, applicationId }) {
   return (
     <div>
       <button
-        className='bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mr-2'
+        className='bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mr-2 md:block hidden'
         onClick={handleView}
       >
         View PDF
