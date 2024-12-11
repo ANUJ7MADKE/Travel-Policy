@@ -1,6 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { studentFormFeilds, facultyFormFeilds } from "./FormFeilds";
 import { useRouteLoaderData } from "react-router-dom";
+import ExpenseForm from "./components/ExpenseForm";
+import ExpenseTable from "./components/ExpenseTable";
+import PdfViewer from "../../components/PdfViewer";
 
 function Input({
   values,
@@ -11,161 +14,248 @@ function Input({
   setFieldValue,
 }) {
   const applicant = useRouteLoaderData("Applicant-Root");
-  const designation = applicant.data.user.designation; //Faculty or Student
+  const designation = applicant.data.user.designation;
+
   let formFeilds;
   if (designation === "Student") {
     formFeilds = studentFormFeilds;
-  } else  {
+  } else {
     formFeilds = facultyFormFeilds;
   }
+
+  const [showMiniFrom, setShowMiniForm] = useState(false);
+  const [pdfIsVisible, setPdfIsVisible] = useState(false);
+  const [fileUrl, setFileUrl] = useState(null);
+  console.log(values?.expenses);
 
   return formFeilds.map((section, sectionIndex) => (
     <div
       key={sectionIndex}
-      className="bg-white p-4 mb-4 rounded"
+      className="space-y-4 bg-white p-6 rounded-lg shadow-lg min-w-fit border-t-4 border-red-700 mb-4"
     >
       <h3 className="text-xl font-semibold mt-2 mb-4">{section.label}</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
-          {section.fields.map((formFeild) => {
-            if (formFeild?.parent) {
-              if (values[formFeild?.parent] === false) {
-                typeof values[formFeild?.name] === "boolean"
-                  ? (values[formFeild?.name] = false)
-                  : (values[formFeild?.name] = "");
-                return null;
-              } else if (
-                typeof values[formFeild?.parent] === "string" &&
-                values[formFeild?.parent] !== "Other"
-              ) {
-                typeof values[formFeild?.name] === "boolean"
-                  ? (values[formFeild?.name] = false)
-                  : (values[formFeild?.name] = "");
-                return null;
-              }
+      <div
+        className={`${
+          section.label === "Expense Details"
+            ? "grid grid-cols-1" // Apply single column grid when the label is "Expense Details"
+            : "grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3" // Apply multi-column grid for other labels
+        } gap-4`}
+      >
+        {section.fields.map((formFeild) => {
+          if (formFeild?.parent) {
+            if (values[formFeild?.parent] === false) {
+              typeof values[formFeild?.name] === "boolean"
+                ? (values[formFeild?.name] = false)
+                : (values[formFeild?.name] = "");
+              return null;
+            } else if (
+              typeof values[formFeild?.parent] === "string" &&
+              values[formFeild?.parent] !== "Other"
+            ) {
+              typeof values[formFeild?.name] === "boolean"
+                ? (values[formFeild?.name] = false)
+                : (values[formFeild?.name] = "");
+              return null;
             }
+          }
 
-            switch (formFeild.type) {
-              case "dropdown":
-                return (
-                  <div key={formFeild.name} className="space-y-1 bg-slate-50 p-3 rounded-md">
-                    <label
-                      htmlFor={formFeild.name}
-                      className="block font-medium"
-                    >
-                      {formFeild.label}
-                    </label>
-                    <select
+          switch (formFeild.type) {
+            case "dropdown":
+              return (
+                <div
+                  key={formFeild.name}
+                  className="space-y-1 bg-slate-50 p-3 rounded-md"
+                >
+                  <label htmlFor={formFeild.name} className="block font-medium">
+                    {formFeild.label}
+                  </label>
+                  <select
+                    name={formFeild.name}
+                    id={formFeild.name}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    value={values[formFeild.name] || ""}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  >
+                    <option value="" label="Select option" />
+                    {formFeild.options[values[formFeild.depend] || ""].map(
+                      (option) => (
+                        <option
+                          key={option.value}
+                          value={option.value}
+                          label={option.label}
+                          className="text-black"
+                        >
+                          {option.label}
+                        </option>
+                      )
+                    )}
+                  </select>
+                  <p className="text-red-500 text-sm">
+                    {errors[formFeild.name] &&
+                      touched[formFeild.name] &&
+                      errors[formFeild.name]}
+                  </p>
+                </div>
+              );
+
+            case "checkbox":
+              return (
+                <div
+                  key={formFeild.name}
+                  className="space-y-1 bg-slate-50 p-3 rounded-md"
+                >
+                  <label
+                    htmlFor={formFeild.name}
+                    className="inline-flex items-center space-x-2"
+                  >
+                    <input
+                      type="checkbox"
                       name={formFeild.name}
                       id={formFeild.name}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      value={values[formFeild.name] || ""}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                    >
-                      <option value="" label="Select option" />
-                      {formFeild.options[values[formFeild.depend] || ""].map(
-                        (option) => (
-                          <option
-                            key={option.value}
-                            value={option.value}
-                            label={option.label}
-                            className="text-black"
-                          >
-                            {option.label}
-                          </option>
-                        )
-                      )}
-                    </select>
-                    <p className="text-red-500 text-sm">
-                      {errors[formFeild.name] &&
-                        touched[formFeild.name] &&
-                        errors[formFeild.name]}
-                    </p>
-                  </div>
-                );
+                      checked={values[formFeild.name] || false}
+                      className="h-4 w-4 border-gray-300 rounded"
+                    />
+                    <span className="text-sm">{formFeild.label}</span>
+                  </label>
+                  <p className="text-red-500 text-sm">
+                    {errors[formFeild.name] &&
+                      touched[formFeild.name] &&
+                      errors[formFeild.name]}
+                  </p>
+                </div>
+              );
 
-              case "checkbox":
-                return (
-                  <div key={formFeild.name} className="space-y-1 bg-slate-50 p-3 rounded-md">
+            case "file":
+              return (
+                <div
+                  key={formFeild.name}
+                  className="space-y-1 bg-slate-50 p-3 rounded-md"
+                >
+                  <label htmlFor={formFeild.name} className="block font-medium">
+                    {formFeild.label}
+                  </label>
+                  <input
+                    type="file"
+                    name={formFeild.name}
+                    id={formFeild.name}
+                    onChange={(e) => {
+                      // Handle file input change
+                      setFieldValue(formFeild.name, e.target.files[0]);
+                    }}
+                    onBlur={handleBlur}
+                    className="w-full bg-white px-3 py-2 border border-gray-300 rounded-md"
+                  />
+                  <p className="text-red-500 text-sm">
+                    {errors[formFeild.name] &&
+                      touched[formFeild.name] &&
+                      errors[formFeild.name]}
+                  </p>
+                </div>
+              );
+
+            case "miniForm":
+              return (
+                <div
+                  key={formFeild.name}
+                  className="space-y-4 bg-slate-50 p-6 rounded-md w-full"
+                >
+                  {pdfIsVisible && (
+                    <PdfViewer
+                      fileUrl={URL.createObjectURL(fileUrl)}
+                      setIsModalOpen={setPdfIsVisible}
+                    />
+                  )}
+              
+                  {/* Label and Add Expense Button */}
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4">
                     <label
                       htmlFor={formFeild.name}
-                      className="inline-flex items-center space-x-2"
+                      className="block text-lg font-medium text-gray-800 mb-3 sm:mb-0 sm:w-1/2"
                     >
-                      <input
-                        type="checkbox"
-                        name={formFeild.name}
-                        id={formFeild.name}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        checked={values[formFeild.name] || false}
-                        className="h-4 w-4 border-gray-300 rounded"
+                       {`${formFeild.label}: ₹${values[formFeild.name]?.reduce((total, rec) => total + parseFloat(rec.expenseAmount || 0), 0).toFixed(2)}`}
+                    </label>
+              
+                    <div className="flex-shrink-0 mt-4 sm:mt-0 sm:w-auto">
+                      <button
+                        className="bg-red-700 text-white font-semibold py-3 px-8 rounded-lg shadow-md transform transition duration-300 hover:bg-red-800 hover:scale-105 active:scale-95"
+                        type="button"
+                        onClick={() => setShowMiniForm(true)}
+                      >
+                        Add Expense
+                      </button>
+                    </div>
+                  </div>
+              
+                  {/* Expense Form */}
+                  {showMiniFrom && (
+                    <ExpenseForm
+                      onClose={() => setShowMiniForm(false)}
+                      setExpenses={(newExpenses) =>
+                        setFieldValue(formFeild.name, [
+                          ...values[formFeild.name],
+                          newExpenses,
+                        ])
+                      }
+                    />
+                  )}
+              
+                  {/* Error Message */}
+                  <p className="text-red-500 text-sm mt-2">
+                    {errors[formFeild.name] && touched[formFeild.name] && errors[formFeild.name]}
+                  </p>
+              
+                  {/* Display Expense Table */}
+                  {values[formFeild.name]?.length > 0 && (
+                    <div className="mt-6 w-full overflow-x-auto">
+                      <ExpenseTable
+                        expenses={values[formFeild.name]}
+                        setPdfIsVisible={setPdfIsVisible}
+                        setFileUrl={setFileUrl}
+                        deleteExpense={(expense) =>
+                          setFieldValue(
+                            formFeild.name,
+                            values[formFeild.name]?.filter((toDel) => toDel !== expense)
+                          )
+                        }
                       />
-                      <span className="text-sm">{formFeild.label}</span>
-                    </label>
-                    <p className="text-red-500 text-sm">
-                      {errors[formFeild.name] &&
-                        touched[formFeild.name] &&
-                        errors[formFeild.name]}
-                    </p>
-                  </div>
-                );
+                    </div>
+                  )}
+                </div>
+              );
+              
+              
 
-              case "file":
-                return (
-                  <div key={formFeild.name} className="space-y-1 bg-slate-50 p-3 rounded-md">
-                    <label
-                      htmlFor={formFeild.name}
-                      className="block font-medium"
-                    >
-                      {formFeild.label}
-                    </label>
-                    <input
-                      type="file"
-                      name={formFeild.name}
-                      id={formFeild.name}
-                      onChange={(e) => {
-                        // Handle file input change
-                        setFieldValue(formFeild.name, e.target.files[0]);
-                      }}
-                      onBlur={handleBlur}
-                      className="w-full bg-white px-3 py-2 border border-gray-300 rounded-md"
-                    />
-                    <p className="text-red-500 text-sm">
-                      {errors[formFeild.name] &&
-                        touched[formFeild.name] &&
-                        errors[formFeild.name]}
-                    </p>
-                  </div>
-                );
-
-              default:
-                return (
-                  <div key={formFeild.name} className="space-y-1 bg-slate-50 p-3 rounded-md">
-                    <label
-                      htmlFor={formFeild.name}
-                      className="block font-medium"
-                    >
-                      {formFeild.label}
-                    </label>
-                    <input
-                      type={formFeild.type}
-                      name={formFeild.name}
-                      id={formFeild.name}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      value={values[formFeild.name] || ""}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                    />
-                    <p className="text-red-500 text-sm">
-                      {errors[formFeild.name] &&
-                        touched[formFeild.name] &&
-                        errors[formFeild.name]}
-                    </p>
-                  </div>
-                );
-            }
-          })}
-        </div>
+            default:
+              return (
+                <div
+                  key={formFeild.name}
+                  className="space-y-1 bg-slate-50 p-3 rounded-md"
+                >
+                  <label htmlFor={formFeild.name} className="block font-medium">
+                    {formFeild.label}
+                  </label>
+                  <input
+                    type={formFeild.type}
+                    name={formFeild.name}
+                    id={formFeild.name}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    value={values[formFeild.name] || ""}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  />
+                  <p className="text-red-500 text-sm">
+                    {errors[formFeild.name] &&
+                      touched[formFeild.name] &&
+                      errors[formFeild.name]}
+                  </p>
+                </div>
+              );
+          }
+        })}
+      </div>
     </div>
   ));
 }

@@ -19,6 +19,26 @@ function Form() {
     formFeilds = facultyFormFeilds;
   }
 
+  const createIntialValuesScheme = (formFields) => {
+    const schema = {};
+  
+    formFields.forEach((section) => {
+      section.fields.forEach((field) => {
+        if (field.type === "checkbox") {
+          schema[field.name] = false;
+        } else if (field.type === "miniForm") {
+          schema[field.name] = []; 
+        } else {
+          schema[field.name] = "";
+        }
+      });
+    });
+  
+    return schema;
+  };
+
+  const intialValuesSchema = createIntialValuesScheme(formFeilds)
+
   const createValidationSchema = (formFields) => {
     const schema = {};
   
@@ -60,48 +80,7 @@ function Form() {
 
   return (
     <Formik
-      initialValues={{
-        applicantFullName: "",
-        applicantAge: "",
-        applicantContact: "",
-        applicantAddress: "",
-        applicantCourse: "",
-        applicantYearOfStudy: "",
-        applicantEmail: "",
-        applicantRollNo: "",
-        applicantDepartment: "",
-        primarySupervisor: true,
-        primarySupervisorFullName: "",
-        primarySupervisorEmail: "",
-        primarySupervisorContact: "",
-        primarySupervisorDepartment: "",
-        anotherSupervisor: false,
-        anotherSupervisorFullName: "",
-        anotherSupervisorEmail: "",
-        anotherSupervisorContact: "",
-        anotherSupervisorDepartment: "",
-        purposeOfTravel: "",
-        purposeOfTravelOther: "",
-        modeOfTravel: "",
-        modeOfTravelOther: "",
-        proofOfTravel: "",
-        accommodationOpted: false,
-        typeOfAccommodation: "",
-        durationOfStay: "",
-        accommodationAddress: "",
-        proofOfAccommodation: "",
-        eventName: "",
-        eventDate: "",
-        eventVenue: "",
-        eventWebsite: "",
-        proofOfAttendance: "",
-        parentalConsent: false,
-        fatherFullName: "",
-        fatherContact: "",
-        motherFullName: "",
-        motherContact: "",
-        anyOtherRequirements: "",
-      }}
+      initialValues={intialValuesSchema}
       validationSchema={validationSchema} 
       onSubmit={handleSubmit}
     >

@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import Modal from '../../components/Modal/Modal.jsx';
+import PdfViewer from '../../components/PdfViewer.jsx';
 
 function PdfActions({ fileName, applicationId }) {
   const [fileUrl, setFileUrl] = useState(null);
@@ -61,13 +62,10 @@ function PdfActions({ fileName, applicationId }) {
       </button>
 
       {isModalOpen && fileUrl && (
-        <Modal onClose={() => setIsModalOpen(false)}>
-          <object data={fileUrl} type="application/pdf" width="100%" height="600px">
-            <p>
-              PDF preview failed. Please <a href={fileUrl} target="_blank" rel="noopener noreferrer">open the PDF</a> in a new tab.
-            </p>
-          </object>
-        </Modal>
+        <PdfViewer 
+        fileUrl={fileUrl}
+        setIsModalOpen={setIsModalOpen}
+        />
       )}
     </div>
   );

@@ -462,7 +462,19 @@ const studentFormFeilds = [
       },
     ],
   },
+  {
+    label: "Expense Details",
+    fields: [
+      {
+        label: "Total Expenses Incurred",
+        name: "expenses",
+        type: "miniForm",
+        validation: yup.array(),
+      }
+    ]
+  }
 ];
+
 const facultyFormFeilds = [
   {
     label: "Personal and Academic Information",

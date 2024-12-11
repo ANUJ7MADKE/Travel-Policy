@@ -1,19 +1,26 @@
-name: travel-policy
-
 services:
   postgres:
-    image: postgres
-    volumes:
-      - postgres_data:/data/db
-    networks:
-      - travel-policy
+    container_name: postgres
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PW}
+      - POSTGRES_DB=${POSTGRES_DB} 
     ports:
-      - 5432:5432
+      - "5431:5432"  
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  
+    restart: always
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}"]
+      interval: 10s
+      retries: 5
+      timeout: 5s
+
   api:
-    build: 
+    build:
       context: ./backend
       dockerfile: Dockerfile
-    restart: unless-stopped
     env_file:
       - ./backend/.env
     volumes:
@@ -22,12 +29,12 @@ services:
     networks:
       - travel-policy
     ports:
-      - 3000:3000
+      - "3000:3000"
     depends_on:
-      - postgres
-
+      postgres:
+        condition: service_healthy  
 volumes:
-  postgres_data:
+  postgres_data:  
 
 networks:
   travel-policy:
