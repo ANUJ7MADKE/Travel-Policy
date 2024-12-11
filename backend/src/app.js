@@ -5,6 +5,7 @@ import router from './routes/auth.js';
 import applicantRoute from './routes/applicant.js'
 import validatorRoute from './routes/validator.js'
 import generalRoute from './routes/general.js'
+import bodyParser from 'body-parser';
 import { verifyApplicantToken, verifyToken, verifyValidatorToken } from './middleware/verifyJwt.js';
 
 
@@ -16,6 +17,10 @@ app.use(cors({
         origin: true,
         credentials: true              // Allows cookies to be sent
 }));
+
+app.use(express.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use('/applicant', verifyApplicantToken ,applicantRoute);
 app.use('/validator', verifyValidatorToken ,validatorRoute);

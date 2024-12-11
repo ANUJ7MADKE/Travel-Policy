@@ -26,7 +26,6 @@ function Input({
   const [showMiniFrom, setShowMiniForm] = useState(false);
   const [pdfIsVisible, setPdfIsVisible] = useState(false);
   const [fileUrl, setFileUrl] = useState(null);
-  console.log(values?.expenses);
 
   return formFeilds.map((section, sectionIndex) => (
     <div
@@ -164,31 +163,43 @@ function Input({
                 >
                   {pdfIsVisible && (
                     <PdfViewer
-                      fileUrl={URL.createObjectURL(fileUrl)}
+                      fileUrl={fileUrl}
                       setIsModalOpen={setPdfIsVisible}
                     />
                   )}
-              
+
                   {/* Label and Add Expense Button */}
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4">
                     <label
                       htmlFor={formFeild.name}
                       className="block text-lg font-medium text-gray-800 mb-3 sm:mb-0 sm:w-1/2"
                     >
-                       {`${formFeild.label}: ₹${values[formFeild.name]?.reduce((total, rec) => total + parseFloat(rec.expenseAmount || 0), 0).toFixed(2)}`}
+                      {`${formFeild.label}: ₹${values[formFeild.name]
+                        ?.reduce(
+                          (total, rec) =>
+                            total + parseFloat(rec.expenseAmount || 0),
+                          0
+                        )
+                        .toFixed(2)}`}
                     </label>
-              
-                    <div className="flex-shrink-0 mt-4 sm:mt-0 sm:w-auto">
-                      <button
-                        className="bg-red-700 text-white font-semibold py-3 px-8 rounded-lg shadow-md transform transition duration-300 hover:bg-red-800 hover:scale-105 active:scale-95"
-                        type="button"
-                        onClick={() => setShowMiniForm(true)}
-                      >
-                        Add Expense
-                      </button>
-                    </div>
+
+                    {values[formFeild.name].length < 10 ? (
+                      <div className="flex-shrink-0 mt-4 sm:mt-0 sm:w-auto">
+                        <button
+                          className="bg-red-700 text-white font-semibold py-3 px-8 rounded-lg shadow-md transform transition duration-300 hover:bg-red-800 hover:scale-105 active:scale-95"
+                          type="button"
+                          onClick={() => setShowMiniForm(true)}
+                        >
+                          Add Expense
+                        </button>
+                      </div>
+                    ) : (
+                      <h3 className="block text-lg font-medium text-gray-800 mb-3 sm:mb-0 sm:w-1/2">
+                        Cannot add more than 10 expenses
+                      </h3>
+                    )}
                   </div>
-              
+
                   {/* Expense Form */}
                   {showMiniFrom && (
                     <ExpenseForm
@@ -201,12 +212,14 @@ function Input({
                       }
                     />
                   )}
-              
+
                   {/* Error Message */}
                   <p className="text-red-500 text-sm mt-2">
-                    {errors[formFeild.name] && touched[formFeild.name] && errors[formFeild.name]}
+                    {errors[formFeild.name] &&
+                      touched[formFeild.name] &&
+                      errors[formFeild.name]}
                   </p>
-              
+
                   {/* Display Expense Table */}
                   {values[formFeild.name]?.length > 0 && (
                     <div className="mt-6 w-full overflow-x-auto">
@@ -217,7 +230,9 @@ function Input({
                         deleteExpense={(expense) =>
                           setFieldValue(
                             formFeild.name,
-                            values[formFeild.name]?.filter((toDel) => toDel !== expense)
+                            values[formFeild.name]?.filter(
+                              (toDel) => toDel !== expense
+                            )
                           )
                         }
                       />
@@ -225,8 +240,6 @@ function Input({
                   )}
                 </div>
               );
-              
-              
 
             default:
               return (

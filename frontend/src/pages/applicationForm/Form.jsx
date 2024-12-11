@@ -3,45 +3,45 @@ import { Formik } from "formik";
 import Input from "./Input"; // Import the Input component
 import { useSubmit, useRouteLoaderData, useNavigation } from "react-router-dom";
 import { studentFormFeilds, facultyFormFeilds } from "./FormFeilds";
-import * as yup from 'yup';
+import * as yup from "yup";
 
 function Form() {
   const submit = useSubmit();
   const navigation = useNavigation();
   const isSubmittingNav = navigation.state === "submitting";
-  let formFeilds = []
+  let formFeilds = [];
 
   const applicant = useRouteLoaderData("Applicant-Root");
   const designation = applicant.data.user.designation; //Faculty or Student
   if (designation === "Student") {
     formFeilds = studentFormFeilds;
-  } else  {
+  } else {
     formFeilds = facultyFormFeilds;
   }
 
   const createIntialValuesScheme = (formFields) => {
     const schema = {};
-  
+
     formFields.forEach((section) => {
       section.fields.forEach((field) => {
         if (field.type === "checkbox") {
           schema[field.name] = false;
         } else if (field.type === "miniForm") {
-          schema[field.name] = []; 
+          schema[field.name] = [];
         } else {
           schema[field.name] = "";
         }
       });
     });
-  
+
     return schema;
   };
 
-  const intialValuesSchema = createIntialValuesScheme(formFeilds)
+  const intialValuesSchema = createIntialValuesScheme(formFeilds);
 
   const createValidationSchema = (formFields) => {
     const schema = {};
-  
+
     formFields.forEach((section) => {
       section.fields.forEach((field) => {
         if (field.validation) {
@@ -49,19 +49,29 @@ function Form() {
         }
       });
     });
-  
+
     return yup.object().shape(schema);
   };
-  
+
   const validationSchema = createValidationSchema(formFeilds);
 
-  // Form submission handler
   const handleSubmit = async (values, { setSubmitting }) => {
     const formDataToSend = new FormData();
 
-    // Append form fields to FormData
     for (const key in values) {
-      if (values.hasOwnProperty(key)) {
+      if (key === "expenses") {
+        // Serialize the expenses array as a JSON string and append
+        const expenses = JSON.stringify(values[key]);
+        formDataToSend.append('expenses', expenses);
+  
+        // Append expenseProof files separately (as file objects)
+        values[key].forEach((expense, index) => {
+          if (expense.expenseProof) {
+            formDataToSend.append(`expenses[${index}].expenseProof`, expense.expenseProof);
+          }
+        });
+      } else {
+        // For other fields, just append normally
         formDataToSend.append(key, values[key]);
       }
     }
@@ -74,14 +84,14 @@ function Form() {
     } catch (error) {
       console.error("Error uploading form:", error.message);
     } finally {
-      setSubmitting(false); // Reset submitting state
+      setSubmitting(false); // Reset the submitting state after request is done
     }
   };
 
   return (
     <Formik
       initialValues={intialValuesSchema}
-      validationSchema={validationSchema} 
+      validationSchema={validationSchema}
       onSubmit={handleSubmit}
     >
       {({
@@ -94,7 +104,10 @@ function Form() {
         setFieldValue, // Use setFieldValue for file handling
         isSubmitting,
       }) => (
-        <form onSubmit={handleSubmit} className="m-6 pb-4 overflow-y-scroll bg-transparent">
+        <form
+          onSubmit={handleSubmit}
+          className="p-7 overflow-y-scroll bg-transparent"
+        >
           <Input
             values={values}
             errors={errors}
@@ -108,7 +121,7 @@ function Form() {
             disabled={isSubmitting || isSubmittingNav}
             className="w-full flex items-center justify-center bg-gradient-to-r from-red-600 to-red-800 hover:from-red-800 hover:to-red-600 text-white font-semibold py-2 px-4 rounded-lg shadow-lg transform transition duration-300 ease-in-out disabled:bg-gray-400"
           >
-            {(isSubmitting || isSubmittingNav) ? "Submitting" : "Submit"}
+            {isSubmitting || isSubmittingNav ? "Submitting" : "Submit"}
           </button>
         </form>
       )}

@@ -7,7 +7,7 @@ const studentFormFeilds = [
         label: "Enter Full Name",
         name: "applicantFullName",
         type: "text",
-        validation: yup.string().required("Full Name is required"),
+        validation: yup.string().notRequired("Full Name is notRequired"),
       },
       {
         label: "Enter Age",
@@ -15,7 +15,7 @@ const studentFormFeilds = [
         type: "number",
         validation: yup
           .number()
-          .required("Age is required")
+          .notRequired("Age is notRequired")
           .min(0, "Age must be positive"),
       },
       {
@@ -24,14 +24,14 @@ const studentFormFeilds = [
         type: "tel",
         validation: yup
           .string()
-          .required("Contact Number is required")
+          .notRequired("Contact Number is notRequired")
           .matches(/^[0-9]{10}$/, "Contact Number must be 10 digits"),
       },
       {
         label: "Enter Address",
         name: "applicantAddress",
         type: "text",
-        validation: yup.string().required("Address is required"),
+        validation: yup.string().notRequired("Address is notRequired"),
       },
       {
         label: "Select Course",
@@ -44,7 +44,7 @@ const studentFormFeilds = [
             { label: "PHD", value: "PHD" },
           ],
         },
-        validation: yup.string().required("Course selection is required"),
+        validation: yup.string().notRequired("Course selection is notRequired"),
       },
       {
         depend: "applicantCourse",
@@ -67,8 +67,8 @@ const studentFormFeilds = [
         },
         validation: yup.string().when("applicantCourse", {
           is: "PHD",
-          then: (schema) => schema.notRequired(),
-          otherwise: (schema) => schema.required("Year of Study is required")
+          then: (schema) => schema.notnotRequired(),
+          otherwise: (schema) => schema.notRequired("Year of Study is notRequired")
         }
         ),
       },
@@ -79,7 +79,7 @@ const studentFormFeilds = [
         validation: yup
           .string()
           .email("Invalid email format")
-          .required("Email is required"),
+          .notRequired("Email is notRequired"),
       },
       {
         label: "Enter Roll No",
@@ -87,7 +87,7 @@ const studentFormFeilds = [
         type: "text",
         validation: yup
           .string()
-          .required("Roll No is required")
+          .notRequired("Roll No is notRequired")
           .matches(/^\d{11}$/, "Roll No must be exactly 11 digits"),
       },
       {
@@ -108,7 +108,7 @@ const studentFormFeilds = [
             { label: "RAI", value: "RAI" },
           ],
         },
-        validation: yup.string().required("Department selection is required"),
+        validation: yup.string().notRequired("Department selection is notRequired"),
       },
       {
         label: "Enter Primary Supervisor Full Name",
@@ -116,7 +116,7 @@ const studentFormFeilds = [
         type: "text",
         validation: yup
           .string()
-          .required("Primary Supervisor Full Name is required"),
+          .notRequired("Primary Supervisor Full Name is notRequired"),
       },
       {
         label: "Enter Primary Supervisor Email",
@@ -125,7 +125,7 @@ const studentFormFeilds = [
         validation: yup
           .string()
           .email("Invalid email format")
-          .required("Primary Supervisor Email is required"),
+          .notRequired("Primary Supervisor Email is notRequired"),
       },
       {
         label: "Enter Primary Supervisor Contact",
@@ -133,7 +133,7 @@ const studentFormFeilds = [
         type: "tel",
         validation: yup
           .string()
-          .required("Primary Supervisor Contact is required")
+          .notRequired("Primary Supervisor Contact is notRequired")
           .matches(/^[0-9]{10}$/, "Contact Number must be 10 digits"),
       },
       {
@@ -156,7 +156,7 @@ const studentFormFeilds = [
         },
         validation: yup
           .string()
-          .required("Primary Supervisor Department is required"),
+          .notRequired("Primary Supervisor Department is notRequired"),
       },
       {
         label: "Do you have another Supervisor?",
@@ -172,7 +172,7 @@ const studentFormFeilds = [
           .string()
           .when("anotherSupervisor", {
             is: true,
-            then: (schema) => schema.required("Another Supervisor Full Name is required"),
+            then: (schema) => schema.notRequired("Another Supervisor Full Name is notRequired"),
           }),
       },
       {
@@ -184,7 +184,7 @@ const studentFormFeilds = [
           .string()
           .when("anotherSupervisor", {
             is: true,
-            then: (schema) => schema.required("Another Supervisor Email is required").email("Invalid email format"),
+            then: (schema) => schema.notRequired("Another Supervisor Email is notRequired").email("Invalid email format"),
           }),
       },
       {
@@ -196,7 +196,7 @@ const studentFormFeilds = [
           .string()
           .when("anotherSupervisor", {
             is: true,
-            then: (schema) => schema.required("Another Supervisor Contact is required").matches(/^[0-9]{10}$/, "Contact Number must be 10 digits"),
+            then: (schema) => schema.notRequired("Another Supervisor Contact is notRequired").matches(/^[0-9]{10}$/, "Contact Number must be 10 digits"),
           }),
       },
       {
@@ -222,7 +222,7 @@ const studentFormFeilds = [
           .string()
           .when("anotherSupervisor", {
             is: true,
-            then: (schema) => schema.required("Another Supervisor Department is required"),
+            then: (schema) => schema.notRequired("Another Supervisor Department is notRequired"),
           }),
       },
     ],
@@ -242,7 +242,7 @@ const studentFormFeilds = [
             { label: "Other", value: "Other" },
           ],
         },
-        validation: yup.string().required("Purpose of Travel is required"),
+        validation: yup.string().notRequired("Purpose of Travel is notRequired"),
       },
       {
         parent: "purposeOfTravel",
@@ -253,7 +253,7 @@ const studentFormFeilds = [
           .string()
           .when("purposeOfTravel", {
             is: "Other",
-            then: (schema) => schema.required("Purpose of Travel (Other) is required"),
+            then: (schema) => schema.notRequired("Purpose of Travel (Other) is notRequired"),
           }),
       },
       {
@@ -269,7 +269,7 @@ const studentFormFeilds = [
             { label: "Other", value: "Other" },
           ],
         },
-        validation: yup.string().required("Mode of Travel is required"),
+        validation: yup.string().notRequired("Mode of Travel is notRequired"),
       },
       {
         parent: "modeOfTravel",
@@ -280,16 +280,17 @@ const studentFormFeilds = [
           .string()
           .when("modeOfTravel", {
             is: "Other",
-            then: (schema) => schema.required("Mode of Travel (Other) is required"),
+            then: (schema) => schema.notRequired("Mode of Travel (Other) is notRequired"),
           }),
       },
       {
         label: "Upload Proof of Travel",
         name: "proofOfTravel",
         type: "file",
-        validation: yup.mixed().required("Proof of Travel is required").test("fileType", "Only PDF files are allowed", (value) => {
-          return value && value.type === "application/pdf";
-        }),
+        validation: yup.mixed().notRequired("Proof of Travel is notRequired")
+        // .test("fileType", "Only PDF files are allowed", (value) => {
+        //   return value && value.type === "application/pdf";
+        // }),
       },
       {
         label: "Accommodation Opted?",
@@ -312,7 +313,7 @@ const studentFormFeilds = [
           .string()
           .when("accommodationOpted", {
             is: true,
-            then: (schema) => schema.required("Type of Accommodation is required"),
+            then: (schema) => schema.notRequired("Type of Accommodation is notRequired"),
           }),
       },
       {
@@ -324,7 +325,7 @@ const studentFormFeilds = [
           .string()
           .when("accommodationOpted", {
             is: true,
-            then: (schema) => schema.required("Duration of Stay is required"),
+            then: (schema) => schema.notRequired("Duration of Stay is notRequired"),
           }),
       },
       {
@@ -336,7 +337,7 @@ const studentFormFeilds = [
           .string()
           .when("accommodationOpted", {
             is: true,
-            then: (schema) => schema.required("Accommodation Address is required"),
+            then: (schema) => schema.notRequired("Accommodation Address is notRequired"),
           }),
       },
       {
@@ -348,9 +349,10 @@ const studentFormFeilds = [
           .mixed()
           .when("accommodationOpted", {
             is: true,
-            then: (schema) => schema.required("Proof of Accommodation is required").test("fileType", "Only PDF files are allowed", (value) => {
-              return value && value.type === "application/pdf";
-            }),
+            then: (schema) => schema.notRequired("Proof of Accommodation is notRequired")
+            // .test("fileType", "Only PDF files are allowed", (value) => {
+            //   return value && value.type === "application/pdf";
+            // }),
           }),
       },
     ],
@@ -362,33 +364,34 @@ const studentFormFeilds = [
         label: "Enter Event Name",
         name: "eventName",
         type: "text",
-        validation: yup.string().required("Event Name is required"),
+        validation: yup.string().notRequired("Event Name is notRequired"),
       },
       {
         label: "Enter Event Date",
         name: "eventDate",
         type: "date",
-        validation: yup.date().required("Event Date is required"),
+        validation: yup.date().notRequired("Event Date is notRequired"),
       },
       {
         label: "Enter Event Venue",
         name: "eventVenue",
         type: "text",
-        validation: yup.string().required("Event Venue is required"),
+        validation: yup.string().notRequired("Event Venue is notRequired"),
       },
       {
         label: "Enter Event Website",
         name: "eventWebsite",
         type: "text",
-        validation: yup.string().required("Event Website is required"),
+        validation: yup.string().notRequired("Event Website is notRequired"),
       },
       {
         label: "Upload Proof of Attendance",
         name: "proofOfAttendance",
         type: "file",
-        validation: yup.mixed().required("Proof of Attendance is required").test("fileType", "Only PDF files are allowed", (value) => {
-          return value && value.type === "application/pdf";
-        }),
+        validation: yup.mixed().notRequired("Proof of Attendance is notRequired")
+        // .test("fileType", "Only PDF files are allowed", (value) => {
+        //   return value && value.type === "application/pdf";
+        // }),
       },
     ],
   },
@@ -399,7 +402,7 @@ const studentFormFeilds = [
         label: "Parental Consent?",
         name: "parentalConsent",
         type: "checkbox",
-        validation: yup.boolean().isTrue("Parent's Consent is Required"),
+        validation: yup.boolean().isFalse("Parent's Consent is notRequired"),
       },
       {
         parent: "parentalConsent",
@@ -410,7 +413,7 @@ const studentFormFeilds = [
           .string()
           .when("parentalConsent", {
             is: true,
-            then: (schema) => schema.required("Father's Full Name is required"),
+            then: (schema) => schema.notRequired("Father's Full Name is notRequired"),
           }),
       },
       {
@@ -422,7 +425,7 @@ const studentFormFeilds = [
           .string()
           .when("parentalConsent", {
             is: true,
-            then: (schema) => schema.required("Father's Contact is required").matches(/^[0-9]{10}$/, "Contact Number must be 10 digits"),
+            then: (schema) => schema.notRequired("Father's Contact is notRequired").matches(/^[0-9]{10}$/, "Contact Number must be 10 digits"),
           }),
       },
       {
@@ -434,7 +437,7 @@ const studentFormFeilds = [
           .string()
           .when("parentalConsent", {
             is: true,
-            then: (schema) => schema.required("Mother's Full Name is required"),
+            then: (schema) => schema.notRequired("Mother's Full Name is notRequired"),
           }),
       },
       {
@@ -446,7 +449,7 @@ const studentFormFeilds = [
           .string()
           .when("parentalConsent", {
             is: true,
-            then: (schema) => schema.required("Mother's Contact is required").matches(/^[0-9]{10}$/, "Contact Number must be 10 digits"),
+            then: (schema) => schema.notRequired("Mother's Contact is notRequired").matches(/^[0-9]{10}$/, "Contact Number must be 10 digits"),
           }),
       },
     ],
@@ -483,7 +486,7 @@ const facultyFormFeilds = [
         label: "Enter Full Name",
         name: "applicantFullName",
         type: "text",
-        validation: yup.string().required("Full Name is required"),
+        validation: yup.string().notRequired("Full Name is notRequired"),
       },
       {
         label: "Enter Age",
@@ -491,7 +494,7 @@ const facultyFormFeilds = [
         type: "number",
         validation: yup
           .number()
-          .required("Age is required")
+          .notRequired("Age is notRequired")
           .min(18, "Age must be at least 18"),
       },
       {
@@ -500,14 +503,14 @@ const facultyFormFeilds = [
         type: "tel",
         validation: yup
           .string()
-          .required("Contact Number is required")
+          .notRequired("Contact Number is notRequired")
           .matches(/^[0-9]{10}$/, "Contact Number must be 10 digits"),
       },
       {
         label: "Enter Address",
         name: "applicantAddress",
         type: "text",
-        validation: yup.string().required("Address is required"),
+        validation: yup.string().notRequired("Address is notRequired"),
       },
       {
         label: "Enter Email",
@@ -516,13 +519,13 @@ const facultyFormFeilds = [
         validation: yup
           .string()
           .email("Invalid email format")
-          .required("Email is required"),
+          .notRequired("Email is notRequired"),
       },
       {
         label: "Enter Roll No",
         name: "applicantRollNo",
         type: "text",
-        validation: yup.string().required("Roll No is required"),
+        validation: yup.string().notRequired("Roll No is notRequired"),
       },
       {
         label: "Select Department",
@@ -542,7 +545,7 @@ const facultyFormFeilds = [
             { label: "RAI", value: "RAI" },
           ],
         },
-        validation: yup.string().required("Department selection is required"),
+        validation: yup.string().notRequired("Department selection is notRequired"),
       },
       {
         label: "Do you have a Supervisor?",
@@ -558,7 +561,7 @@ const facultyFormFeilds = [
           .string()
           .when("primarySupervisor", {
             is: true,
-            then: (schema) => schema.required("Primary Supervisor Full Name is required"),
+            then: (schema) => schema.notRequired("Primary Supervisor Full Name is notRequired"),
           }),
       },
       {
@@ -570,7 +573,7 @@ const facultyFormFeilds = [
           .string()
           .when("primarySupervisor", {
             is: true,
-            then: (schema) => schema.required("Primary Supervisor Email is required").email("Invalid email format"),
+            then: (schema) => schema.notRequired("Primary Supervisor Email is notRequired").email("Invalid email format"),
           }),
       },
       {
@@ -582,7 +585,7 @@ const facultyFormFeilds = [
           .string()
           .when("primarySupervisor", {
             is: true,
-            then: (schema) => schema.required("Primary Supervisor Contact is required").matches(/^[0-9]{10}$/, "Contact Number must be 10 digits"),
+            then: (schema) => schema.notRequired("Primary Supervisor Contact is notRequired").matches(/^[0-9]{10}$/, "Contact Number must be 10 digits"),
           }),
       },
       {
@@ -608,7 +611,7 @@ const facultyFormFeilds = [
           .string()
           .when("primarySupervisor", {
             is: true,
-            then: (schema) => schema.required("Primary Supervisor Department is required"),
+            then: (schema) => schema.notRequired("Primary Supervisor Department is notRequired"),
           }),
       },
       {
@@ -626,7 +629,7 @@ const facultyFormFeilds = [
           .string()
           .when("anotherSupervisor", {
             is: true,
-            then: (schema) => schema.required("Another Supervisor Full Name is required"),
+            then: (schema) => schema.notRequired("Another Supervisor Full Name is notRequired"),
           }),
       },
       {
@@ -638,7 +641,7 @@ const facultyFormFeilds = [
           .string()
           .when("anotherSupervisor", {
             is: true,
-            then: (schema) => schema.required("Another Supervisor Email is required").email("Invalid email format"),
+            then: (schema) => schema.notRequired("Another Supervisor Email is notRequired").email("Invalid email format"),
           }),
       },
       {
@@ -650,7 +653,7 @@ const facultyFormFeilds = [
           .string()
           .when("anotherSupervisor", {
             is: true,
-            then: (schema) => schema.required("Another Supervisor Contact is required").matches(/^[0-9]{10}$/, "Contact Number must be 10 digits"),
+            then: (schema) => schema.notRequired("Another Supervisor Contact is notRequired").matches(/^[0-9]{10}$/, "Contact Number must be 10 digits"),
           }),
       },
       {
@@ -676,7 +679,7 @@ const facultyFormFeilds = [
           .string()
           .when("anotherSupervisor", {
             is: true,
-            then: (schema) => schema.required("Another Supervisor Department is required"),
+            then: (schema) => schema.notRequired("Another Supervisor Department is notRequired"),
           }),
       },
     ],
@@ -696,7 +699,7 @@ const facultyFormFeilds = [
             { label: "Other", value: "Other" },
           ],
         },
-        validation: yup.string().required("Purpose of Travel is required"),
+        validation: yup.string().notRequired("Purpose of Travel is notRequired"),
       },
       {
         parent: "purposeOfTravel",
@@ -707,7 +710,7 @@ const facultyFormFeilds = [
           .string()
           .when("purposeOfTravel", {
             is: "Other",
-            then: (schema) => schema.required("Purpose of Travel (Other) is required"),
+            then: (schema) => schema.notRequired("Purpose of Travel (Other) is notRequired"),
           }),
       },
       {
@@ -723,7 +726,7 @@ const facultyFormFeilds = [
             { label: "Other", value: "Other" },
           ],
         },
-        validation: yup.string().required("Mode of Travel is required"),
+        validation: yup.string().notRequired("Mode of Travel is notRequired"),
       },
       {
         parent: "modeOfTravel",
@@ -734,16 +737,17 @@ const facultyFormFeilds = [
           .string()
           .when("modeOfTravel", {
             is: "Other",
-            then: (schema) => schema.required("Mode of Travel (Other) is required"),
+            then: (schema) => schema.notRequired("Mode of Travel (Other) is notRequired"),
           }),
       },
       {
         label: "Upload Proof of Travel",
         name: "proofOfTravel",
         type: "file",
-        validation: yup.mixed().required("Proof of Travel is required").test("fileType", "Only PDF files are allowed", (value) => {
-          return value && value.type === "application/pdf";
-        }),
+        validation: yup.mixed().notRequired("Proof of Travel is notRequired")
+        // .test("fileType", "Only PDF files are allowed", (value) => {
+        //   return value && value.type === "application/pdf";
+        // }),
       },
       {
         label: "Accommodation Opted?",
@@ -766,7 +770,7 @@ const facultyFormFeilds = [
           .string()
           .when("accommodationOpted", {
             is: true,
-            then: (schema) => schema.required("Type of Accommodation is required"),
+            then: (schema) => schema.notRequired("Type of Accommodation is notRequired"),
           }),
       },
       {
@@ -778,7 +782,7 @@ const facultyFormFeilds = [
           .string()
           .when("accommodationOpted", {
             is: true,
-            then: (schema) => schema.required("Duration of Stay is required"),
+            then: (schema) => schema.notRequired("Duration of Stay is notRequired"),
           }),
       },
       {
@@ -790,7 +794,7 @@ const facultyFormFeilds = [
           .string()
           .when("accommodationOpted", {
             is: true,
-            then: (schema) => schema.required("Accommodation Address is required"),
+            then: (schema) => schema.notRequired("Accommodation Address is notRequired"),
           }),
       },
       {
@@ -802,9 +806,10 @@ const facultyFormFeilds = [
           .mixed()
           .when("accommodationOpted", {
             is: true,
-            then: (schema) => schema.required("Proof of Accommodation is required").test("fileType", "Only PDF files are allowed", (value) => {
-              return value && value.type === "application/pdf";
-            }),
+            then: (schema) => schema.notRequired("Proof of Accommodation is notRequired")
+            // .test("fileType", "Only PDF files are allowed", (value) => {
+            //   return value && value.type === "application/pdf";
+            // }),
           }),
       },
     ],
@@ -816,33 +821,34 @@ const facultyFormFeilds = [
         label: "Enter Event Name",
         name: "eventName",
         type: "text",
-        validation: yup.string().required("Event Name is required"),
+        validation: yup.string().notRequired("Event Name is notRequired"),
       },
       {
         label: "Enter Event Date",
         name: "eventDate",
         type: "date",
-        validation: yup.date().required("Event Date is required"),
+        validation: yup.date().notRequired("Event Date is notRequired"),
       },
       {
         label: "Enter Event Venue",
         name: "eventVenue",
         type: "text",
-        validation: yup.string().required("Event Venue is required"),
+        validation: yup.string().notRequired("Event Venue is notRequired"),
       },
       {
         label: "Enter Event Website",
         name: "eventWebsite",
         type: "text",
-        validation: yup.string().required("Event Website is required"),
+        validation: yup.string().notRequired("Event Website is notRequired"),
       },
       {
         label: "Upload Proof of Attendance",
         name: "proofOfAttendance",
         type: "file",
-        validation: yup.mixed().required("Proof of Attendance is required").test("fileType", "Only PDF files are allowed", (value) => {
-          return value && value.type === "application/pdf";
-        }),
+        validation: yup.mixed().notRequired("Proof of Attendance is notRequired")
+        // .test("fileType", "Only PDF files are allowed", (value) => {
+        //   return value && value.type === "application/pdf";
+        // }),
       },
     ],
   },

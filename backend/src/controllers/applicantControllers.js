@@ -6,8 +6,7 @@ const createApplication = async (req, res) => {
   const applicantDesignation = req.user.designation;
 
   const formData = req.body;
-  const { proofOfTravel, proofOfAccommodation, proofOfAttendance } = req.files;
-
+  
   try {
     const applicant = await prisma.applicant.findUnique({
       where: { profileId: applicantId }
@@ -82,21 +81,37 @@ const createApplication = async (req, res) => {
       { profileId: hoi.profileId }
     ];
 
-    // Prepare file buffers
-    const proofOfTravelBuffer = proofOfTravel?.[0]?.buffer || null;
-    const proofOfAccommodationBuffer = proofOfAccommodation?.[0]?.buffer || null;
-    const proofOfAttendanceBuffer = proofOfAttendance?.[0]?.buffer || null;
+const { proofOfTravel, proofOfAccommodation, proofOfAttendance, ...otherFiles } = req.files;
 
-    // Construct the application data object
-    const applicationData = {
-      applicantName,
-      formData: JSON.parse(JSON.stringify(formData)),
-      proofOfTravel: proofOfTravelBuffer,
-      proofOfAccommodation: proofOfAccommodationBuffer,
-      proofOfAttendance: proofOfAttendanceBuffer,
-      fdccoordinatorValidation: applicantDesignation === "Faculty" ? (supervisor || additionalSupervisor) ? undefined : "PENDING" : undefined,
-      supervisorValidation: formData.primarySupervisorEmail ? "PENDING" : undefined,
-    };
+// Prepare file buffers for fixed fields
+const proofOfTravelBuffer = proofOfTravel?.[0]?.buffer || null;
+const proofOfAccommodationBuffer = proofOfAccommodation?.[0]?.buffer || null;
+const proofOfAttendanceBuffer = proofOfAttendance?.[0]?.buffer || null;
+
+// Prepare an object to hold the expense proof buffers dynamically
+const expenseProofs = {};
+
+for (let i = 0; i < 10; i++) {
+  const expenseProofField = `expenses[${i}].expenseProof`;
+  if (otherFiles[expenseProofField]) {
+    expenseProofs[`expenseProof${i}`] = otherFiles[expenseProofField][0].buffer;
+  }
+}
+
+// Construct the application data object
+const applicationData = {
+  applicantName,
+  formData: JSON.parse(JSON.stringify(formData)),
+  proofOfTravel: proofOfTravelBuffer,
+  proofOfAccommodation: proofOfAccommodationBuffer,
+  proofOfAttendance: proofOfAttendanceBuffer,
+  ...expenseProofs, // Add dynamically generated expense proof fields
+  fdccoordinatorValidation: applicantDesignation === "Faculty" 
+    ? (supervisor || additionalSupervisor) ? undefined : "PENDING"
+    : undefined,
+  supervisorValidation: formData.primarySupervisorEmail ? "PENDING" : undefined,
+};
+
 
     // Create new application entry with linked applicant and validators
     const newApplication = await prisma.application.create({
