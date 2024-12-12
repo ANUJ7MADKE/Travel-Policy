@@ -1,4 +1,4 @@
-FROM node:23-alpine3.20
+FROM node:23-alpine3.20 as builder
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -7,15 +7,20 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm ci
 
 # Copy the rest of the application files
 COPY . .
 
-# Expose the port that your application will run on
-EXPOSE 3000
-
 RUN npx prisma generate
 
-# Start the application using nodemon (for development)
+# Stage 2: Runtime
+FROM node:23-alpine3.20
+
+WORKDIR /app
+
+COPY --from=builder /app /app
+
+EXPOSE 3000
+
 CMD ["npm", "run", "dev"]
