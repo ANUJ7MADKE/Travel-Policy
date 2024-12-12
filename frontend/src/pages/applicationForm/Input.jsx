@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { studentFormFeilds, facultyFormFeilds } from "./FormFeilds";
+import { studentFormFeilds, facultyFormFeilds } from "./FormFeilds"
 import { useRouteLoaderData } from "react-router-dom";
 import ExpenseForm from "./components/ExpenseForm";
 import ExpenseTable from "./components/ExpenseTable";
@@ -181,6 +181,13 @@ function Input({
                           0
                         )
                         .toFixed(2)}`}
+                      {values[formFeild.name]
+                        ?.reduce(
+                          (total, rec) =>
+                            total + parseFloat(rec.expenseAmount || 0),
+                          0
+                        )
+                        .toFixed(2) > 10000 && <p>Warning: Limit Exceded</p>}
                     </label>
 
                     {values[formFeild.name].length < 10 ? (
