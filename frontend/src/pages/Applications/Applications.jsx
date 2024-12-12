@@ -10,7 +10,7 @@ import Modal from '../../components/Modal/Modal';
 import Root from '../../components/DashboardRoot/Root';
 
 const Applications = () => {
-  const { role } = useRouteLoaderData("Applicant-Root")?.data || useRouteLoaderData("Validator-Root")?.data 
+  const { role } = useRouteLoaderData("Applicant-Root")?.data || useRouteLoaderData("Validator-Root")?.data
   const [numOfApplications, setNumOfApplications] = useState(0);
   const [applications, setApplications] = useState([]);
   const [applicantName, setApplicantName] = useState('');

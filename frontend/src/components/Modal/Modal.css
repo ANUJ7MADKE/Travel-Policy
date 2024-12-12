@@ -1,6 +1,6 @@
 .modal-overlay {
   height: 100%;
-  width: 100%;  
+  width: 100%;
   position: fixed;
   top: 0;
   left: 0;
@@ -31,7 +31,6 @@
   height: 95%;
   overflow-y: scroll;
 }
-
 
 .modal-close {
   position: absolute;

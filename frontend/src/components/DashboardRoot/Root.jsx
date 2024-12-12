@@ -30,7 +30,7 @@ const Root = () => {
 
   return (
     <div className="overflow-hidden h-screen">
-      <Navbar userData={user} role={role} setSidebarIsVisible={setSidebarIsVisible} sidebarIsVisible={sidebarIsVisible}/>
+      <Navbar userData={user} role={role} setSidebarIsVisible={setSidebarIsVisible} sidebarIsVisible={sidebarIsVisible} />
       <div className="flex bg-gray-100 h-full">
         {sidebarIsVisible && <Sidebar role={role} />}
         <div className="w-full h-[90%] overflow-y-scroll">

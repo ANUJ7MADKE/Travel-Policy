@@ -1,6 +1,9 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const ApplicationTable = ({ title, applications, setApplicationDisplay }) => {
+
+  const navigate = useNavigate();
 
   // Fetch full application data on row click
   const getFullApplication = async (applicationId, currentStatus) => {
@@ -21,7 +24,7 @@ const ApplicationTable = ({ title, applications, setApplicationDisplay }) => {
     getFullApplication(application.applicationId, application.currentStatus);
   };
 
-  
+
   return (
     <div className="mb-6">
       {/* <h2 className="text-xl font-bold mb-2">{title}</h2> */}
@@ -39,7 +42,12 @@ const ApplicationTable = ({ title, applications, setApplicationDisplay }) => {
           {applications.map((app, index) => (
             <tr
               key={index}
-              onClick={() => onRowClick({...app, currentStatus : title.split(" ")[0]})} 
+              // onClick={() => onRowClick({ ...app, currentStatus: title.split(" ")[0] })}
+              onClick={() => {
+                const location = window.location.pathname;
+                const newPath = location.split('/').slice(0, -1).join('/');
+                navigate(`${newPath}/application/${app.applicationId}`);
+              }}
               className="odd:bg-gray-50 even:bg-white hover:bg-gray-200 cursor-pointer"
               style={{ height: '50px' }}
             >
@@ -47,7 +55,7 @@ const ApplicationTable = ({ title, applications, setApplicationDisplay }) => {
               <td className="p-4">{app.applicantName}</td>
               <td className="p-4">{formatDateToDDMMYYYY(app.createdAt)}</td>
               <td className="p-4">{app.formData.applicantDepartment}</td>
-              <td className="p-4 text-green-500">{title.split(" ")[0] }</td>
+              <td className="p-4 text-green-500">{title.split(" ")[0]}</td>
             </tr>
           ))}
         </tbody>
