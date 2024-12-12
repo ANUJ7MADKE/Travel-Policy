@@ -16,6 +16,7 @@ function ApplicationsStatusDescription() {
         </h1>
         {role === "Applicant" && (
           <button
+            type='button'
             onClick={() => navigate("../form")}
             className="flex items-center bg-gradient-to-r from-red-600 to-red-800 hover:from-red-800 hover:to-red-600 text-white font-semibold py-2 px-4 rounded-lg shadow-lg transform transition duration-300 ease-in-out hover:scale-105"
           >

@@ -12,6 +12,7 @@ const Modal = ({ onClose, children }) => {
       >
         <div className="flex justify-start p-2">
           <button
+            type='button'
             className="absolute top-3 right-3 text-xl font-bold text-gray-700 hover:text-gray-900"
             onClick={onClose}
           >

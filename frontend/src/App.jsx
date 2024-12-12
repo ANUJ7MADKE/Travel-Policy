@@ -7,7 +7,7 @@ import { createApplicationAction } from "./services/createApplicationAction";
 import { applicationStatusAction } from "./services/applicationStatusAction";
 import Root from "./components/DashboardRoot/Root";
 import ContactUs from "./pages/ContactUs/ContactUs";
-import TrialTestHaha from "./trial/test";
+import ApplicationView from "./pages/ApplicationView/ApplicationView";
 
 const router = createBrowserRouter([
   {
@@ -27,7 +27,7 @@ const router = createBrowserRouter([
     children: [
       { path: "dashboard", element: <Dashboard />, },
       { path: "dashboard/:status", element: <Applications /> },
-      { path: "dashboard/application/:applicationId", element: <TrialTestHaha /> },
+      { path: "dashboard/:status/:applicationId", element: <ApplicationView/> },
       { path: "form", element: <Form />, action: createApplicationAction },
       { path: "faqs", element: <h1>FAQs</h1> },
       { path: "contact-us", element: <ContactUs /> },
@@ -43,8 +43,8 @@ const router = createBrowserRouter([
       {
         path: "dashboard/:status",
         element: <Applications />,
-        action: applicationStatusAction,
       },
+      { path: "dashboard/:status/:applicationId", element: <ApplicationView/>, action: applicationStatusAction, },
       {
         path: "report",
         element: <Report />,

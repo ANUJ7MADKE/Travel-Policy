@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { studentFormFeilds, facultyFormFeilds } from "./FormFeilds"
-import { useRouteLoaderData } from "react-router-dom";
+import { studentFormFeilds, facultyFormFeilds } from "./FormFeilds";
+import { useParams, useRouteLoaderData } from "react-router-dom";
 import ExpenseForm from "./components/ExpenseForm";
 import ExpenseTable from "./components/ExpenseTable";
 import PdfViewer from "../../components/PdfViewer";
+import PdfActions from "../ApplicationView/PdfActions";
 
 function Input({
   values,
@@ -12,16 +13,11 @@ function Input({
   handleChange,
   handleBlur,
   setFieldValue,
+  formFeilds,
 }) {
-  const applicant = useRouteLoaderData("Applicant-Root");
-  const designation = applicant.data.user.designation;
+  const applicationId = useParams().applicationId;
 
-  let formFeilds;
-  if (designation === "Student") {
-    formFeilds = studentFormFeilds;
-  } else {
-    formFeilds = facultyFormFeilds;
-  }
+  console.log(values)
 
   const [showMiniFrom, setShowMiniForm] = useState(false);
   const [pdfIsVisible, setPdfIsVisible] = useState(false);
@@ -30,7 +26,7 @@ function Input({
   return formFeilds.map((section, sectionIndex) => (
     <div
       key={sectionIndex}
-      className="space-y-4 bg-white p-6 rounded-lg shadow-lg min-w-fit border-t-4 border-red-700 mb-4"
+      className="space-y-4 bg-white p-6 rounded-lg shadow-md min-w-fit border-t-4 border-red-700 mb-4"
     >
       <h3 className="text-xl font-semibold mt-2 mb-4">{section.label}</h3>
       <div
@@ -75,6 +71,7 @@ function Input({
                     onBlur={handleBlur}
                     value={values[formFeild.name] || ""}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    disabled={formFeild?.disabled}
                   >
                     <option value="" label="Select option" />
                     {formFeild.options[values[formFeild.depend] || ""].map(
@@ -116,6 +113,7 @@ function Input({
                       onBlur={handleBlur}
                       checked={values[formFeild.name] || false}
                       className="h-4 w-4 border-gray-300 rounded"
+                      disabled={formFeild?.disabled}
                     />
                     <span className="text-sm">{formFeild.label}</span>
                   </label>
@@ -136,22 +134,35 @@ function Input({
                   <label htmlFor={formFeild.name} className="block font-medium">
                     {formFeild.label}
                   </label>
-                  <input
-                    type="file"
-                    name={formFeild.name}
-                    id={formFeild.name}
-                    onChange={(e) => {
-                      // Handle file input change
-                      setFieldValue(formFeild.name, e.target.files[0]);
-                    }}
-                    onBlur={handleBlur}
-                    className="w-full bg-white px-3 py-2 border border-gray-300 rounded-md"
-                  />
-                  <p className="text-red-500 text-sm">
-                    {errors[formFeild.name] &&
-                      touched[formFeild.name] &&
-                      errors[formFeild.name]}
-                  </p>
+
+                  {formFeild?.disabled ? (
+                    values[formFeild.name] === "" ? (
+                      <p className="pt-2">No File Submitted</p>
+                    ) : (
+                      <PdfActions
+                        applicationId={applicationId}
+                        fileName={formFeild.name}
+                      />
+                    )
+                  ) : (
+                    <>
+                      <input
+                        type="file"
+                        name={formFeild.name}
+                        id={formFeild.name}
+                        onChange={(e) => {
+                          setFieldValue(formFeild.name, e.target.files[0]);
+                        }}
+                        onBlur={handleBlur}
+                        className="w-full bg-white px-3 py-2 border border-gray-300 rounded-md"
+                      />
+                      <p className="text-red-500 text-sm">
+                        {errors[formFeild.name] &&
+                          touched[formFeild.name] &&
+                          errors[formFeild.name]}
+                      </p>
+                    </>
+                  )}
                 </div>
               );
 
@@ -190,25 +201,26 @@ function Input({
                         .toFixed(2) > 10000 && <p>Warning: Limit Exceded</p>}
                     </label>
 
-                    {values[formFeild.name].length < 10 ? (
-                      <div className="flex-shrink-0 mt-4 sm:mt-0 sm:w-auto">
-                        <button
-                          className="bg-red-700 text-white font-semibold py-3 px-8 rounded-lg shadow-md transform transition duration-300 hover:bg-red-800 hover:scale-105 active:scale-95"
-                          type="button"
-                          onClick={() => setShowMiniForm(true)}
-                        >
-                          Add Expense
-                        </button>
-                      </div>
-                    ) : (
-                      <h3 className="block text-lg font-medium text-gray-800 mb-3 sm:mb-0 sm:w-1/2">
-                        Cannot add more than 10 expenses
-                      </h3>
-                    )}
+                    {!formFeild?.disabled &&
+                      (values[formFeild.name]?.length < 10 ? (
+                        <div className="flex-shrink-0 mt-4 sm:mt-0 sm:w-auto">
+                          <button
+                            className="bg-red-700 text-white font-semibold py-3 px-8 rounded-lg shadow-md transform transition duration-300 hover:bg-red-800 hover:scale-105 active:scale-95"
+                            type="button"
+                            onClick={() => setShowMiniForm(true)}
+                          >
+                            Add Expense
+                          </button>
+                        </div>
+                      ) : (
+                        <h3 className="block text-lg font-medium text-gray-800 mb-3 sm:mb-0 sm:w-1/2">
+                          Cannot add more than 10 expenses
+                        </h3>
+                      ))}
                   </div>
 
                   {/* Expense Form */}
-                  {showMiniFrom && (
+                  {showMiniFrom && !formFeild?.disabled && (
                     <ExpenseForm
                       onClose={() => setShowMiniForm(false)}
                       setExpenses={(newExpenses) =>
@@ -242,6 +254,7 @@ function Input({
                             )
                           )
                         }
+                        disabled={formFeild?.disabled}
                       />
                     </div>
                   )}
@@ -265,6 +278,7 @@ function Input({
                     onBlur={handleBlur}
                     value={values[formFeild.name] || ""}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    disabled={formFeild?.disabled}
                   />
                   <p className="text-red-500 text-sm">
                     {errors[formFeild.name] &&
