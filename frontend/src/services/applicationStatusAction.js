@@ -9,7 +9,8 @@ export async function applicationStatusAction({ request, params }) {
     try {
         const res = await fetch( `${import.meta.env.VITE_APP_API_URL}/validator/${applicationId}/${action}` , {
             method: 'PUT',
-            credentials: 'include'
+            credentials: 'include',
+            body: formData
         });
 
         if (res.status === 401) {

@@ -3,7 +3,6 @@ import PdfActions from "./PdfActions";
 import Form from "../ApplicationForm/Form";
 
 function FormDisplay({ applicantDesignation, formData }) {
-  console.log(formData);
   if (!formData) return <h1>Error: Application Not Found</h1>;
   return (
     <Form

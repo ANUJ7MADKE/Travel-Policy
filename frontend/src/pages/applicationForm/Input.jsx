@@ -17,8 +17,6 @@ function Input({
 }) {
   const applicationId = useParams().applicationId;
 
-  console.log(values)
-
   const [showMiniFrom, setShowMiniForm] = useState(false);
   const [pdfIsVisible, setPdfIsVisible] = useState(false);
   const [fileUrl, setFileUrl] = useState(null);

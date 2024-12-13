@@ -232,6 +232,7 @@ const getApplicationData = async (req, res) => {
         fdccoordinatorValidation: true,
         hodValidation: true,
         hoiValidation: true,
+        rejectionFeedback: true,
         createdAt: true,
         applicant: {
           select: {

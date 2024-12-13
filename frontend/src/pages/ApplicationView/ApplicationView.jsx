@@ -6,10 +6,9 @@ import {
   useRouteLoaderData,
   useSubmit,
 } from "react-router-dom";
-import Modal from "../../components/Modal/Modal";
 import ValidationStatus from "./ValidationStatus";
 import Form from "../ApplicationForm/Form";
-import FormDisplay from "./FormDisplay";
+import RejectionFeedback from "./RejectionFeedback";
 
 function ApplicationView() {
   const { role } =
@@ -18,16 +17,24 @@ function ApplicationView() {
   const submit = useSubmit();
   const navigate = useNavigate();
 
-  const handleSubmit = (applicationId, action) => {
+  const handleSubmit = (applicationId, action, rejectionFeedback = "") => {
     const formData = new FormData();
     formData.append("applicationId", applicationId);
     formData.append("action", action);
+    formData.append("rejectionFeedback", rejectionFeedback);
+    
+    formData.forEach((value, key) => {
+      console.log(key, value);
+    });
 
-    // Use the submit function to send a PUT request with the form data
-    submit(formData, { method: "POST" });
+    submit(formData, {
+      method: "PUT",
+      encType: "multipart/form-data", // Specify the encoding type
+    });
   };
 
   const [applicationDisplay, setApplicationDisplay] = useState(null);
+  const [rejectionFeedbackPopUp, setRejectionFeedbackPopUp] = useState(false);
 
   const applicationId = useParams().applicationId;
   const statusParam = useParams().status;
@@ -55,22 +62,27 @@ function ApplicationView() {
     }
   };
   let currentStatus = applicationDisplay?.currentStatus?.toLowerCase();
+
   useEffect(() => {
     getFullApplication(applicationId);
-  }, [applicationId]);
+  }, []);
 
-  if (
-    statusParam !== currentStatus ||
-    applicationId !== applicationDisplay?.applicationId
-  ) {
-    const location = window.location.pathname;
-    const newPath = location.split("/").slice(0, -2).join("/");
-    navigate(
-      `${newPath}/${currentStatus}/${applicationDisplay?.applicationId}`
-    );
-  }
+  useEffect(() => {
+    if (
+      (statusParam !== currentStatus && currentStatus) ||
+      (applicationId !== applicationDisplay?.applicationId && applicationDisplay?.applicationId)
+    ) {
+      const location = window.location.pathname;
+      const newPath = location.split("/").slice(0, -2).join("/");
+      navigate(
+        `${newPath}/${currentStatus}/${applicationDisplay?.applicationId}`
+      );
+    }
+  }, [statusParam, currentStatus, applicationDisplay]);
 
   let title = applicationDisplay?.formData?.eventName;
+
+  if (!applicationDisplay) return;
 
   return (
     <div className="min-w-min bg-white shadow rounded-lg p-4 m-6">
@@ -84,12 +96,29 @@ function ApplicationView() {
           hodValidation: applicationDisplay?.hodValidation,
           hoiValidation: applicationDisplay?.hoiValidation,
         }}
+        rejectionFeedback= {applicationDisplay?.rejectionFeedback}
       />
-
-      <FormDisplay
+      <Form
+        prefilledData={applicationDisplay?.formData}
+        applicantDesignation={applicationDisplay?.applicant?.designation}
+      />
+      {/* <FormDisplay
         applicantDesignation={applicationDisplay?.applicant?.designation}
         formData={applicationDisplay?.formData}
-      />
+      /> */}
+
+      {rejectionFeedbackPopUp && (
+        <RejectionFeedback
+          onClose={() => setRejectionFeedbackPopUp(false)}
+          onSubmit={(rejectionFeedback) =>
+            handleSubmit(
+              applicationDisplay?.applicationId,
+              "rejected",
+              rejectionFeedback
+            )
+          }
+        />
+      )}
 
       <div className="flex justify-between items-center mt-6 gap-2">
         {role === "Validator" && currentStatus === "pending" && (
@@ -105,8 +134,9 @@ function ApplicationView() {
             </button>
             <button
               type="button"
-              onClick={() =>
-                handleSubmit(applicationDisplay?.applicationId, "rejected")
+              onClick={
+                () => setRejectionFeedbackPopUp(true)
+                // handleSubmit(applicationDisplay?.applicationId, "rejected")
               }
               className="bg-red-500 text-white font-semibold text-sm sm:text-sm md:text-lg px-4 py-2 rounded-md hover:bg-red-600 focus:outline-double transition duration-200 hover:scale-110 hover:animate-spin"
             >
@@ -116,7 +146,11 @@ function ApplicationView() {
         )}
         <button
           type="button"
-          onClick={() => navigate(-1)}
+          onClick={() => {
+            const location = window.location.pathname;
+            const newPath = location.split("/").slice(0, -1).join("/");
+            navigate(newPath);
+          }}
           className="bg-blue-500 text-white font-semibold text-sm sm:text-sm md:text-lg px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-double transition duration-200 hover:scale-110"
         >
           Close

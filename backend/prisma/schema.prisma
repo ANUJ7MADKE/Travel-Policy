@@ -64,6 +64,8 @@ model Application {
   hodValidation            ApplicationStatus?
   hoiValidation            ApplicationStatus?
 
+  rejectionFeedback     String?
+
   proofOfTravel         Bytes?
   proofOfAccommodation  Bytes?
   proofOfAttendance     Bytes?

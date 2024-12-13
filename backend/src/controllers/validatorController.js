@@ -4,8 +4,9 @@ const applicationAction = async (req, res) => {
   let profileId = req.user.id;
 
   try {
-    const { applicationId, action } = req.params; // actions = 'accepted' or 'rejected'
-
+    const { applicationId, action, rejectionFeedback } = req.body; // actions = 'accepted' or 'rejected'
+    
+    
     const validator = await prisma.validator.findFirst({
       where: { profileId },
       include: { applications: true, },
@@ -88,6 +89,10 @@ const applicationAction = async (req, res) => {
         break;
       default:
         return res.status(400).send("Invalid validator designation");
+    }
+
+    if ( rejectionFeedback ) {
+      validationData.rejectionFeedback = rejectionFeedback;
     }
 
     const response = await prisma.application.update({
