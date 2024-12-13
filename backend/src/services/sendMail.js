@@ -2,6 +2,10 @@ import nodeMailer from 'nodemailer';
 
 export default async function sendMail(emailId, linkToApplication, toValidator, status) {
 
+  //dev purpose
+  if (!process.env.TravelPolicyEmail || !process.env.TravelPolicyEmailPass) {
+    return
+  }
     console.log(process.env.TravelPolicyEmail);
     console.log(process.env.TravelPolicyEmailPass);
 

@@ -64,7 +64,7 @@ const Sidebar = ({ role }) => (
                 to={`/${role.toLowerCase()}/dashboard/pending`}
                 className={({ isActive }) =>
                   `flex items-center text-gray-600 hover:text-white hover:bg-red-700 p-2 rounded ${
-                    isActive ? "font-extrabold" : ""
+                    isActive ? "font-black" : ""
                   }`
                 }
               >
@@ -90,7 +90,7 @@ const Sidebar = ({ role }) => (
                 to={`/${role.toLowerCase()}/dashboard/accepted`}
                 className={({ isActive }) =>
                   `flex items-center text-gray-600 hover:text-white hover:bg-red-700 p-2 rounded ${
-                    isActive ? "font-extrabold" : ""
+                    isActive ? "font-black" : ""
                   }`
                 }
               >
@@ -116,7 +116,7 @@ const Sidebar = ({ role }) => (
                 to={`/${role.toLowerCase()}/dashboard/rejected`}
                 className={({ isActive }) =>
                   `flex items-center text-gray-600 hover:text-white hover:bg-red-700 p-2 rounded ${
-                    isActive ? "font-extrabold" : ""
+                    isActive ? "font-black" : ""
                   }`
                 }
               >

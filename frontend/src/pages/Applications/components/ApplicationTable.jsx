@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const ApplicationTable = ({ title, applications, setApplicationDisplay }) => {
+const ApplicationTable = ({ title, applications,}) => {
 
   const navigate = useNavigate();
 
