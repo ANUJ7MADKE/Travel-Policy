@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useParams, useRouteLoaderData, useSubmit } from "react-router-dom";
+import {
+  useNavigate,
+  useParams,
+  useRouteLoaderData,
+  useSubmit,
+} from "react-router-dom";
 import ValidationStatus from "./ValidationStatus";
 import Form from "../ApplicationForm/Form";
 import RejectionFeedback from "./RejectionFeedback";
@@ -22,7 +27,9 @@ function ApplicationView() {
     try {
       setLoading(true);
       const response = await fetch(
-        `${import.meta.env.VITE_APP_API_URL}/general/getApplicationData/${applicationId}`,
+        `${
+          import.meta.env.VITE_APP_API_URL
+        }/general/getApplicationData/${applicationId}`,
         {
           method: "GET",
           credentials: "include",
@@ -30,7 +37,9 @@ function ApplicationView() {
       );
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch application data: ${response.status} ${response.statusText}`);
+        throw new Error(
+          `Failed to fetch application data: ${response.status} ${response.statusText}`
+        );
       }
       const fullApplication = await response.json();
       setApplicationDisplay(fullApplication);
@@ -43,7 +52,7 @@ function ApplicationView() {
 
   const handleSubmit = (applicationId, action, rejectionFeedback = "") => {
     try {
-      setLoading(true); 
+      setLoading(true);
       const formData = new FormData();
       formData.append("applicationId", applicationId);
       formData.append("action", action);
@@ -56,8 +65,7 @@ function ApplicationView() {
       submit(formData, {
         method: "PUT",
         encType: "multipart/form-data", // Specify the encoding type
-      })
-      
+      });
     } catch (error) {
       console.error("Error during submit:", error);
     } finally {
@@ -75,7 +83,8 @@ function ApplicationView() {
   useEffect(() => {
     if (
       (statusParam !== currentStatus && currentStatus) ||
-      (applicationId !== applicationDisplay?.applicationId && applicationDisplay?.applicationId)
+      (applicationId !== applicationDisplay?.applicationId &&
+        applicationDisplay?.applicationId)
     ) {
       const location = window.location.pathname;
       const newPath = location.split("/").slice(0, -2).join("/");
@@ -85,7 +94,14 @@ function ApplicationView() {
     }
   }, [statusParam, currentStatus, applicationDisplay]);
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) {
+    return (
+      <div className="flex flex-col justify-center items-center h-full animate-pulse">
+        <TbLoader3 className="animate-spin text-xl size-24" />
+        <p className="mt-2">Loading...</p>
+      </div>
+    );
+  }
 
   let title = applicationDisplay?.formData?.eventName;
 
@@ -97,7 +113,8 @@ function ApplicationView() {
 
       <ValidationStatus
         validations={{
-          fdccoordinatorValidation: applicationDisplay?.fdccoordinatorValidation,
+          fdccoordinatorValidation:
+            applicationDisplay?.fdccoordinatorValidation,
           supervisorValidation: applicationDisplay?.supervisorValidation,
           hodValidation: applicationDisplay?.hodValidation,
           hoiValidation: applicationDisplay?.hoiValidation,
@@ -113,7 +130,11 @@ function ApplicationView() {
         <RejectionFeedback
           onClose={() => setRejectionFeedbackPopUp(false)}
           onSubmit={(rejectionFeedback) =>
-            handleSubmit(applicationDisplay?.applicationId, "rejected", rejectionFeedback)
+            handleSubmit(
+              applicationDisplay?.applicationId,
+              "rejected",
+              rejectionFeedback
+            )
           }
         />
       )}
@@ -123,7 +144,9 @@ function ApplicationView() {
           <div className="flex space-x-2">
             <button
               type="button"
-              onClick={() => handleSubmit(applicationDisplay?.applicationId, "accepted")}
+              onClick={() =>
+                handleSubmit(applicationDisplay?.applicationId, "accepted")
+              }
               className="bg-green-500 text-white font-semibold text-sm sm:text-sm md:text-lg px-4 py-2 rounded-md hover:bg-green-600 focus:outline-double transition duration-200 hover:scale-110 hover:animate-spin"
             >
               Accept

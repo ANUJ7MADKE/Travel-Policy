@@ -1,5 +1,5 @@
 # Use the official Node.js image
-FROM node:18-alpine
+FROM node:23-alpine3.20
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -17,4 +17,4 @@ COPY . .
 EXPOSE 5173
 
 # Start the development server
-CMD ["npm", "run", "dev"]
+CMD ["sh", "-c", "npm install && npm run dev"]

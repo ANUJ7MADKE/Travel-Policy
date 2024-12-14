@@ -29,11 +29,11 @@ const Root = () => {
   }, []);
 
   return (
-    <div className="overflow-hidden h-screen">
+    <div className="h-full overflow-y-auto">
       <Navbar userData={user} role={role} setSidebarIsVisible={setSidebarIsVisible} sidebarIsVisible={sidebarIsVisible} />
-      <div className="flex bg-gray-100 h-full">
+      <div className= "flex h-full bg-gray-100 overflow-auto">
         {sidebarIsVisible && <Sidebar role={role} />}
-        <div className="w-full h-[90%] overflow-y-scroll">
+        <div className="w-full h-full">
           <Outlet />
         </div>
       </div>
