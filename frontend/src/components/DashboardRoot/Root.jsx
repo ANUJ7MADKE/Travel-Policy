@@ -33,7 +33,7 @@ const Root = () => {
       <Navbar userData={user} role={role} setSidebarIsVisible={setSidebarIsVisible} sidebarIsVisible={sidebarIsVisible} />
       <div className= "flex h-full bg-gray-100 overflow-auto">
         {sidebarIsVisible && <Sidebar role={role} />}
-        <div className="w-full h-full">
+        <div className="w-full h-min-full overflow-y-scroll">
           <Outlet />
         </div>
       </div>
