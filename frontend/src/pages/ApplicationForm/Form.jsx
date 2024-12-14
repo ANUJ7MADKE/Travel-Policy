@@ -1,6 +1,6 @@
 import React from "react";
 import { Formik } from "formik";
-import Input from "./Input"; // Import the Input component
+import Input from "./Input";
 import { useSubmit, useRouteLoaderData, useNavigation } from "react-router-dom";
 import { studentFormFeilds, facultyFormFeilds } from "./FormFeilds";
 import * as yup from "yup";
