@@ -7,7 +7,7 @@ const dataRoot = async (req, res) => {
     const userId = user.id;
 
     // Determine if the user is an Applicant or Validator based on designation
-    if (['Student', 'Faculty'].includes(user.designation)) {
+    if (["Student", "Faculty"].includes(user.designation)) {
       // Applicant Logic
       const applicant = await prisma.applicant.findUnique({
         where: { profileId: userId },
@@ -15,9 +15,9 @@ const dataRoot = async (req, res) => {
           profileId: true,
           userName: true,
           email: true,
-          department: true,        
+          department: true,
           designation: true,
-        }
+        },
       });
 
       // Check if the applicant exists
@@ -31,10 +31,11 @@ const dataRoot = async (req, res) => {
       return res.status(200).json({
         message: "Applicant Authorized",
         user: applicant,
-        role: "Applicant"
+        role: "Applicant",
       });
-
-    } else if (['Supervisor', 'HOD', 'HOI', "FDCcoordinator"].includes(user.designation)) {
+    } else if (
+      ["Supervisor", "HOD", "HOI", "FDCcoordinator"].includes(user.designation)
+    ) {
       // Validator Logic
       const validator = await prisma.validator.findUnique({
         where: { profileId: userId },
@@ -58,12 +59,11 @@ const dataRoot = async (req, res) => {
       return res.status(200).json({
         message: "Validator Authorized",
         user: validator,
-        role: "Validator"
+        role: "Validator",
       });
     } else {
       return res.status(403).send("Unauthorized");
     }
-
   } catch (error) {
     // Handle any errors that occur during the process
     console.error(error);
@@ -89,7 +89,7 @@ const getApplicationsByStatus = async (req, res) => {
     let applications, totalApplications;
 
     // Filter conditions for Student and Faculty
-    if (['Student', 'Faculty'].includes(user.designation)) {
+    if (["Student", "Faculty"].includes(user.designation)) {
       const baseWhere = {
         applicantId: userId,
         ...(status === "PENDING" && {
@@ -102,12 +102,18 @@ const getApplicationsByStatus = async (req, res) => {
         }),
         ...(status === "ACCEPTED" && {
           AND: [
-            { fdccoordinatorValidation: user.designation === "Faculty" ? "ACCEPTED" : null },
+            {
+              fdccoordinatorValidation:
+                user.designation === "Faculty" ? "ACCEPTED" : null,
+            },
             {
               OR: [
                 { supervisorValidation: "ACCEPTED" },
-                { supervisorValidation: user.designation === "Student" ? "ACCEPTED" : null }
-              ]
+                {
+                  supervisorValidation:
+                    user.designation === "Student" ? "ACCEPTED" : null,
+                },
+              ],
             },
             { hodValidation: "ACCEPTED" },
             { hoiValidation: "ACCEPTED" },
@@ -127,7 +133,7 @@ const getApplicationsByStatus = async (req, res) => {
       if (sortBy && sortValue) {
         baseWhere[sortBy] = {
           contains: sortValue,
-          mode: 'insensitive',
+          mode: "insensitive",
         };
       }
 
@@ -146,8 +152,10 @@ const getApplicationsByStatus = async (req, res) => {
         orderBy: { createdAt: "desc" },
       });
 
-    // Filter conditions for Validators (Supervisor, HOD, HOI, FDCcoordinator)
-    } else if (['Supervisor', 'HOD', 'HOI', "FDCcoordinator"].includes(user.designation)) {
+      // Filter conditions for Validators (Supervisor, HOD, HOI, FDCcoordinator)
+    } else if (
+      ["Supervisor", "HOD", "HOI", "FDCcoordinator"].includes(user.designation)
+    ) {
       const validationField = `${user.designation.toLowerCase()}Validation`;
 
       const baseWhere = {
@@ -158,7 +166,7 @@ const getApplicationsByStatus = async (req, res) => {
       if (sortBy && sortValue) {
         baseWhere[sortBy] = {
           contains: sortValue,
-          mode: 'insensitive',
+          mode: "insensitive",
         };
       }
 
@@ -184,7 +192,7 @@ const getApplicationsByStatus = async (req, res) => {
     }
 
     // Format response with selected fields
-    const responseApplications = applications.map(application => ({
+    const responseApplications = applications.map((application) => ({
       applicationId: application.applicationId,
       applicantName: application.applicantName,
       formData: {
@@ -199,7 +207,6 @@ const getApplicationsByStatus = async (req, res) => {
       totalApplications,
       applications: responseApplications,
     });
-
   } catch (error) {
     console.error(error);
     res.status(500).send(error.message);
@@ -209,6 +216,7 @@ const getApplicationsByStatus = async (req, res) => {
 const getApplicationData = async (req, res) => {
   try {
     const applicationId = req.params.applicationId;
+    const user = req.user;
 
     // Fetch application data excluding proof fields
     const applicationFull = await prisma.application.findUnique({
@@ -224,7 +232,13 @@ const getApplicationData = async (req, res) => {
         fdccoordinatorValidation: true,
         hodValidation: true,
         hoiValidation: true,
+        rejectionFeedback: true,
         createdAt: true,
+        applicant: {
+          select: {
+            designation: true,
+          },
+        },
       },
     });
 
@@ -232,59 +246,49 @@ const getApplicationData = async (req, res) => {
       return res.status(404).json({ error: "Application not found" });
     }
 
-    return res.status(200).json(applicationFull);
-  } catch (error) {
-    console.error("Error retrieving application data:", error);
-    return res
-      .status(500)
-      .json({
-        error: "An error occurred while retrieving the application data",
-      });
-  }
-};
+    let currentStatus;
 
-const getFile = async (req, res) => {
-  try {
-    const { applicationId, fileName } = req.params;
+    if (["Student", "Faculty"].includes(user.designation)) {
+      if (
+        applicationFull.supervisorValidation === "ACCEPTED" &&
+        applicationFull.hodValidation === "ACCEPTED" &&
+        applicationFull.hoiValidation === "ACCEPTED"
+      ) {
+        if (user.designation === "Student") {
+          currentStatus = "ACCEPTED";
+        } else if (
+          user.designation === "Faculty" &&
+          applicationFull.fdccoordinatorValidation === "ACCEPTED"
+        ) {
+          currentStatus = "ACCEPTED";
+        }
+      } else if (
+        applicationFull.supervisorValidation === "REJECTED" ||
+        applicationFull.hodValidation === "REJECTED" ||
+        applicationFull.hoiValidation === "REJECTED" ||
+        applicationFull.fdccoordinatorValidation === "REJECTED"
+      ) {
+        currentStatus = "REJECTED";
+      } else {
+        currentStatus = "PENDING";
+      }
+    } else if (
+      ["Supervisor", "HOD", "HOI", "FDCcoordinator"].includes(user.designation)
+    ) {
+      const validationField = `${user.designation.toLowerCase()}Validation`;
 
-    let proofOfTravel = false;
-    let proofOfAccommodation = false;
-    let proofOfAttendance = false;
-
-    switch (fileName) {
-      case "proofOfTravel":
-        proofOfTravel = true;
-        break;
-      case "proofOfAccommodation":
-        proofOfAccommodation = true;
-        break;
-      case "proofOfAttendance":
-        proofOfAttendance = true;
-        break;
-      default:
-        return res.status(400).json({ error: "Invalid File request" });
+      if (applicationFull[validationField] === "ACCEPTED") {
+        currentStatus = "ACCEPTED";
+      } else if (applicationFull[validationField] === "REJECTED") {
+        currentStatus = "REJECTED";
+      } else {
+        currentStatus = "PENDING";
+      }
+    } else {
+      return res.status(403).send("Unauthorized");
     }
 
-    const myFile = await prisma.application.findUnique({
-      where: { applicationId },
-      select: {
-        proofOfTravel,
-        proofOfAccommodation,
-        proofOfAttendance,
-      },
-    });
-
-    if (!myFile) {
-      return res.status(404).json({ error: "File not found" });
-    }
-
-    const fileBuffer = myFile[fileName];
-
-    res.setHeader('Content-Type', 'application/pdf'); 
-    res.setHeader('Content-Disposition', `attachment; filename="${fileName}.pdf"`);
-
-    return res.send(fileBuffer);
-
+    return res.status(200).json({ ...applicationFull, currentStatus });
   } catch (error) {
     console.error("Error retrieving application data:", error);
     return res.status(500).json({
@@ -293,5 +297,117 @@ const getFile = async (req, res) => {
   }
 };
 
+const getFile = async (req, res) => {
+  try {
+    const { applicationId, fileName } = req.params;
+    const user = req.user;
+    const userId = user.id;
+
+    const validFileNames = [
+      "proofOfTravel",
+      "proofOfAccommodation",
+      "proofOfAttendance",
+      "expenseProof0",
+      "expenseProof1",
+      "expenseProof2",
+      "expenseProof3",
+      "expenseProof4",
+      "expenseProof5",
+      "expenseProof6",
+      "expenseProof7",
+      "expenseProof8",
+      "expenseProof9",
+    ];
+
+    if (!validFileNames.includes(fileName)) {
+      return res.status(400).json({ error: "Invalid File request" });
+    }
+
+    let applicationSelection = {};
+
+    const fileSelection = {
+      proofOfTravel: false,
+      proofOfAccommodation: false,
+      proofOfAttendance: false,
+      expenseProof0: false,
+      expenseProof1: false,
+      expenseProof2: false,
+      expenseProof3: false,
+      expenseProof4: false,
+      expenseProof5: false,
+      expenseProof6: false,
+      expenseProof7: false,
+      expenseProof8: false,
+      expenseProof9: false,
+    };
+
+    if (validFileNames.includes(fileName)) {
+      fileSelection[fileName] = true;
+    }
+
+    let myApplication;
+
+    if (["Student", "Faculty"].includes(user.designation)) {
+      myApplication = await prisma.applicant.findUnique({
+        where: {
+          profileId: userId,
+        },
+        select: {
+          applications: {
+            where: {
+              applicationId,
+            },
+            select: fileSelection,
+          },
+        },
+      });
+    } else if (
+      ["Supervisor", "HOD", "HOI", "FDCcoordinator"].includes(user.designation)
+    ) {
+      myApplication = await prisma.validator.findUnique({
+        where: {
+          profileId: userId,
+        },
+        select: {
+          applications: {
+            where: {
+              applicationId,
+            },
+            select: fileSelection,
+          },
+        },
+      });
+    }
+
+    const myFile = myApplication?.applications[0];
+
+    if (!myFile) {
+      return res.status(404).json({ error: "File not found" });
+    }
+
+    // Retrieve the file buffer dynamically based on the fileName
+    const fileBuffer = myFile[fileName];
+
+    // If file buffer doesn't exist
+    if (!fileBuffer) {
+      return res.status(404).json({ error: "File content not found" });
+    }
+
+    // Set response headers for PDF file download
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="${fileName}.pdf"`
+    );
+
+    // Send the file buffer as a response
+    return res.send(fileBuffer);
+  } catch (error) {
+    console.error("Error retrieving application data:", error);
+    return res.status(500).json({
+      error: "An error occurred while retrieving the application data",
+    });
+  }
+};
 
 export { getApplicationData, getFile, dataRoot, getApplicationsByStatus };

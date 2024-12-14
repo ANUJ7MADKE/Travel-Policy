@@ -10,7 +10,7 @@ import Modal from '../../components/Modal/Modal';
 import Root from '../../components/DashboardRoot/Root';
 
 const Applications = () => {
-  const { role } = useRouteLoaderData("Applicant-Root")?.data || useRouteLoaderData("Validator-Root")?.data 
+  const { role } = useRouteLoaderData("Applicant-Root")?.data || useRouteLoaderData("Validator-Root")?.data
   const [numOfApplications, setNumOfApplications] = useState(0);
   const [applications, setApplications] = useState([]);
   const [applicantName, setApplicantName] = useState('');
@@ -48,10 +48,6 @@ const Applications = () => {
     fetchApplications();
   }, [status, currentPage, applicantName]);
 
-  const closeModal = () => {
-    setApplicationDisplay(null);
-  };
-
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
@@ -65,7 +61,6 @@ const Applications = () => {
       <ApplicationTable
         title={`${status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()} Applications`}
         applications={applications}
-        setApplicationDisplay={setApplicationDisplay}
       />
     ) : (
       <p className="text-gray-600">No {status.toLowerCase()} applications found.</p>
@@ -88,7 +83,6 @@ const Applications = () => {
           currentPage={currentPage}
           onPageChange={handlePageChange}
         />
-        {applicationDisplay && <Modal><ApplicationView applicationDisplay={applicationDisplay} closeModal={closeModal} /></Modal>}
       </div>
     </main>
   );

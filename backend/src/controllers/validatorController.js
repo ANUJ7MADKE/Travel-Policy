@@ -1,10 +1,12 @@
 import prisma from "../config/prismaConfig.js";
+import sendMail from "../services/sendMail.js";
 
 const applicationAction = async (req, res) => {
   let profileId = req.user.id;
 
   try {
-    const { applicationId, action } = req.params; // actions = 'accepted' or 'rejected'
+    const { applicationId, action, rejectionFeedback } = req.body; // actions = 'accepted' or 'rejected'
+
 
     const validator = await prisma.validator.findFirst({
       where: { profileId },
@@ -25,8 +27,8 @@ const applicationAction = async (req, res) => {
     }
 
     const applicant = await prisma.applicant.findFirst({
-      where: {profileId: application.applicantId},
-      select: {designation: true}
+      where: { profileId: application.applicantId },
+      select: { designation: true }
     })
 
     const applicantDesignation = applicant.designation
@@ -50,10 +52,18 @@ const applicationAction = async (req, res) => {
 
         if (validationStatus === "ACCEPTED" && applicantDesignation === "Student") {
           validationData.hodValidation = "PENDING";
+          const hod = await prisma.validator.findFirst({
+            where: { department: application.formData.applicantDepartment, designation: "HOD" }
+          })
+          sendMail(hod.email, `http://localhost:5173/validator/dashboard/pending/${applicationId}`, false, validationStatus);
         }
 
         if (validationStatus === "ACCEPTED" && applicantDesignation === "Faculty") {
           validationData.fdccoordinatorValidation = "PENDING";
+          const fdccoordinator = await prisma.validator.findFirst({
+            where: { department: validator.department, designation: "FDCcoordinator" }
+          })
+          sendMail(fdccoordinator.email, `http://localhost:5173/validator/dashboard/pending/${applicationId}`, false, validationStatus);
         }
         break;
       case "FDCcoordinator":
@@ -65,6 +75,10 @@ const applicationAction = async (req, res) => {
         validationData.fdccoordinatorValidation = validationStatus;
         if (validationStatus === "ACCEPTED") {
           validationData.hodValidation = "PENDING"
+          const hod = await prisma.validator.findFirst({
+            where: { department: application.formData.applicantDepartment, designation: "HOD" }
+          })
+          sendMail(hod.email, `http://localhost:5173/validator/dashboard/pending/${applicationId}`, false, validationStatus);
         }
         break;
       case "HOD":
@@ -76,6 +90,10 @@ const applicationAction = async (req, res) => {
         validationData.hodValidation = validationStatus;
         if (validationStatus === "ACCEPTED") {
           validationData.hoiValidation = "PENDING";
+          const hoi = await prisma.validator.findFirst({
+            where: { designation: "HOI" }
+          })
+          sendMail(hoi.email, `http://localhost:5173/validator/dashboard/pending/${applicationId}`, false, validationStatus);
         }
         break;
       case "HOI":
@@ -85,9 +103,21 @@ const applicationAction = async (req, res) => {
             .send("Already performed an action, can't change status again");
         }
         validationData.hoiValidation = validationStatus;
+        sendMail(application.formData.applicantEmail, `http://localhost:5173/applicant/dashboard/${validationStatus}/${applicationId}`, false, validationStatus);
+
+        if (validationStatus === "ACCEPTED") {
+
+          //forward to accounts department for transaction processing
+
+        }
+
         break;
       default:
         return res.status(400).send("Invalid validator designation");
+    }
+
+    if (rejectionFeedback) {
+      validationData.rejectionFeedback = rejectionFeedback;
     }
 
     const response = await prisma.application.update({

@@ -1,4 +1,5 @@
 import prisma from '../config/prismaConfig.js';
+import sendMail from '../services/sendMail.js';
 
 const createApplication = async (req, res) => {
   const applicantId = req.user.id;
@@ -6,7 +7,7 @@ const createApplication = async (req, res) => {
   const applicantDesignation = req.user.designation;
 
   const formData = req.body;
-  
+
   try {
     const applicant = await prisma.applicant.findUnique({
       where: { profileId: applicantId }
@@ -81,36 +82,36 @@ const createApplication = async (req, res) => {
       { profileId: hoi.profileId }
     ];
 
-const { proofOfTravel, proofOfAccommodation, proofOfAttendance, ...otherFiles } = req.files;
+    const { proofOfTravel, proofOfAccommodation, proofOfAttendance, ...otherFiles } = req.files;
 
-// Prepare file buffers for fixed fields
-const proofOfTravelBuffer = proofOfTravel?.[0]?.buffer || null;
-const proofOfAccommodationBuffer = proofOfAccommodation?.[0]?.buffer || null;
-const proofOfAttendanceBuffer = proofOfAttendance?.[0]?.buffer || null;
+    // Prepare file buffers for fixed fields
+    const proofOfTravelBuffer = proofOfTravel?.[0]?.buffer || null;
+    const proofOfAccommodationBuffer = proofOfAccommodation?.[0]?.buffer || null;
+    const proofOfAttendanceBuffer = proofOfAttendance?.[0]?.buffer || null;
 
-// Prepare an object to hold the expense proof buffers dynamically
-const expenseProofs = {};
+    // Prepare an object to hold the expense proof buffers dynamically
+    const expenseProofs = {};
 
-for (let i = 0; i < 10; i++) {
-  const expenseProofField = `expenses[${i}].expenseProof`;
-  if (otherFiles[expenseProofField]) {
-    expenseProofs[`expenseProof${i}`] = otherFiles[expenseProofField][0].buffer;
-  }
-}
+    for (let i = 0; i < 10; i++) {
+      const expenseProofField = `expenses[${i}].expenseProof`;
+      if (otherFiles[expenseProofField]) {
+        expenseProofs[`expenseProof${i}`] = otherFiles[expenseProofField][0].buffer;
+      }
+    }
 
-// Construct the application data object
-const applicationData = {
-  applicantName,
-  formData: JSON.parse(JSON.stringify(formData)),
-  proofOfTravel: proofOfTravelBuffer,
-  proofOfAccommodation: proofOfAccommodationBuffer,
-  proofOfAttendance: proofOfAttendanceBuffer,
-  ...expenseProofs, // Add dynamically generated expense proof fields
-  fdccoordinatorValidation: applicantDesignation === "Faculty" 
-    ? (supervisor || additionalSupervisor) ? undefined : "PENDING"
-    : undefined,
-  supervisorValidation: formData.primarySupervisorEmail ? "PENDING" : undefined,
-};
+    // Construct the application data object
+    const applicationData = {
+      applicantName,
+      formData: JSON.parse(JSON.stringify(formData)),
+      proofOfTravel: proofOfTravelBuffer,
+      proofOfAccommodation: proofOfAccommodationBuffer,
+      proofOfAttendance: proofOfAttendanceBuffer,
+      ...expenseProofs, // Add dynamically generated expense proof fields
+      fdccoordinatorValidation: applicantDesignation === "Faculty"
+        ? (supervisor || additionalSupervisor) ? undefined : "PENDING"
+        : undefined,
+      supervisorValidation: formData.primarySupervisorEmail ? "PENDING" : undefined,
+    };
 
 
     // Create new application entry with linked applicant and validators
@@ -125,6 +126,19 @@ const applicationData = {
         }
       }
     });
+
+    if (applicantDesignation === "Faculty") {
+      if (fdccoordinator) {
+        sendMail(fdccoordinator.email, `http://localhost:5173/validator/dashboard/pending/${newApplication.applicationId}`, true, null);
+      } else {
+        sendMail(formData.primarySupervisorEmail, `http://localhost:5173/validator/dashboard/pending/${newApplication.applicationId}`, true, null);
+        formData.anotherSupervisorEmail && sendMail(formData.anotherSupervisorEmail, `http://localhost:5173/validator/dashboard/pending/${newApplication.applicationId}`, true, null);
+      }
+    } else {
+      sendMail(formData.primarySupervisorEmail, `http://localhost:5173/validator/dashboard/pending/${newApplication.applicationId}`, true, null);
+      formData.anotherSupervisorEmail && sendMail(formData.anotherSupervisorEmail, `http://localhost:5173/validator/dashboard/pending/${newApplication.applicationId}`, true, null);
+    }
+
 
     res.status(201).send(newApplication);
   } catch (error) {

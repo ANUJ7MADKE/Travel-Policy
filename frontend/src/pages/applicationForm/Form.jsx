@@ -5,26 +5,56 @@ import { useSubmit, useRouteLoaderData, useNavigation } from "react-router-dom";
 import { studentFormFeilds, facultyFormFeilds } from "./FormFeilds";
 import * as yup from "yup";
 
-function Form() {
+function Form({ prefilledData, applicantDesignation }) {
   const submit = useSubmit();
   const navigation = useNavigation();
   const isSubmittingNav = navigation.state === "submitting";
   let formFeilds = [];
+  let toBeFormFeilds = [];
+  let designation;
 
   const applicant = useRouteLoaderData("Applicant-Root");
-  const designation = applicant.data.user.designation; //Faculty or Student
-  if (designation === "Student") {
-    formFeilds = studentFormFeilds;
+
+  if (applicantDesignation) {
+    designation = applicantDesignation;
   } else {
-    formFeilds = facultyFormFeilds;
+    designation = applicant?.data?.user?.designation; //Faculty or Student
+  }
+
+  if (designation === "Student") {
+    toBeFormFeilds = studentFormFeilds;
+  } else {
+    toBeFormFeilds = facultyFormFeilds;
+  }
+
+  if (prefilledData) {
+    formFeilds = toBeFormFeilds?.map((section) => {
+      return {
+        ...section,
+        fields: section?.fields?.map((field) => ({
+          ...field,
+          disabled: true,
+        })),
+      };
+    });
+  } else {
+    formFeilds = toBeFormFeilds;
   }
 
   const createIntialValuesScheme = (formFields) => {
     const schema = {};
 
-    formFields.forEach((section) => {
-      section.fields.forEach((field) => {
-        if (field.type === "checkbox") {
+    formFields?.forEach((section) => {
+      section?.fields?.forEach((field) => {
+        if (prefilledData) {
+          if (field.type === "miniForm") {
+            schema[field.name] = JSON.parse(prefilledData[field.name]);
+          } else if (field.type === "checkbox") {
+            schema[field.name] = JSON.parse(prefilledData[field.name]);
+          } else {
+            schema[field.name] = prefilledData[field.name];
+          }
+        } else if (field.type === "checkbox") {
           schema[field.name] = false;
         } else if (field.type === "miniForm") {
           schema[field.name] = [];
@@ -42,8 +72,8 @@ function Form() {
   const createValidationSchema = (formFields) => {
     const schema = {};
 
-    formFields.forEach((section) => {
-      section.fields.forEach((field) => {
+    formFields?.forEach((section) => {
+      section.fields?.forEach((field) => {
         if (field.validation) {
           schema[field.name] = field.validation;
         }
@@ -62,12 +92,15 @@ function Form() {
       if (key === "expenses") {
         // Serialize the expenses array as a JSON string and append
         const expenses = JSON.stringify(values[key]);
-        formDataToSend.append('expenses', expenses);
-  
+        formDataToSend.append("expenses", expenses);
+
         // Append expenseProof files separately (as file objects)
         values[key].forEach((expense, index) => {
           if (expense.expenseProof) {
-            formDataToSend.append(`expenses[${index}].expenseProof`, expense.expenseProof);
+            formDataToSend.append(
+              `expenses[${index}].expenseProof`,
+              expense.expenseProof
+            );
           }
         });
       } else {
@@ -106,7 +139,7 @@ function Form() {
       }) => (
         <form
           onSubmit={handleSubmit}
-          className="p-7 overflow-y-scroll bg-transparent"
+          className="p-7 overflow-y-auto bg-transparent"
         >
           <Input
             values={values}
@@ -115,14 +148,17 @@ function Form() {
             handleChange={handleChange}
             handleBlur={handleBlur}
             setFieldValue={setFieldValue} // Pass setFieldValue for file handling
+            formFeilds={formFeilds}
           />
-          <button
-            type="submit"
-            disabled={isSubmitting || isSubmittingNav}
-            className="w-full flex items-center justify-center bg-gradient-to-r from-red-600 to-red-800 hover:from-red-800 hover:to-red-600 text-white font-semibold py-2 px-4 rounded-lg shadow-lg transform transition duration-300 ease-in-out disabled:bg-gray-400"
-          >
-            {isSubmitting || isSubmittingNav ? "Submitting" : "Submit"}
-          </button>
+          {!prefilledData && (
+            <button
+              type="submit"
+              disabled={isSubmitting || isSubmittingNav}
+              className="w-full flex items-center justify-center bg-gradient-to-r from-red-600 to-red-800 hover:from-red-800 hover:to-red-600 text-white font-semibold py-2 px-4 rounded-lg shadow-lg transform transition duration-300 ease-in-out disabled:bg-gray-400"
+            >
+              {isSubmitting || isSubmittingNav ? "Submitting" : "Submit"}
+            </button>
+          )}
         </form>
       )}
     </Formik>

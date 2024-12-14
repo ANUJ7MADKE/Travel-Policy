@@ -48,6 +48,7 @@ function ApplicantLogin({ changeRole }) {
         <h3 className="text-white text-lg md:text-xl font-bold">Validator?</h3>
         <p className="text-white mb-3">Go to Validator’s Sign in</p>
         <button 
+          type='button'
           className="bg-white text-red-700 text-sm md:text-base px-3 py-1.5 rounded-full font-semibold shadow-md hover:bg-gray-100 transition" 
           onClick={handleChangeRole}
         >
@@ -58,6 +59,7 @@ function ApplicantLogin({ changeRole }) {
       <div className={`bg-white w-full md:w-3/4 p-8 flex flex-col justify-center ${animate ? 'text-blur-out' : 'fade-in-fwd'}`}>
         <h2 className="text-lg md:text-xl lg:text-2xl font-bold mb-3">Login for Applicants<span role="img" aria-label="wave">👋</span></h2>
         <button 
+          type='button'
           className="bg-gray-100 text-gray-700 text-sm md:text-base px-4 py-2 rounded-full font-semibold mb-3 shadow-md flex items-center justify-center hover:bg-gray-200 transition-transform transform hover:scale-105"
           onClick={handleSubmit}
         >
