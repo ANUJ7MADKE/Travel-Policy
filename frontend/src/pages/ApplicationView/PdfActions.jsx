@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import Modal from "../../components/Modal/Modal.jsx";
 import PdfViewer from "../../components/PdfViewer.jsx";
+import { FaFileDownload } from "react-icons/fa";
 
 function PdfActions({ fileName, applicationId }) {
   const [fileUrl, setFileUrl] = useState(null);
@@ -51,10 +52,10 @@ function PdfActions({ fileName, applicationId }) {
   };
 
   return (
-    <div className="flex flex-wrap gap-3 justify-center md:justify-between">
+    <div className="flex flex-wrap gap-3 justify-center lg:justify-between">
       <button
         type="button"
-        className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-300"
+        className="hidden bg-gray-500 hover:bg-gray-700 text-white text-sm font-bold py-2 px-3 rounded transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-300 sm:block md:block"
         onClick={handleView}
       >
         View PDF
@@ -62,10 +63,11 @@ function PdfActions({ fileName, applicationId }) {
 
       <button
         type="button"
-        className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-300"
+        className="bg-gray-500 hover:bg-gray-700 text-white text-sm font-bold py-2 px-3 rounded transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-300 flex gap-2 items-center"
         onClick={handleDownload}
       >
-        Download PDF
+        <FaFileDownload className="block sm:hidden md:hidden"/>
+        <span className="hidden sm:block md:block">Download PDF</span>
       </button>
 
       {/* Modal to view PDF */}

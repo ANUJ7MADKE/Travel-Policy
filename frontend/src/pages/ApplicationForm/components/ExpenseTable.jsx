@@ -67,7 +67,7 @@ const ExpenseTable = ({
             <button
               type='button'
               onClick={() => deleteExpense(row.original)}
-              className="bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-colors focus:outline-none"
+              className="bg-red-600 text-white py-2 px-3 rounded-lg hover:bg-red-700 transition-colors focus:outline-none"
             >
               <MdDeleteOutline />
             </button>
@@ -111,7 +111,7 @@ const ExpenseTable = ({
                       <th
                         key={column.id} // Explicitly add key for th
                         {...restColumnProps}
-                        className="px-4 py-2 text-center text-sm font-bold text-gray-600 border-b border-gray-300"
+                        className="px-3 py-2 text-center text-sm font-bold text-gray-600 border-b border-gray-300"
                       >
                         {column.render("Header")}
                       </th>
@@ -135,7 +135,7 @@ const ExpenseTable = ({
                       <td
                         key={cell.column.id} // Explicitly add key for td
                         {...restCellProps}
-                        className="px-4 py-2 border-t border-b border-gray-300"
+                        className="px-3 py-2 border-t border-b border-gray-300"
                       >
                         {cell.render("Cell")}
                       </td>
