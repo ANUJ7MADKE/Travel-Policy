@@ -139,7 +139,7 @@ function Form({ prefilledData, applicantDesignation }) {
       }) => (
         <form
           onSubmit={handleSubmit}
-          className="p-7 overflow-y-auto bg-transparent"
+          className="p-2 overflow-y-auto bg-transparent"
         >
           <Input
             values={values}

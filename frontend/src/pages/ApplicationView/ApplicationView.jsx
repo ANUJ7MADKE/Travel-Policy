@@ -100,7 +100,7 @@ function ApplicationView() {
   if (!applicationDisplay) return null;
 
   return (
-    <div className="min-w-min bg-white shadow rounded-lg p-4 m-6">
+    <div className="min-w-min bg-white shadow rounded-lg p-2 sm:p-4 md:p-6 m-4">
       <h1 className="text-3xl font-extrabold text-gray-800 mb-6">{title}</h1>
 
       <ValidationStatus
@@ -126,7 +126,7 @@ function ApplicationView() {
         />
       )}
 
-      <div className="flex justify-between items-center mt-6 gap-2">
+      <div className="flex justify-between items-center mt-6 gap-2 mx-2">
         {role === "Validator" && currentStatus === "pending" && (
           <div className="flex space-x-2">
             <button

@@ -6,6 +6,15 @@ import Sidebar from "./Sidebar";
 const Root = () => {
   const { user, role } = useLoaderData().data;
   const [sidebarIsVisible, setSidebarIsVisible] = useState(true)
+  const urlPath = window.location.pathname;
+
+  // useEffect(() => {
+  //   if (urlPath.split("/").at(-1).includes("dashboard")) {
+  //     setSidebarIsVisible(false);
+  //   } else {
+  //     setSidebarIsVisible(true);
+  //   }
+  // }, [urlPath]);
 
   const handleResize = () => {
     if (window.innerWidth < 768) {
@@ -29,11 +38,11 @@ const Root = () => {
   }, []);
 
   return (
-    <div className="h-full overflow-y-auto">
+    <div className="h-full">
       <Navbar userData={user} role={role} setSidebarIsVisible={setSidebarIsVisible} sidebarIsVisible={sidebarIsVisible} />
       <div className= "flex h-full bg-gray-100 overflow-auto">
-        {sidebarIsVisible && <Sidebar role={role} />}
-        <div className="w-full h-min-full overflow-y-scroll">
+        {sidebarIsVisible && !(urlPath.split("/").at(-1).includes("dashboard")) && <Sidebar role={role} />}
+        <div className="w-full min-h-full h-screen overflow-y-scroll">
           <Outlet />
         </div>
       </div>
