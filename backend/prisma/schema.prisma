@@ -9,7 +9,6 @@ generator client {
   binaryTargets = ["native", "darwin-arm64", "linux-musl-arm64-openssl-3.0.x"]
 }
 
-
 datasource db {
   provider     = "postgresql"
   url          = env("DATABASE_URL")
@@ -27,21 +26,17 @@ enum Department {
   RAI
 }
 
-enum ApplicantDesignation {
-  Student
-  Faculty
+enum Designation {
+  FACULTY
+  HOD
+  HOI
+  SECRETARY
+  VC
+  FINANCE
 }
 
-model Applicant {
-  profileId String @id @default(uuid())
-  userName  String
-  email     String @unique @db.Text
-  password  String
-
-  department  Department
-  designation ApplicantDesignation
-
-  applications Application[]
+enum Institution {
+  KJSCE
 }
 
 enum ApplicationStatus {
@@ -50,59 +45,74 @@ enum ApplicationStatus {
   PENDING
 }
 
+// enum ExpenseType {
+//   TRAVEL
+//   LODGING
+//   BOARDING
+//   LOCAL_CONVEYANCE
+//   MISCELLANEOUS
+// }
+
+model User {
+  userId      String      @id @default(uuid())
+  userName    String
+  email       String      @unique @db.Text
+  password    String
+
+  institution Institution
+  department  Department
+  designation Designation
+
+  // Applications initiated by the user
+  applicationsByUser Application[] @relation("ApplicantApplications")
+
+  // Applications assigned to the user for validation
+  applicationsToValidate Application[] @relation("ValidatorsApplications")
+
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+}
+
 model Application {
-  applicationId String @id @default(uuid())
-
-  applicantId String
-  applicant   Applicant @relation(fields: [applicantId], references: [profileId], onDelete: Cascade)
-
+  applicationId String          @id @default(uuid())
   applicantName String
 
-  formData Json
+  // Applicant (User) relationship
+  applicant   User?            @relation("ApplicantApplications", fields: [applicantId], references: [userId])
+  applicantId String?
 
-  fdccoordinatorValidation ApplicationStatus?
-  supervisorValidation     ApplicationStatus?
-  hodValidation            ApplicationStatus?
-  hoiValidation            ApplicationStatus?
+  // Form data in JSON format
+  formData    Json
 
-  rejectionFeedback     String?
+  // Validation steps
+  hodValidation ApplicationStatus?
+  hoiValidation ApplicationStatus?
+  adminApproval ApplicationStatus?
+  financeApproval ApplicationStatus?
 
-  proofOfTravel         Bytes?
-  proofOfAccommodation  Bytes?
-  proofOfAttendance     Bytes?
-  expenseProof0 Bytes?
-  expenseProof1 Bytes?
-  expenseProof2 Bytes?
-  expenseProof3 Bytes?
-  expenseProof4 Bytes?
-  expenseProof5 Bytes?
-  expenseProof6 Bytes?
-  expenseProof7 Bytes?
-  expenseProof8 Bytes?
-  expenseProof9 Bytes?
+  // Feedback for rejection
+  rejectionFeedback String?
 
-  createdAt DateTime @default(now())
+  // Proofs and supporting documents
+  proofOfTravel        Bytes?
+  proofOfAccommodation Bytes?
+  proofOfAttendance    Bytes?
+  expenseProof0        Bytes?
+  expenseProof1        Bytes?
+  expenseProof2        Bytes?
+  expenseProof3        Bytes?
+  expenseProof4        Bytes?
+  expenseProof5        Bytes?
+  expenseProof6        Bytes?
+  expenseProof7        Bytes?
+  expenseProof8        Bytes?
+  expenseProof9        Bytes?
 
-  validators Validator[]
+  // Validators assigned to the application
+  validators User[]             @relation("ValidatorsApplications")
+
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
 
   @@index([applicantId])
-}
-
-enum ValidatorDesignation {
-  FDCcoordinator
-  Supervisor
-  HOD
-  HOI
-}
-
-model Validator {
-  profileId String @id @default(uuid())
-  userName  String
-  email     String @unique @db.Text
-  password  String
-
-  department  Department
-  designation ValidatorDesignation
-
-  applications Application[]
 }
