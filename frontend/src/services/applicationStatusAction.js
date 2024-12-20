@@ -2,14 +2,13 @@ import { json } from "react-router-dom";
 
 export async function applicationStatusAction({ request, params }) {
   const formData = await request.formData();
-  const applicationId = formData.get("applicationId");
-  const action = formData.get("action");
+  const action = formData.get("action")
 
   try {
     const res = await fetch(
       `${
         import.meta.env.VITE_APP_API_URL
-      }/validator/${applicationId}/${action}`,
+      }/validator/statusAction`,
       {
         method: "PUT",
         credentials: "include",

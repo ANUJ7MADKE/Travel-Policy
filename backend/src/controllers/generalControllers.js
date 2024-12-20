@@ -1,39 +1,50 @@
 import { application } from "express";
 import prisma from "../config/prismaConfig.js";
-import { applicantDesignations, validatorDesignations } from "../config/designations.js";
+import {
+  applicantDesignations,
+  validatorDesignations,
+} from "../config/designations.js";
 
 const dataRoot = async (req, res) => {
   try {
     const user = req.user; // Contains all user info (id, designation, department, etc.)
     const userId = user.id;
     const userDesignation = user.designation;
+    const role = user.role;
 
-    if (applicantDesignations.includes(userDesignation)) {
-
+    if (
+      applicantDesignations.includes(userDesignation) &&
+      role === "applicant"
+    ) {
       const applicant = await prisma.applicant.findUnique({
         where: { profileId: userId },
       });
 
-      delete applicant.password;
-
       if (!applicant) {
-        return res.status(404).json({ message: "Applicant not found", data: null });
+        return res
+          .status(404)
+          .json({ message: "Applicant not found", data: null });
       }
+
+      delete applicant.password;
 
       return res.status(200).json({
         message: "Applicant Authorized",
         user: applicant,
         role: "Applicant",
       });
-
-    } else if (validatorDesignations.includes(userDesignation)) {
-
+    } else if (
+      validatorDesignations.includes(userDesignation) &&
+      role === "validator"
+    ) {
       const validator = await prisma.validator.findUnique({
         where: { profileId: userId },
       });
 
       if (!validator) {
-        return res.status(404).json({ message: "Validator not found", data: null });
+        return res
+          .status(404)
+          .json({ message: "Validator not found", data: null });
       }
 
       delete validator.password;
@@ -43,15 +54,17 @@ const dataRoot = async (req, res) => {
         user: validator,
         role: "Validator",
       });
-
     } else {
-      return res.status(403).json({ message: "Unauthorized access", data: null });
+      return res
+        .status(403)
+        .json({ message: "Unauthorized access", data: null });
     }
-
   } catch (error) {
     // Handle any errors that occur during the process
     console.error(error);
-    return res.status(500).json({ message: "Internal Server Error", data: null });
+    return res
+      .status(500)
+      .json({ message: "Internal Server Error", data: null });
   }
 };
 
@@ -73,7 +86,7 @@ const getApplicationsByStatus = async (req, res) => {
     let applications, totalApplications;
 
     // Filter conditions for Student and Faculty
-    if (applicantDesignations.includes(user.designation)) {
+    if (applicantDesignations.includes(user.designation) && user.role === "applicant") {
       const baseWhere = {
         applicantId: userId,
         ...(status === "PENDING" && {
@@ -89,7 +102,12 @@ const getApplicationsByStatus = async (req, res) => {
             { OR: [{ hodValidation: "ACCEPTED" }, { hodValidation: null }] },
             { OR: [{ hoiValidation: "ACCEPTED" }, { hoiValidation: null }] },
             { OR: [{ vcValidation: "ACCEPTED" }, { vcValidation: null }] },
-            { OR: [{ accountsValidation: "ACCEPTED" }, { accountsValidation: null }] },
+            {
+              OR: [
+                { accountsValidation: "ACCEPTED" },
+                { accountsValidation: null },
+              ],
+            },
           ],
         }),
         ...(status === "REJECTED" && {
@@ -126,9 +144,7 @@ const getApplicationsByStatus = async (req, res) => {
       });
 
       // Filter conditions for Validators (Supervisor, HOD, HOI, FDCcoordinator)
-    } else if (
-      validatorDesignations.includes(user.designation)
-    ) {
+    } else if (validatorDesignations.includes(user.designation) && user.role === "validator") {
       const validationField = `${user.designation.toLowerCase()}Validation`;
 
       const baseWhere = {
@@ -225,7 +241,7 @@ const getApplicationData = async (req, res) => {
     let currentStatus;
 
     // Check if the user is an applicant or a validator
-    if (applicantDesignations.includes(user.designation)) {
+    if (applicantDesignations.includes(user.designation) && user.role === "applicant") {
       if (
         applicationFull.hodValidation === "PENDING" ||
         applicationFull.hoiValidation === "PENDING" ||
@@ -243,7 +259,7 @@ const getApplicationData = async (req, res) => {
       } else {
         currentStatus = "ACCEPTED";
       }
-    } else if (validatorDesignations.includes(user.designation)) {
+    } else if (validatorDesignations.includes(user.designation) && user.role === "validator") {
       const validationField = `${user.designation.toLowerCase()}Validation`;
 
       if (applicationFull[validationField] === "ACCEPTED") {
@@ -324,7 +340,7 @@ const getFile = async (req, res) => {
 
     let myApplication;
 
-    if (applicantDesignations.includes(user.designation)) {
+    if (applicantDesignations.includes(user.designation) && user.role === "applicant") {
       myApplication = await prisma.applicant.findUnique({
         where: {
           profileId: userId,
@@ -338,9 +354,7 @@ const getFile = async (req, res) => {
           },
         },
       });
-    } else if (
-      validatorDesignations.includes(user.designation)
-    ) {
+    } else if (validatorDesignations.includes(user.designation) && user.role === "validator") {
       myApplication = await prisma.validator.findUnique({
         where: {
           profileId: userId,

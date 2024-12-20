@@ -32,7 +32,8 @@ const applicantLogin = async (req, res) => {
       id: validProfile.profileId,
       designation: validProfile.designation,
       department: validProfile.department,
-      institute: validProfile.institute
+      institute: validProfile.institute,
+      role: "applicant",
     };
 
     // Generate the token
@@ -85,7 +86,8 @@ const validatorLogin = async (req, res) => {
       id: validProfile.profileId,
       designation: validProfile.designation,
       department: validProfile.department,
-      institute: validProfile.institute
+      institute: validProfile.institute,
+      role: "validator",
     };
 
     // Generate the token

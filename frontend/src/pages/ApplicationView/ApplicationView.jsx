@@ -1,12 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useParams, useRouteLoaderData, useSubmit } from "react-router-dom";
+import {
+  useNavigate,
+  useParams,
+  useRouteLoaderData,
+  useSubmit,
+} from "react-router-dom";
 import ValidationStatus from "./ValidationStatus";
 import Form from "../ApplicationForm/Form";
 import RejectionFeedback from "./RejectionFeedback";
 import { TbLoader3 } from "react-icons/tb";
+import AcceptChoice from "./AcceptChoice";
 
 function ApplicationView() {
-  const { role } =
+  const { role, user } =
     useRouteLoaderData("Applicant-Root")?.data ||
     useRouteLoaderData("Validator-Root")?.data;
   const submit = useSubmit();
@@ -15,6 +21,7 @@ function ApplicationView() {
   const [loading, setLoading] = useState(false);
   const [applicationDisplay, setApplicationDisplay] = useState(null);
   const [rejectionFeedbackPopUp, setRejectionFeedbackPopUp] = useState(false);
+  const [acceptChoicePopUp, setAcceptChoicePopUp] = useState(false);
 
   const applicationId = useParams().applicationId;
   const statusParam = useParams().status;
@@ -23,7 +30,9 @@ function ApplicationView() {
     try {
       setLoading(true);
       const response = await fetch(
-        `${import.meta.env.VITE_APP_API_URL}/general/getApplicationData/${applicationId}`,
+        `${
+          import.meta.env.VITE_APP_API_URL
+        }/general/getApplicationData/${applicationId}`,
         {
           method: "GET",
           credentials: "include",
@@ -31,7 +40,9 @@ function ApplicationView() {
       );
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch application data: ${response.status} ${response.statusText}`);
+        throw new Error(
+          `Failed to fetch application data: ${response.status} ${response.statusText}`
+        );
       }
       const fullApplication = await response.json();
       setApplicationDisplay(fullApplication?.data);
@@ -42,13 +53,19 @@ function ApplicationView() {
     }
   };
 
-  const handleSubmit = (applicationId, action, rejectionFeedback = "") => {
+  const handleSubmit = (
+    applicationId,
+    action,
+    rejectionFeedback = "",
+    toVC = false
+  ) => {
     try {
-      setLoading(true); 
+      setLoading(true);
       const formData = new FormData();
       formData.append("applicationId", applicationId);
       formData.append("action", action);
       formData.append("rejectionFeedback", rejectionFeedback);
+      formData.append("toVC", toVC);
 
       formData.forEach((value, key) => {
         console.log(key, value);
@@ -57,8 +74,7 @@ function ApplicationView() {
       submit(formData, {
         method: "PUT",
         encType: "multipart/form-data", // Specify the encoding type
-      })
-      
+      });
     } catch (error) {
       console.error("Error during submit:", error);
     } finally {
@@ -76,7 +92,8 @@ function ApplicationView() {
   useEffect(() => {
     if (
       (statusParam !== currentStatus && currentStatus) ||
-      (applicationId !== applicationDisplay?.applicationId && applicationDisplay?.applicationId)
+      (applicationId !== applicationDisplay?.applicationId &&
+        applicationDisplay?.applicationId)
     ) {
       const location = window.location.pathname;
       const newPath = location.split("/").slice(0, -2).join("/");
@@ -87,13 +104,13 @@ function ApplicationView() {
   }, [statusParam, currentStatus, applicationDisplay]);
 
   if (loading) {
-      return (
-        <div className="flex flex-col justify-center items-center h-full animate-pulse pb-[10%]">
-          <TbLoader3 className="animate-spin text-xl size-24 text-red-700" />
-          <p className="mt-2">Loading...</p>
-        </div>
-      );
-    }
+    return (
+      <div className="flex flex-col justify-center items-center h-full animate-pulse pb-[10%]">
+        <TbLoader3 className="animate-spin text-xl size-24 text-red-700" />
+        <p className="mt-2">Loading...</p>
+      </div>
+    );
+  }
 
   let title = applicationDisplay?.formData?.eventName;
 
@@ -121,25 +138,40 @@ function ApplicationView() {
         <RejectionFeedback
           onClose={() => setRejectionFeedbackPopUp(false)}
           onSubmit={(rejectionFeedback) =>
-            handleSubmit(applicationDisplay?.applicationId, "rejected", rejectionFeedback)
+            handleSubmit(
+              applicationDisplay?.applicationId,
+              "rejected",
+              rejectionFeedback,
+              false
+            )
           }
         />
       )}
 
-      <div className="flex justify-between items-center mt-6 gap-2 mx-2">
+      {acceptChoicePopUp && (
+        <AcceptChoice
+          onClose={() => setAcceptChoicePopUp(false)}
+          onSubmit={(toVC) =>
+            handleSubmit(applicationDisplay?.applicationId, "accepted", "", toVC)
+          }
+          designation={user.designation}
+        />
+      )}
+
+      <div className="flex justify-between items-center my-4 gap-2 mx-2">
         {role === "Validator" && currentStatus === "pending" && (
           <div className="flex space-x-2">
             <button
               type="button"
-              onClick={() => handleSubmit(applicationDisplay?.applicationId, "accepted")}
-              className="bg-green-500 text-white font-semibold text-sm sm:text-sm md:text-lg px-4 py-2 rounded-md hover:bg-green-600 focus:outline-double transition duration-200 hover:scale-110 hover:animate-spin"
+              onClick={() => setAcceptChoicePopUp(true)}
+              className="bg-green-700 text-white font-semibold text-sm sm:text-sm md:text-lg px-4 py-2 rounded-md hover:bg-green-800 focus:outline-double transition duration-200 hover:scale-110 hover:animate-spin"
             >
               Accept
             </button>
             <button
               type="button"
               onClick={() => setRejectionFeedbackPopUp(true)}
-              className="bg-red-500 text-white font-semibold text-sm sm:text-sm md:text-lg px-4 py-2 rounded-md hover:bg-red-600 focus:outline-double transition duration-200 hover:scale-110 hover:animate-spin"
+              className="bg-red-700 text-white font-semibold text-sm sm:text-sm md:text-lg px-4 py-2 rounded-md hover:bg-red-800 focus:outline-double transition duration-200 hover:scale-110 hover:animate-spin"
             >
               Reject
             </button>
@@ -152,7 +184,7 @@ function ApplicationView() {
             const newPath = location.split("/").slice(0, -1).join("/");
             navigate(newPath);
           }}
-          className="bg-blue-500 text-white font-semibold text-sm sm:text-sm md:text-lg px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-double transition duration-200 hover:scale-110"
+          className="bg-blue-700 text-white font-semibold text-sm sm:text-sm md:text-lg px-4 py-2 rounded-md hover:bg-blue-800 focus:outline-double transition duration-200 hover:scale-110"
         >
           Close
         </button>

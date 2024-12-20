@@ -2,25 +2,25 @@ import prisma from "../config/prismaConfig.js";
 import sendMail from "../services/sendMail.js";
 
 const applicationAction = async (req, res) => {
-  let profileId = req.user.id;
+  const { id: profileId, designation, department, institute, role } = req.user;
 
   try {
-    const { applicationId, action, rejectionFeedback } = req.body; // actions = 'accepted' or 'rejected'
-
+    const { applicationId, action, rejectionFeedback, toVC } = req.body; // actions = 'accepted' or 'rejected'
 
     const validator = await prisma.validator.findFirst({
       where: { profileId },
-      include: { applications: true, },
+      include: {
+        applications: {
+          where: { applicationId },
+        },
+      },
     });
-
 
     if (!validator) {
       return res.status(404).send("Validator doesn't exist");
     }
 
-    const application = validator.applications.find(
-      (app) => app.applicationId === applicationId
-    );
+    const application = validator.applications[0];
 
     if (!application) {
       return res.status(404).send("Application not available");
@@ -28,10 +28,11 @@ const applicationAction = async (req, res) => {
 
     const applicant = await prisma.applicant.findFirst({
       where: { profileId: application.applicantId },
-      select: { designation: true }
-    })
+      select: { designation: true, institute: true },
+    });
 
-    const applicantDesignation = applicant.designation
+    const applicantDesignation = applicant.designation;
+    const applicantInstitute = applicant.institute;
 
     const validationStatus = action.toUpperCase();
 
@@ -40,47 +41,11 @@ const applicationAction = async (req, res) => {
     }
 
     const validationData = {};
+    let hoi,
+      vc,
+      accounts = null;
 
     switch (validator.designation) {
-      case "Supervisor":
-        if (application.supervisorValidation != "PENDING") {
-          return res
-            .status(400)
-            .send("Already performed an action, can't change status again");
-        }
-        validationData.supervisorValidation = validationStatus;
-
-        if (validationStatus === "ACCEPTED" && applicantDesignation === "Student") {
-          validationData.hodValidation = "PENDING";
-          const hod = await prisma.validator.findFirst({
-            where: { department: application.formData.applicantDepartment, designation: "HOD" }
-          })
-          sendMail(hod.email, `http://localhost:5173/validator/dashboard/pending/${applicationId}`, false, validationStatus);
-        }
-
-        if (validationStatus === "ACCEPTED" && applicantDesignation === "Faculty") {
-          validationData.fdccoordinatorValidation = "PENDING";
-          const fdccoordinator = await prisma.validator.findFirst({
-            where: { department: validator.department, designation: "FDCcoordinator" }
-          })
-          sendMail(fdccoordinator.email, `http://localhost:5173/validator/dashboard/pending/${applicationId}`, false, validationStatus);
-        }
-        break;
-      case "FDCcoordinator":
-        if (application.fdccoordinatorValidation != "PENDING") {
-          return res
-            .status(400)
-            .send("Already performed an action, can't change status again");
-        }
-        validationData.fdccoordinatorValidation = validationStatus;
-        if (validationStatus === "ACCEPTED") {
-          validationData.hodValidation = "PENDING"
-          const hod = await prisma.validator.findFirst({
-            where: { department: application.formData.applicantDepartment, designation: "HOD" }
-          })
-          sendMail(hod.email, `http://localhost:5173/validator/dashboard/pending/${applicationId}`, false, validationStatus);
-        }
-        break;
       case "HOD":
         if (application.hodValidation != "PENDING") {
           return res
@@ -90,10 +55,15 @@ const applicationAction = async (req, res) => {
         validationData.hodValidation = validationStatus;
         if (validationStatus === "ACCEPTED") {
           validationData.hoiValidation = "PENDING";
-          const hoi = await prisma.validator.findFirst({
-            where: { designation: "HOI" }
-          })
-          sendMail(hoi.email, `http://localhost:5173/validator/dashboard/pending/${applicationId}`, false, validationStatus);
+          hoi = await prisma.validator.findFirst({
+            where: { designation: "HOI", institute: applicantInstitute },
+          });
+          sendMail(
+            hoi.email,
+            `http://localhost:5173/validator/dashboard/pending/${applicationId}`,
+            false,
+            validationStatus
+          );
         }
         break;
       case "HOI":
@@ -103,18 +73,71 @@ const applicationAction = async (req, res) => {
             .send("Already performed an action, can't change status again");
         }
         validationData.hoiValidation = validationStatus;
-        sendMail(application.formData.applicantEmail, `http://localhost:5173/applicant/dashboard/${validationStatus}/${applicationId}`, false, validationStatus);
 
         if (validationStatus === "ACCEPTED") {
-
-          //forward to accounts department for transaction processing
-
+          if (JSON.parse(toVC)) {
+            validationData.vcValidation = "PENDING"
+            vc = await prisma.validator.findFirst({
+              where: { designation: "VC" },
+            });
+          } else {
+            validationData.accountsValidation = "PENDING"
+            accounts = await prisma.validator.findFirst({
+              where: { designation: "ACCOUNTS", institute: applicantInstitute },
+            });
+          }
+          sendMail(
+            application.formData.applicantEmail,
+            `http://localhost:5173/applicant/dashboard/${validationStatus}/${applicationId}`,
+            false,
+            validationStatus
+          );
         }
-
         break;
+      case "VC":
+        if (application.vcValidation != "PENDING") {
+          return res
+            .status(400)
+            .send("Already performed an action, can't change status again");
+        }
+        validationData.vcValidation = validationStatus;
+        if (validationStatus === "ACCEPTED") {
+          validationData.accountsValidation = "PENDING"
+          accounts = await prisma.validator.findFirst({
+            where: { designation: "ACCOUNTS", institute: applicantInstitute },
+          });
+        }
+        sendMail(
+          application.formData.applicantEmail,
+          `http://localhost:5173/applicant/dashboard/${validationStatus}/${applicationId}`,
+          false,
+          validationStatus
+        );
+        break;
+      case "ACCOUNTS":
+        if (application.accountsValidation != "PENDING") {
+          return res
+            .status(400)
+            .send("Already performed an action, can't change status again");
+        }
+        validationData.accountsValidation = validationStatus;
+        sendMail(
+          application.formData.applicantEmail,
+          `http://localhost:5173/applicant/dashboard/${validationStatus}/${applicationId}`,
+          false,
+          validationStatus
+        );
+        break;
+
       default:
         return res.status(400).send("Invalid validator designation");
     }
+
+    const validators = [
+      hoi && { profileId: hoi?.profileId },
+      vc && { profileId: vc?.profileId },
+      accounts && { profileId: accounts?.profileId },
+    ].filter(Boolean);
 
     if (rejectionFeedback) {
       validationData.rejectionFeedback = rejectionFeedback;
@@ -124,7 +147,13 @@ const applicationAction = async (req, res) => {
       where: {
         applicationId: applicationId,
       },
-      data: validationData,
+      data: {
+        ...validationData,
+        validators: {
+          connect: validators,
+        },
+      },
+      select: {applicationId: true}
     });
 
     res.status(200).send(response);
@@ -142,7 +171,7 @@ const getApplicantNames = async (req, res) => {
       select: {
         applicantName: true,
       },
-      distinct: ['applicantName'],
+      distinct: ["applicantName"],
     });
 
     const ApplicantNames = applicants.map((application) => ({
@@ -156,7 +185,5 @@ const getApplicantNames = async (req, res) => {
     res.status(500).send(error.message);
   }
 };
-
-
 
 export { applicationAction, getApplicantNames };

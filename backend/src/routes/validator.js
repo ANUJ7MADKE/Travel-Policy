@@ -5,7 +5,7 @@ import multer from 'multer';
 const router = express.Router();
 const upload = multer(); 
 
-router.put("/:applicationId/:action", upload.none(), applicationAction)
+router.put("/statusAction", upload.none(), applicationAction)
 
 router.get("/getApplicantNames", getApplicantNames)
 

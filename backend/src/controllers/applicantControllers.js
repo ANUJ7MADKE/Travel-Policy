@@ -22,7 +22,7 @@ const createApplication = async (req, res) => {
 
     const applicantName = applicant.userName;
 
-    let hod, hoi, vc, accounts = null
+    let hod, hoi, vc = null
 
     if (["FACULTY"].includes(applicant.designation)) {
       hod = await prisma.validator.findFirst({
@@ -33,7 +33,7 @@ const createApplication = async (req, res) => {
       }
     }
 
-    if (["FACULTY", "HOD"].includes(applicant.designation)) {
+    if (["HOD"].includes(applicant.designation)) {
       hoi = await prisma.validator.findFirst({
         where: { designation: "HOI", institute },
       });
@@ -51,16 +51,8 @@ const createApplication = async (req, res) => {
       }
     }
 
-    accounts = await prisma.validator.findFirst({
-      where: { designation: "ACCOUNTS", institute },
-    });
-    if (!accounts) {
-      return res.status(404).send({ message: "ACCOUNTS not found" });
-    }
-
     // Compile the validators list with available supervisors, FDC coordinator, HOD, and HOI
     const validators = [
-      accounts && { profileId: accounts.profileId },
       hod  && { profileId: hod?.profileId },
       hoi && { profileId: hoi?.profileId },
       vc && { profileId: vc?.profileId },
