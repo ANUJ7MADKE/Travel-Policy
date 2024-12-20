@@ -1,92 +1,82 @@
-import prisma from '../config/prismaConfig.js';
-import sendMail from '../services/sendMail.js';
+import prisma from "../config/prismaConfig.js";
+import sendMail from "../services/sendMail.js";
 
 const createApplication = async (req, res) => {
-  const applicantId = req.user.id;
-  const department = req.user.department;
-  const applicantDesignation = req.user.designation;
+  const {
+    id: applicantId,
+    designation: applicantDesignation,
+    department,
+    institute,
+  } = req.user;
 
   const formData = req.body;
 
   try {
     const applicant = await prisma.applicant.findUnique({
-      where: { profileId: applicantId }
+      where: { profileId: applicantId },
     });
 
     if (!applicant) {
-      return res.status(404).send("Applicant invalid");
+      return res.status(404).send({ message: "Not an Applicant" });
     }
 
     const applicantName = applicant.userName;
 
-    let supervisor = null;
-    let additionalSupervisor = null;
+    let hod, hoi, vc, accounts = null
 
-    // Require a primary supervisor email for Students
-    if (!formData.primarySupervisorEmail && applicantDesignation === "Student") {
-      return res.status(404).send("Supervisor Email Required");
-    }
-
-    // Supervisor logic: Only apply if supervisor email fields are provided
-    if (formData.primarySupervisorEmail) {
-      supervisor = await prisma.validator.findUnique({
-        where: { email: formData.primarySupervisorEmail }
+    if (["FACULTY"].includes(applicant.designation)) {
+      hod = await prisma.validator.findFirst({
+        where: { department, designation: "HOD", institute },
       });
-
-      if (!supervisor || supervisor.designation !== "Supervisor" || supervisor.department !== department) {
-        return res.status(404).send("Invalid supervisor information");
+      if (!hod) {
+        return res.status(404).send({ message: "HOD not found" });
       }
     }
 
-    if (formData.anotherSupervisorEmail) {
-      additionalSupervisor = await prisma.validator.findUnique({
-        where: { email: formData.anotherSupervisorEmail }
+    if (["FACULTY", "HOD"].includes(applicant.designation)) {
+      hoi = await prisma.validator.findFirst({
+        where: { designation: "HOI", institute },
       });
-
-      if (additionalSupervisor?.profileId === supervisor?.profileId) {
-        return res.status(404).send("Additional Supervisor's email can't be the same as Supervisor's");
-      }
-
-      if (additionalSupervisor?.designation !== "Supervisor") {
-        return res.status(404).send("Invalid additional supervisor email");
+      if (!hoi) {
+        return res.status(404).send({ message: "HOI not found" });
       }
     }
 
-    let fdccoordinator = null;
-
-    // Retrieve FDC coordinator only for Faculty applicants
-    if (applicantDesignation === "Faculty") {
-      fdccoordinator = await prisma.validator.findFirst({
-        where: { department, designation: "FDCcoordinator" }
+    if (["HOI"].includes(applicant.designation)) {
+      vc = await prisma.validator.findFirst({
+        where: { designation: "VC" },
       });
-      if (!fdccoordinator) return res.status(404).send("Invalid Email for FDC coordinator");
+      if (!vc) {
+        return res.status(404).send({ message: "VC not found" });
+      }
     }
 
-    // Retrieve HOD and HOI (required for all applicants)
-    const hod = await prisma.validator.findFirst({
-      where: { department, designation: 'HOD' }
+    accounts = await prisma.validator.findFirst({
+      where: { designation: "ACCOUNTS", institute },
     });
-    if (!hod) return res.status(404).send("HOD not found");
-
-    const hoi = await prisma.validator.findFirst({
-      where: { designation: 'HOI' }
-    });
-    if (!hoi) return res.status(404).send("HOI not found");
+    if (!accounts) {
+      return res.status(404).send({ message: "ACCOUNTS not found" });
+    }
 
     // Compile the validators list with available supervisors, FDC coordinator, HOD, and HOI
     const validators = [
-      ...(supervisor ? [{ profileId: supervisor.profileId }] : []),
-      ...(additionalSupervisor ? [{ profileId: additionalSupervisor.profileId }] : []),
-      ...(fdccoordinator ? [{ profileId: fdccoordinator.profileId }] : []),
-      { profileId: hod.profileId },
-      { profileId: hoi.profileId }
-    ];
+      accounts && { profileId: accounts.profileId },
+      hod  && { profileId: hod?.profileId },
+      hoi && { profileId: hoi?.profileId },
+      vc && { profileId: vc?.profileId },
+    ].filter(Boolean);
 
-    const { proofOfTravel, proofOfAccommodation, proofOfAttendance, ...otherFiles } = req.files;
+    const {
+      proofOfTravel,
+      proofOfAccommodation,
+      proofOfAttendance,
+      ...otherFiles
+    } = req.files;
 
     // Prepare file buffers for fixed fields
     const proofOfTravelBuffer = proofOfTravel?.[0]?.buffer || null;
-    const proofOfAccommodationBuffer = proofOfAccommodation?.[0]?.buffer || null;
+    const proofOfAccommodationBuffer =
+      proofOfAccommodation?.[0]?.buffer || null;
     const proofOfAttendanceBuffer = proofOfAttendance?.[0]?.buffer || null;
 
     // Prepare an object to hold the expense proof buffers dynamically
@@ -95,7 +85,8 @@ const createApplication = async (req, res) => {
     for (let i = 0; i < 10; i++) {
       const expenseProofField = `expenses[${i}].expenseProof`;
       if (otherFiles[expenseProofField]) {
-        expenseProofs[`expenseProof${i}`] = otherFiles[expenseProofField][0].buffer;
+        expenseProofs[`expenseProof${i}`] =
+          otherFiles[expenseProofField][0].buffer;
       }
     }
 
@@ -107,43 +98,79 @@ const createApplication = async (req, res) => {
       proofOfAccommodation: proofOfAccommodationBuffer,
       proofOfAttendance: proofOfAttendanceBuffer,
       ...expenseProofs, // Add dynamically generated expense proof fields
-      fdccoordinatorValidation: applicantDesignation === "Faculty"
-        ? (supervisor || additionalSupervisor) ? undefined : "PENDING"
+      hodValidation: ["FACULTY"].includes(applicant.designation)
+        ? "PENDING"
         : undefined,
-      supervisorValidation: formData.primarySupervisorEmail ? "PENDING" : undefined,
+      hoiValidation: ["HOD"].includes(applicant.designation)
+        ? "PENDING"
+        : undefined,
+      vcValidation: ["HOI"].includes(applicant.designation)
+        ? "PENDING"
+        : undefined,
     };
-
 
     // Create new application entry with linked applicant and validators
     const newApplication = await prisma.application.create({
       data: {
         ...applicationData,
         applicant: {
-          connect: { profileId: applicantId } // Link the applicant by profileId
+          connect: { profileId: applicantId },
         },
         validators: {
-          connect: validators
-        }
-      }
+          connect: validators,
+        },
+      },
     });
 
     if (applicantDesignation === "Faculty") {
       if (fdccoordinator) {
-        sendMail(fdccoordinator.email, `http://localhost:5173/validator/dashboard/pending/${newApplication.applicationId}`, true, null);
+        sendMail(
+          fdccoordinator.email,
+          `http://localhost:5173/validator/dashboard/pending/${newApplication.applicationId}`,
+          true,
+          null
+        );
       } else {
-        sendMail(formData.primarySupervisorEmail, `http://localhost:5173/validator/dashboard/pending/${newApplication.applicationId}`, true, null);
-        formData.anotherSupervisorEmail && sendMail(formData.anotherSupervisorEmail, `http://localhost:5173/validator/dashboard/pending/${newApplication.applicationId}`, true, null);
+        sendMail(
+          formData.primarySupervisorEmail,
+          `http://localhost:5173/validator/dashboard/pending/${newApplication.applicationId}`,
+          true,
+          null
+        );
+        formData.anotherSupervisorEmail &&
+          sendMail(
+            formData.anotherSupervisorEmail,
+            `http://localhost:5173/validator/dashboard/pending/${newApplication.applicationId}`,
+            true,
+            null
+          );
       }
     } else {
-      sendMail(formData.primarySupervisorEmail, `http://localhost:5173/validator/dashboard/pending/${newApplication.applicationId}`, true, null);
-      formData.anotherSupervisorEmail && sendMail(formData.anotherSupervisorEmail, `http://localhost:5173/validator/dashboard/pending/${newApplication.applicationId}`, true, null);
+      sendMail(
+        formData.primarySupervisorEmail,
+        `http://localhost:5173/validator/dashboard/pending/${newApplication.applicationId}`,
+        true,
+        null
+      );
+      formData.anotherSupervisorEmail &&
+        sendMail(
+          formData.anotherSupervisorEmail,
+          `http://localhost:5173/validator/dashboard/pending/${newApplication.applicationId}`,
+          true,
+          null
+        );
     }
 
-
-    res.status(201).send(newApplication);
+    res.status(201).send({
+      message: "Application created successfully",
+      data: newApplication,
+    });
   } catch (error) {
-    console.error('Error creating application:', error);
-    res.status(500).send(error.message);
+    console.error("Error creating application:", error);
+    res.status(500).send({
+      message: "Error creating application",
+      error: error.message,
+    });
   }
 };
 

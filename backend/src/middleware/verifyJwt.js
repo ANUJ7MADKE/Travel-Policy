@@ -17,7 +17,8 @@ const verifyApplicantToken = (req, res, next) => {
         req.user = {
             id : payload.id,
             designation : payload.designation,
-            department : payload.department
+            department : payload.department,
+            institute : payload.institute,
         };
     
         if (req.user && req.user.designation === 'Student' || 'Faculty') {
