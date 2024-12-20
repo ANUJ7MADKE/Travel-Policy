@@ -4,8 +4,10 @@ import './LoginAnimation.css';
 
 function ValidatorLogin({ changeRole }) {
   const navigate = useNavigate();
-  const [credentials, setCredentials] = useState({ username: '', password: 'password123' });
+  const [credentials, setCredentials] = useState({ email: 'hod.comps.kjsce@example.com', password: 'securePassword123' });
   const [animate, setAnimate] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false); // Loading state
 
   const handleChangeRole = () => {
     setAnimate(true);
@@ -14,8 +16,30 @@ function ValidatorLogin({ changeRole }) {
     }, 800); // Ensure this matches your CSS animation duration
   };
 
+  // Basic email validation
+  const validateEmail = (email) => {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Basic validation
+    if (!credentials.email || !credentials.password) {
+      setError('Please enter both email and password.');
+      return;
+    }
+
+    // Validate email format
+    if (!validateEmail(credentials.email)) {
+      setError('Please enter a valid email address.');
+      return;
+    }
+
+    setLoading(true); // Show loading state
+    setError(''); // Reset previous errors
+
     try {
       const response = await fetch(`${import.meta.env.VITE_APP_API_URL}/validator-login`, {
         method: 'POST',
@@ -26,15 +50,18 @@ function ValidatorLogin({ changeRole }) {
         body: JSON.stringify(credentials),
       });
 
+      const result = await response.json();
       if (response.ok) {
         // Handle successful login (navigate, store tokens, etc.)
         navigate("/validator/dashboard");
       } else {
-        // Handle login failure (display error message, etc.)
-        console.error('Login failed');
+        setError(result.message || 'Invalid login credentials.');
       }
     } catch (error) {
       console.error('Error during login:', error);
+      setError('An error occurred. Please try again later.');
+    } finally {
+      setLoading(false); // Hide loading state
     }
   };
 
@@ -63,13 +90,16 @@ function ValidatorLogin({ changeRole }) {
           Login With Google
         </button>
         <p className="text-center text-gray-500 text-xs md:text-sm mb-3">or use email</p>
+
+        {/* Display Error Message */}
+        {error && <div className="text-red-600 text-sm mb-3">{error}</div>}
+
         <form onSubmit={handleSubmit}>
           <input 
-            //type="email" 
             placeholder="Email" 
             className="w-full mb-3 p-2 border border-gray-300 rounded-lg text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-red-500"
-            value={credentials.username} 
-            onChange={(event) => setCredentials(prev => ({ ...prev, username: event.target.value }))} 
+            value={credentials.email} 
+            onChange={(event) => setCredentials(prev => ({ ...prev, email: event.target.value }))} 
           />
 
           <input 
@@ -87,11 +117,13 @@ function ValidatorLogin({ changeRole }) {
             </label>
             <a href="#" className="text-red-700 text-sm md:text-base hover:underline">Forgot Password?</a>
           </div>
+
           <button 
             type="submit" 
-            className="bg-red-700 text-white text-sm md:text-base w-full py-2 rounded-lg font-semibold shadow-md hover:bg-red-800 transition"
+            className={`bg-red-700 text-white text-sm md:text-base w-full py-2 rounded-lg font-semibold shadow-md hover:bg-red-800 transition ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+            disabled={loading}
           >
-            Log in
+            {loading ? 'Logging in...' : 'Log in'}
           </button>
         </form>
       </div>
