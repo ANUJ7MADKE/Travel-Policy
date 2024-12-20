@@ -34,7 +34,7 @@ function ApplicationView() {
         throw new Error(`Failed to fetch application data: ${response.status} ${response.statusText}`);
       }
       const fullApplication = await response.json();
-      setApplicationDisplay(fullApplication);
+      setApplicationDisplay(fullApplication?.data);
     } catch (error) {
       console.error("Error fetching application data:", error);
     } finally {
@@ -89,7 +89,7 @@ function ApplicationView() {
   if (loading) {
       return (
         <div className="flex flex-col justify-center items-center h-full animate-pulse pb-[10%]">
-          <TbLoader3 className="animate-spin text-xl size-24" />
+          <TbLoader3 className="animate-spin text-xl size-24 text-red-700" />
           <p className="mt-2">Loading...</p>
         </div>
       );
@@ -105,10 +105,10 @@ function ApplicationView() {
 
       <ValidationStatus
         validations={{
-          fdccoordinatorValidation: applicationDisplay?.fdccoordinatorValidation,
-          supervisorValidation: applicationDisplay?.supervisorValidation,
           hodValidation: applicationDisplay?.hodValidation,
           hoiValidation: applicationDisplay?.hoiValidation,
+          vcValidation: applicationDisplay?.vcValidation,
+          accountsValidation: applicationDisplay?.accountsValidation,
         }}
         rejectionFeedback={applicationDisplay?.rejectionFeedback}
       />

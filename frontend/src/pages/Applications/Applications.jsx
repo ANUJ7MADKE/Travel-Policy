@@ -82,7 +82,7 @@ const Applications = () => {
   if (loading) {
     return (
       <div className="flex flex-col justify-center items-center h-full animate-pulse pb-[10%]">
-        <TbLoader3 className="animate-spin text-xl size-24" />
+        <TbLoader3 className="animate-spin text-xl size-24 text-red-700" />
         <p className="mt-2">Loading...</p>
       </div>
     );

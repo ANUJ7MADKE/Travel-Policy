@@ -2,11 +2,13 @@ import React from "react";
 import { MdWarning } from "react-icons/md";
 
 function ValidationStatus({ validations, rejectionFeedback }) {
+
+  console.log(validations)
   const roles = [
-    { name: "Supervisor", status: validations.supervisorValidation },
-    { name: "FDC", status: validations.fdccoordinatorValidation },
     { name: "HOD", status: validations.hodValidation },
     { name: "HOI", status: validations.hoiValidation },
+    { name: "VC", status: validations.vcValidation },
+    { name: "ACCOUNTS", status: validations.accountsValidation },
   ];
 
   const getStatusColor = (status) => {

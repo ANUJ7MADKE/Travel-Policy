@@ -201,10 +201,10 @@ const getApplicationData = async (req, res) => {
         applicantId: true,
         applicantName: true,
         formData: true,
-        supervisorValidation: true,
-        fdccoordinatorValidation: true,
         hodValidation: true,
         hoiValidation: true,
+        vcValidation: true,
+        accountsValidation: true,
         rejectionFeedback: true,
         createdAt: true,
         applicant: {
@@ -216,25 +216,23 @@ const getApplicationData = async (req, res) => {
     });
 
     if (!applicationFull) {
-      return res.status(404).json({ error: "Application not found" });
+      return res.status(404).json({
+        message: "Application not found",
+        data: null,
+      });
     }
 
     let currentStatus;
 
-    if (["Student", "Faculty"].includes(user.designation)) {
+    // Check if the user is an applicant or a validator
+    if (applicantDesignations.includes(user.designation)) {
       if (
-        applicationFull.supervisorValidation === "ACCEPTED" &&
-        applicationFull.hodValidation === "ACCEPTED" &&
-        applicationFull.hoiValidation === "ACCEPTED"
+        applicationFull.hodValidation === "PENDING" ||
+        applicationFull.hoiValidation === "PENDING" ||
+        applicationFull.vcValidation === "PENDING" ||
+        applicationFull.accountsValidation === "PENDING"
       ) {
-        if (user.designation === "Student") {
-          currentStatus = "ACCEPTED";
-        } else if (
-          user.designation === "Faculty" &&
-          applicationFull.fdccoordinatorValidation === "ACCEPTED"
-        ) {
-          currentStatus = "ACCEPTED";
-        }
+        currentStatus = "PENDING";
       } else if (
         applicationFull.supervisorValidation === "REJECTED" ||
         applicationFull.hodValidation === "REJECTED" ||
@@ -243,11 +241,9 @@ const getApplicationData = async (req, res) => {
       ) {
         currentStatus = "REJECTED";
       } else {
-        currentStatus = "PENDING";
+        currentStatus = "ACCEPTED";
       }
-    } else if (
-      ["Supervisor", "HOD", "HOI", "FDCcoordinator"].includes(user.designation)
-    ) {
+    } else if (validatorDesignations.includes(user.designation)) {
       const validationField = `${user.designation.toLowerCase()}Validation`;
 
       if (applicationFull[validationField] === "ACCEPTED") {
@@ -258,14 +254,22 @@ const getApplicationData = async (req, res) => {
         currentStatus = "PENDING";
       }
     } else {
-      return res.status(403).send("Unauthorized");
+      return res.status(403).json({
+        message: "Unauthorized",
+        data: null,
+      });
     }
 
-    return res.status(200).json({ ...applicationFull, currentStatus });
+    // Respond with the full application data and current status
+    return res.status(200).json({
+      message: "Application data retrieved successfully",
+      data: { ...applicationFull, currentStatus },
+    });
   } catch (error) {
     console.error("Error retrieving application data:", error);
     return res.status(500).json({
-      error: "An error occurred while retrieving the application data",
+      message: "An error occurred while retrieving the application data",
+      data: null,
     });
   }
 };
@@ -320,7 +324,7 @@ const getFile = async (req, res) => {
 
     let myApplication;
 
-    if (["Student", "Faculty"].includes(user.designation)) {
+    if (applicantDesignations.includes(user.designation)) {
       myApplication = await prisma.applicant.findUnique({
         where: {
           profileId: userId,
@@ -335,7 +339,7 @@ const getFile = async (req, res) => {
         },
       });
     } else if (
-      ["Supervisor", "HOD", "HOI", "FDCcoordinator"].includes(user.designation)
+      validatorDesignations.includes(user.designation)
     ) {
       myApplication = await prisma.validator.findUnique({
         where: {
