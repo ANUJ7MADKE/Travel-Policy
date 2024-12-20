@@ -1,73 +1,57 @@
 import { application } from "express";
 import prisma from "../config/prismaConfig.js";
+import { applicantDesignations, validatorDesignations } from "../config/designations.js";
 
 const dataRoot = async (req, res) => {
   try {
     const user = req.user; // Contains all user info (id, designation, department, etc.)
     const userId = user.id;
+    const userDesignation = user.designation;
 
-    // Determine if the user is an Applicant or Validator based on designation
-    if (["Student", "Faculty"].includes(user.designation)) {
-      // Applicant Logic
+    if (applicantDesignations.includes(userDesignation)) {
+
       const applicant = await prisma.applicant.findUnique({
         where: { profileId: userId },
-        select: {
-          profileId: true,
-          userName: true,
-          email: true,
-          department: true,
-          designation: true,
-        },
       });
 
-      // Check if the applicant exists
+      delete applicant.password;
+
       if (!applicant) {
-        return res.status(404).send("Applicant doesn't exist");
+        return res.status(404).json({ message: "Applicant not found", data: null });
       }
 
-      delete applicant._count;
-
-      // Return the response for applicant
       return res.status(200).json({
         message: "Applicant Authorized",
         user: applicant,
         role: "Applicant",
       });
-    } else if (
-      ["Supervisor", "HOD", "HOI", "FDCcoordinator"].includes(user.designation)
-    ) {
-      // Validator Logic
+
+    } else if (validatorDesignations.includes(userDesignation)) {
+
       const validator = await prisma.validator.findUnique({
         where: { profileId: userId },
-        select: {
-          profileId: true,
-          userName: true,
-          email: true,
-          department: true,
-          designation: true,
-        },
       });
 
-      // Check if the validator exists
       if (!validator) {
-        return res.status(404).send("Validator doesn't exist");
+        return res.status(404).json({ message: "Validator not found", data: null });
       }
 
-      delete validator._count;
+      delete validator.password;
 
-      // Return the response for validator
       return res.status(200).json({
         message: "Validator Authorized",
         user: validator,
         role: "Validator",
       });
+
     } else {
-      return res.status(403).send("Unauthorized");
+      return res.status(403).json({ message: "Unauthorized access", data: null });
     }
+
   } catch (error) {
     // Handle any errors that occur during the process
     console.error(error);
-    res.status(500).send(error.message);
+    return res.status(500).json({ message: "Internal Server Error", data: null });
   }
 };
 
@@ -89,42 +73,31 @@ const getApplicationsByStatus = async (req, res) => {
     let applications, totalApplications;
 
     // Filter conditions for Student and Faculty
-    if (["Student", "Faculty"].includes(user.designation)) {
+    if (applicantDesignations.includes(user.designation)) {
       const baseWhere = {
         applicantId: userId,
         ...(status === "PENDING" && {
           OR: [
-            { fdccoordinatorValidation: "PENDING" },
-            { supervisorValidation: "PENDING" },
             { hodValidation: "PENDING" },
             { hoiValidation: "PENDING" },
+            { vcValidation: "PENDING" },
+            { accountsValidation: "PENDING" },
           ],
         }),
         ...(status === "ACCEPTED" && {
           AND: [
-            {
-              fdccoordinatorValidation:
-                user.designation === "Faculty" ? "ACCEPTED" : null,
-            },
-            {
-              OR: [
-                { supervisorValidation: "ACCEPTED" },
-                {
-                  supervisorValidation:
-                    user.designation === "Student" ? "ACCEPTED" : null,
-                },
-              ],
-            },
-            { hodValidation: "ACCEPTED" },
-            { hoiValidation: "ACCEPTED" },
+            { OR: [{ hodValidation: "ACCEPTED" }, { hodValidation: null }] },
+            { OR: [{ hoiValidation: "ACCEPTED" }, { hoiValidation: null }] },
+            { OR: [{ vcValidation: "ACCEPTED" }, { vcValidation: null }] },
+            { OR: [{ accountsValidation: "ACCEPTED" }, { accountsValidation: null }] },
           ],
         }),
         ...(status === "REJECTED" && {
           OR: [
-            { fdccoordinatorValidation: "REJECTED" },
-            { supervisorValidation: "REJECTED" },
             { hodValidation: "REJECTED" },
             { hoiValidation: "REJECTED" },
+            { vcValidation: "REJECTED" },
+            { accountsValidation: "REJECTED" },
           ],
         }),
       };
@@ -154,7 +127,7 @@ const getApplicationsByStatus = async (req, res) => {
 
       // Filter conditions for Validators (Supervisor, HOD, HOI, FDCcoordinator)
     } else if (
-      ["Supervisor", "HOD", "HOI", "FDCcoordinator"].includes(user.designation)
+      validatorDesignations.includes(user.designation)
     ) {
       const validationField = `${user.designation.toLowerCase()}Validation`;
 

@@ -4,17 +4,10 @@ import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 
 const Root = () => {
-  const { user, role } = useLoaderData().data;
+  const { user, role } = useLoaderData()?.data;
   const [sidebarIsVisible, setSidebarIsVisible] = useState(true)
   const urlPath = window.location.pathname;
 
-  // useEffect(() => {
-  //   if (urlPath.split("/").at(-1).includes("dashboard")) {
-  //     setSidebarIsVisible(false);
-  //   } else {
-  //     setSidebarIsVisible(true);
-  //   }
-  // }, [urlPath]);
 
   const handleResize = () => {
     if (window.innerWidth < 768) {
