@@ -1,18 +1,18 @@
-import { React, useState } from 'react';
-import { Link } from 'react-router-dom';
-import logo from '/images/logo.jpeg';
-import { IoNotifications, IoPerson } from 'react-icons/io5';
-import Hamburger from 'hamburger-react';
+import { React, useState } from "react";
+import { Link } from "react-router-dom";
+import logo from "/images/logo.jpeg";
+import { IoNotifications, IoPerson } from "react-icons/io5";
+import Hamburger from "hamburger-react";
 
 const Navbar = ({ userData, sidebarIsVisible, setSidebarIsVisible }) => {
   const handleLogout = async () => {
     let res = await fetch(`${import.meta.env.VITE_APP_API_URL}/logout`, {
-      method: 'GET',
-      credentials: 'include',
+      method: "GET",
+      credentials: "include",
     });
 
     return res;
-  }
+  };
 
   const userDesignation = userData.designation;
   const userName = userData.userName;
@@ -24,23 +24,26 @@ const Navbar = ({ userData, sidebarIsVisible, setSidebarIsVisible }) => {
   });
 
   // Navbar Links for Role should be different
-  const links = [
-    { label: "Dashboard", path: "dashboard" },
-  ];
+  const links = [{ label: "Dashboard", path: "dashboard" }];
 
   return (
     <>
       <header>
-        <nav className="bg-white shadow-md border-b-4 border-gray-200 w-full">
+        <nav className="bg-white shadow-md border-b-4 border-gray-200 w-full px-2">
           <div className="w-full flex items-center justify-between px-4 py-3">
-            <div className="flex items-center space-x-6 justify-start">
+            <div className="flex items-center justify-between w-full">
+              {/* Hamburger Menu for Mobile */}
+              <div className="md:hidden">
+                <Hamburger
+                  toggled={sidebarIsVisible}
+                  toggle={setSidebarIsVisible}
+                />
+              </div>
+
+              {/* Logo for Desktop */}
               <Link to="/" className="hidden md:flex items-center">
                 <img src={logo} alt="Somaiya" className="object-contain w-48" />
               </Link>
-              {/* Hamburger Menu for Mobile */}
-              <div className='md:hidden'>
-                <Hamburger toggled={sidebarIsVisible} toggle={setSidebarIsVisible} />
-              </div>
             </div>
 
             <div className="flex items-center space-x-4 text-lg font-medium">
@@ -76,8 +79,12 @@ const Navbar = ({ userData, sidebarIsVisible, setSidebarIsVisible }) => {
                 <div className="flex items-center space-x-2 bg-red-100 p-2 rounded-md">
                   <IoPerson className="text-red-700 text-xl" />
                   <div className="hidden sm:block">
-                    <div className="text-gray-700 font-semibold">{profileData.name}</div>
-                    <div className="text-xs text-gray-500">{profileData.role}</div>
+                    <div className="text-gray-700 font-semibold">
+                      {profileData.name}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {`${userData.department} ${profileData.role} at ${userData.institute}`}
+                    </div>
                   </div>
                 </div>
               )}

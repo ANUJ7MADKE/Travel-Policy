@@ -43,6 +43,7 @@ const router = createBrowserRouter([
       { path: "form", element: <Form />, action: createApplicationAction },
       { path: "faqs", element: <h1>FAQs</h1> },
       { path: "contact-us", element: <ContactUs /> },
+      { path: "policy", element: <Policy /> },
     ],
   },
   {
@@ -55,6 +56,7 @@ const router = createBrowserRouter([
       { path: "dashboard/:status", element: <Applications /> },
       { path: "dashboard/:status/:applicationId", element: <ApplicationView />, action: applicationStatusAction },
       { path: "report", element: <Report /> },
+      { path: "policy", element: <Policy /> },
     ],
   },
 ]);

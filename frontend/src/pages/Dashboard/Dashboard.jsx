@@ -99,7 +99,7 @@ function Dashboard() {
               Analyze and gain insights about research funding and related data.
             </p>
             <button
-              onClick={() => navigate("../dashboard/insights")}
+              onClick={() => navigate("../report")}
               className="px-6 py-3 bg-red-700 text-white font-semibold text-lg rounded-full hover:bg-red-600 transition-all transform hover:scale-110 shadow-md"
             >
               View Insights
@@ -116,7 +116,7 @@ function Dashboard() {
               financial assistance.
             </p>
             <button
-              onClick={() => navigate("../dashboard/policy")}
+              onClick={() => navigate("../policy")}
               className="px-6 py-3 bg-red-700 text-white font-semibold text-lg rounded-full hover:bg-red-600 transition-all transform hover:scale-110 shadow-md"
             >
               Learn More

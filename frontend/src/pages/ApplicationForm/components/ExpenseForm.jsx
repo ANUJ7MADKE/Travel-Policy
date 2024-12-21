@@ -5,6 +5,11 @@ import Modal from "../../../components/Modal/Modal"; // Ensure your Modal is cor
 const validateForm = (values) => {
   const errors = {};
 
+  // Validate Expense Category
+  if (!values.expenseCategory) {
+    errors.expenseCategory = "Expense Category is required";
+  }
+
   // Validate Expense Name
   if (!values.expenseName) {
     errors.expenseName = "Expense Name is required";
@@ -38,12 +43,14 @@ const validateForm = (values) => {
 
 const ExpenseForm = ({ onClose, setExpenses }) => {
   const [values, setValues] = useState({
+    expenseCategory: "",
     expenseName: "",
     expenseAmount: "",
     expenseProof: null,
   });
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({
+    expenseCategory: false,
     expenseName: false,
     expenseAmount: false,
     expenseProof: false,
@@ -96,6 +103,7 @@ const ExpenseForm = ({ onClose, setExpenses }) => {
     if (Object.keys(validationErrors).length === 0) {
       console.log("Submitted values:", values);
       setExpenses({
+        expenseCategory: values.expenseCategory,
         expenseName: values.expenseName,
         expenseAmount: values.expenseAmount,
         expenseProof: values.expenseProof,
@@ -107,6 +115,31 @@ const ExpenseForm = ({ onClose, setExpenses }) => {
   return (
     <Modal onClose={onClose} >
       <div className="space-y-4">
+        {/* Expense Category */}
+        <div className="space-y-1 bg-slate-50 p-3 rounded-md">
+          <label htmlFor="expenseCategory" className="block font-medium">
+            Expense Category
+          </label>
+          <select
+            name="expenseCategory"
+            id="expenseCategory"
+            value={values.expenseCategory}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+          >
+            <option value="">Select Category</option>
+            <option value="TRAVEL">Travel</option>
+            <option value="LODGING">Lodging</option>
+            <option value="BOARDING">Boarding</option>
+            <option value="LOCAL_CONVEYANCE">Local Conveyance</option>
+            <option value="MISCELLANEOUS">Miscellaneous</option>
+          </select>
+          {errors.expenseCategory && (
+            <p className="text-red-500 text-sm">{errors.expenseCategory}</p>
+          )}
+        </div>
+
         {/* Expense Name */}
         <div className="space-y-1 bg-slate-50 p-3 rounded-md">
           <label htmlFor="expenseName" className="block font-medium">
@@ -159,7 +192,6 @@ const ExpenseForm = ({ onClose, setExpenses }) => {
             onBlur={handleBlur}
             className="w-full px-3 py-2 border border-gray-300 rounded-md"
           />
-          
           {errors.expenseProof && (
             <p className="text-red-500 text-sm">{errors.expenseProof}</p>
           )}

@@ -17,6 +17,10 @@ const ExpenseTable = ({
     // Common columns
     const baseColumns = [
       {
+        Header: "Expense Category",
+        accessor: "expenseCategory",
+      },
+      {
         Header: "Expense Name",
         accessor: "expenseName",
       },
