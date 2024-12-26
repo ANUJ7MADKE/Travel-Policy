@@ -41,7 +41,6 @@ const router = createBrowserRouter([
       { path: "dashboard/:status", element: <Applications /> },
       { path: "dashboard/:status/:applicationId", element: <ApplicationView /> },
       { path: "form", element: <Form />, action: createApplicationAction },
-      { path: "faqs", element: <h1>FAQs</h1> },
       { path: "contact-us", element: <ContactUs /> },
       { path: "policy", element: <Policy /> },
     ],

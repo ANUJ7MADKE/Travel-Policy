@@ -68,7 +68,7 @@ function Input({
                     onChange={handleChange}
                     onBlur={handleBlur}
                     value={values[formFeild.name] || ""}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-700 transition duration-300 ease-in-out"
                     disabled={formFeild?.disabled}
                   >
                     <option value="" label="Select option" />
@@ -110,11 +110,37 @@ function Input({
                       onChange={handleChange}
                       onBlur={handleBlur}
                       checked={values[formFeild.name] || false}
-                      className="h-4 w-4 border-gray-300 rounded"
+                      className="h-4 w-4 border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-red-700"
                       disabled={formFeild?.disabled}
                     />
                     <span className="text-sm">{formFeild.label}</span>
                   </label>
+                  <p className="text-red-500 text-sm">
+                    {errors[formFeild.name] &&
+                      touched[formFeild.name] &&
+                      errors[formFeild.name]}
+                  </p>
+                </div>
+              );
+
+            case "textarea":
+              return (
+                <div
+                  key={formFeild.name}
+                  className="space-y-1 bg-slate-50 p-3 rounded-md"
+                >
+                  <label htmlFor={formFeild.name} className="block font-medium">
+                    {formFeild.label}
+                  </label>
+                  <textarea
+                    name={formFeild.name}
+                    id={formFeild.name}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    value={values[formFeild.name] || ""}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md max-h-32 min-h-20 focus:outline-none focus:ring-2 focus:ring-red-700 transition duration-300 ease-in-out"
+                    disabled={formFeild?.disabled}
+                  />
                   <p className="text-red-500 text-sm">
                     {errors[formFeild.name] &&
                       touched[formFeild.name] &&
@@ -152,7 +178,7 @@ function Input({
                           setFieldValue(formFeild.name, e.target.files[0]);
                         }}
                         onBlur={handleBlur}
-                        className="w-full bg-white px-3 py-2 border border-gray-300 rounded-md"
+                        className="w-full bg-white px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-700 transition duration-300 ease-in-out"
                       />
                       <p className="text-red-500 text-sm">
                         {errors[formFeild.name] &&
@@ -196,7 +222,9 @@ function Input({
                             total + parseFloat(rec.expenseAmount || 0),
                           0
                         )
-                        .toFixed(2) > 10000 && <p className="text-red-600">Warning: Limit Exceded</p>}
+                        .toFixed(2) > 10000 && (
+                        <p className="text-red-600">Warning: Limit Exceded</p>
+                      )}
                     </label>
 
                     {!formFeild?.disabled &&
@@ -275,7 +303,7 @@ function Input({
                     onChange={handleChange}
                     onBlur={handleBlur}
                     value={values[formFeild.name] || ""}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-700 transition duration-300 ease-in-out"
                     disabled={formFeild?.disabled}
                   />
                   <p className="text-red-500 text-sm">

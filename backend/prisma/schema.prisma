@@ -10,21 +10,18 @@ datasource db {
   relationMode = "prisma"
 }
 
-enum Department {
-  NULL
-  COMPS
-  IT
-  MECH
-  AIDS
-  EXTC
-  ETRX
-  RAI
+enum Institute {
+  KJSIDS
+  SKSC
+  KJSCE
+  SIRC
+  KJSIM
+  SSA
+  KJSCEd
+  DLIS
+  MSSMPA
 }
 
-enum Institute {
-  KJSCE
-  KJSIM
-}
 
 enum ApplicantDesignation {
   FACULTY
@@ -52,7 +49,7 @@ model Applicant {
   password    String
 
   institute   Institute?  
-  department  Department? 
+  department  String?
   designation ApplicantDesignation
 
   applications Application[] 
@@ -105,7 +102,7 @@ model Validator {
   password    String
 
   institute   Institute? 
-  department  Department? 
+  department  String? 
   designation ValidatorDesignation
 
   applications Application[]
