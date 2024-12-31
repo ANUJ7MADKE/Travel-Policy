@@ -54,7 +54,7 @@ const Navbar = ({ userData, sidebarIsVisible, setSidebarIsVisible }) => {
   }, []);
 
   const handleMouseMove = (e) => {
-    if (e.clientY < 60) {
+    if (e.clientY < 60 && !isSmallScreen) {
       setShowNavbar(true);
     } else {
       setShowNavbar(false);
@@ -62,14 +62,16 @@ const Navbar = ({ userData, sidebarIsVisible, setSidebarIsVisible }) => {
   };
 
   useEffect(() => {
-    // Add event listener for mousemove
-    window.addEventListener("mousemove", handleMouseMove);
+    // Add event listener for mousemove only for large screens
+    if (!isSmallScreen) {
+      window.addEventListener("mousemove", handleMouseMove);
+    }
 
     // Clean up the event listener
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
     };
-  }, []);
+  }, [isSmallScreen]);
 
   return (
     <>
@@ -77,8 +79,10 @@ const Navbar = ({ userData, sidebarIsVisible, setSidebarIsVisible }) => {
         {/* Navbar with the pull-down effect */}
         <nav
           className={`bg-white shadow-md border-b-4 border-gray-200 w-full px-2 z-50 transition-all duration-300 ease-in-out transform ${
-            isSmallScreen ? "" : "fixed top-0 left-0"
-          } ${showNavbar ? "translate-y-0" : "-translate-y-full"}`}
+            isSmallScreen
+              ? ""
+              : `fixed top-0 left-0 ${showNavbar ? "translate-y-0" : "-translate-y-full"}`
+          }`}
         >
           <div className="w-full flex items-center justify-between px-4 py-3">
             <div className="flex items-center justify-between w-full">
@@ -114,7 +118,6 @@ const Navbar = ({ userData, sidebarIsVisible, setSidebarIsVisible }) => {
 
               {/* Logout Button */}
               <div className="flex items-center space-x-2">
-                {/* Logout Button - Icon only on small screens, with text hidden */}
                 <Link
                   to="/"
                   onClick={handleLogout}

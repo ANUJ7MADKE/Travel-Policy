@@ -12,7 +12,7 @@ export const handleLogout = async () => {
 };
 
 const Sidebar = ({ role }) => (
-  <div className="w-72 min-h-screen bg-white p-6 shadow-lg z-10 flex flex-col">
+  <div className="w-72 h-screen bg-white p-6 shadow-lg z-10 flex flex-col overflow-y-auto">
     <div className="mb-8 text-center border-b-2 border-gray-200 pb-6">
       <div className="bg-white shadow-lg rounded-lg px-4 py-4 border border-gray-300">
         <h2 className="text-xl font-semibold text-red-700 tracking-tight">
@@ -242,7 +242,7 @@ const Sidebar = ({ role }) => (
       </ul>
     </nav>
     {/* Spacer to push logout to the bottom */}
-    <div className="mt-auto">
+    <div className="mt-14">
       <Link
         to="/"
         onClick={handleLogout}

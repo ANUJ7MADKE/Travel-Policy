@@ -15,7 +15,7 @@ function Dashboard() {
   const greetingLine2 = `${designation} in ${department} Department, ${institute}`;
 
   return (
-    <div className="font-sans bg-white overflow-y-scroll scroll-smooth snap-y" style={{ height: "100vh" }} >
+    <div className="font-sans bg-white overflow-y-scroll scroll-smooth snap-y h-screen" >
       {/* Hero Section */}
       <section
         className="relative w-full h-screen flex items-center justify-center text-white overflow-hidden bg-cover bg-center snap-start"
