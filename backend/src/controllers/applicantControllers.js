@@ -53,7 +53,7 @@ const createApplication = async (req, res) => {
 
     // Compile the validators list with available supervisors, FDC coordinator, HOD, and HOI
     const validators = [
-      hod  && { profileId: hod?.profileId },
+      hod && { profileId: hod?.profileId },
       hoi && { profileId: hoi?.profileId },
       vc && { profileId: vc?.profileId },
     ].filter(Boolean);
@@ -114,44 +114,15 @@ const createApplication = async (req, res) => {
       },
     });
 
-    if (applicantDesignation === "Faculty") {
-      if (fdccoordinator) {
-        sendMail(
-          fdccoordinator.email,
-          `http://localhost:5173/validator/dashboard/pending/${newApplication.applicationId}`,
-          true,
-          null
-        );
-      } else {
-        sendMail(
-          formData.primarySupervisorEmail,
-          `http://localhost:5173/validator/dashboard/pending/${newApplication.applicationId}`,
-          true,
-          null
-        );
-        formData.anotherSupervisorEmail &&
-          sendMail(
-            formData.anotherSupervisorEmail,
-            `http://localhost:5173/validator/dashboard/pending/${newApplication.applicationId}`,
-            true,
-            null
-          );
-      }
-    } else {
-      sendMail(
-        formData.primarySupervisorEmail,
-        `http://localhost:5173/validator/dashboard/pending/${newApplication.applicationId}`,
-        true,
-        null
-      );
-      formData.anotherSupervisorEmail &&
-        sendMail(
-          formData.anotherSupervisorEmail,
-          `http://localhost:5173/validator/dashboard/pending/${newApplication.applicationId}`,
-          true,
-          null
-        );
-    }
+    console.log(hod);
+
+    sendMail({
+      emailId: hod.email,
+      link: `http://localhost:5173/validator/dashboard/pending/${newApplication.applicationId}`,
+      type: "validator",
+      status: null,
+      designation: null
+    });
 
     res.status(201).send({
       message: "Application created successfully",
