@@ -63,17 +63,17 @@ const applicationAction = async (req, res) => {
           sendMail({
             emailId: hoi.email,
             link: `http://localhost:5173/validator/dashboard/pending/${applicationId}`,
-            type: 'validator',
+            type: "validator",
             status: null,
-            designation: null
+            designation: null,
           });
         }
         sendMail({
           emailId: applicantEmail,
           link: `http://localhost:5173/applicant/dashboard/${validationStatus}/${applicationId}`,
-          type: 'applicant',
+          type: "applicant",
           status: validationStatus,
-          designation: 'HOD',
+          designation: "HOD",
         });
         break;
       case "HOI":
@@ -93,9 +93,9 @@ const applicationAction = async (req, res) => {
             sendMail({
               emailId: vc.email,
               link: `http://localhost:5173/validator/dashboard/pending/${applicationId}`,
-              type: 'validator',
+              type: "validator",
               status: null,
-              designation: null
+              designation: null,
             });
           } else {
             validationData.accountsValidation = "PENDING";
@@ -105,18 +105,18 @@ const applicationAction = async (req, res) => {
             sendMail({
               emailId: accounts.email,
               link: `http://localhost:5173/validator/dashboard/pending/${applicationId}`,
-              type: 'accounts',
+              type: "accounts",
               status: null,
-              designation: null
-            })
+              designation: null,
+            });
           }
         }
         sendMail({
           emailId: applicantEmail,
           link: `http://localhost:5173/applicant/dashboard/${validationStatus}/${applicationId}`,
-          type: 'applicant',
+          type: "applicant",
           status: validationStatus,
-          designation: 'HOI',
+          designation: "HOI",
         });
         break;
       case "VC":
@@ -134,17 +134,17 @@ const applicationAction = async (req, res) => {
           sendMail({
             emailId: accounts.email,
             link: `http://localhost:5173/validator/dashboard/pending/${applicationId}`,
-            type: 'accounts',
+            type: "accounts",
             status: null,
-            designation: null
-          })
+            designation: null,
+          });
         }
         sendMail({
           emailId: applicantEmail,
           link: `http://localhost:5173/applicant/dashboard/${validationStatus}/${applicationId}`,
-          type: 'applicant',
+          type: "applicant",
           status: validationStatus,
-          designation: 'VC',
+          designation: "VC",
         });
         break;
       case "ACCOUNTS":
@@ -157,9 +157,9 @@ const applicationAction = async (req, res) => {
         sendMail({
           emailId: applicantEmail,
           link: `http://localhost:5173/applicant/dashboard/${validationStatus}/${applicationId}`,
-          type: 'applicant',
+          type: "applicant",
           status: validationStatus,
-          designation: 'ACCOUNTS',
+          designation: "ACCOUNTS",
         });
         break;
       default:
@@ -219,4 +219,48 @@ const getApplicantNames = async (req, res) => {
   }
 };
 
-export { applicationAction, getApplicantNames };
+const getReportData = async (req, res) => {
+  const { institute, department, year } = req.query;
+  const {
+    id: profileId,
+    designation,
+    department: ogDepartment,
+    institute: ogInstitute,
+    role,
+  } = req.user;
+
+  try {
+    if ((ogDepartment && department !== ogDepartment) || (ogInstitute && institute !== ogInstitute)) {
+      return res.status(403).send("Forbidden");
+    }
+
+    const whereClause = {
+      institute,
+      department,
+    };
+
+    if (year) {
+      whereClause.createdAt = {
+        gte: new Date(`${year}-01-01`),
+        lt: new Date(`${year}-12-31`),
+      };
+    }
+
+    const applications = await prisma.application.findMany({
+      where: whereClause,
+      select: {
+      _count: true,
+      formData: true,
+      institute: true,
+      department: true,
+      },
+    });
+
+    res.status(200).send(applications);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send(error.message);
+  }
+};
+
+export { applicationAction, getApplicantNames, getReportData };

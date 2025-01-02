@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import ChartWithDropdown from "./approved";
-import Cards from "./cards"
-import './cards.css'
+import Cards from "./cards";
+import "./cards.css";
 import BasicTable from "./Table";
 import { Line } from "react-chartjs-2";
 import { Bar } from "react-chartjs-2";
@@ -33,7 +33,79 @@ ChartJS.register(
   Legend
 );
 
-function Charts() {
+function Charts({ reportData }) {
+  const { data, query } = reportData;
+
+  const tableData = [];
+  const groupedData = {};
+  if (data) {
+    for (const item of data) {
+      const { institute, department, formData } = item;
+      const { totalExpense, purposeOfTravel } = formData;
+
+      if (!groupedData[institute]) {
+        groupedData[institute] = {};
+      }
+
+      if (query.institute) {
+        if (!groupedData[institute][department]) {
+          groupedData[institute][department] = {
+            totalExpense: 0,
+            purposeOfTravel: purposeOfTravel || "Not Provided",
+            applications: 0,
+          };
+        }
+
+        // Aggregate the data
+        groupedData[institute][department].totalExpense +=
+          parseFloat(totalExpense); // Summing the expenses
+        groupedData[institute][department].applications += 1;
+      } else {
+        if (!groupedData[institute].applications) {
+          groupedData[institute] = {
+            totalExpense: 0,
+            purposeOfTravel: purposeOfTravel || "Not Provided",
+            applications: 0,
+          };
+        }
+
+        // Aggregate the data
+        groupedData[institute].totalExpense += parseFloat(totalExpense); // Summing the expenses
+        groupedData[institute].applications += 1;
+      }
+    }
+  }
+
+  // Step 2: Transform grouped data into desired table format
+  if (query.institute) {
+    for (const institute in groupedData) {
+      for (const department in groupedData[institute]) {
+        const departmentData = groupedData[institute][department];
+
+        tableData.push({
+          id: tableData.length + 1,
+          Stream: department,
+          Scholarship: departmentData.applications, // Assuming each application is one scholarship
+          Purpose_of_Travel: departmentData.purposeOfTravel,
+          Funds: departmentData.totalExpense.toFixed(2), // Formatting funds to 2 decimal places
+        });
+      }
+    }
+  } else {
+    for (const institute in groupedData) {
+      const instituteData = groupedData[institute];
+
+      tableData.push({
+        id: tableData.length + 1,
+        Stream: institute,
+        Scholarship: instituteData.applications, // Assuming each application is one scholarship
+        Purpose_of_Travel: instituteData.purposeOfTravel,
+        Funds: instituteData.totalExpense.toFixed(2), // Formatting funds to 2 decimal places
+      });
+    }
+  }
+
+  console.log(tableData);
   // Line Chart Data and Options
   const lineOptions = {
     responsive: true,
@@ -137,14 +209,12 @@ function Charts() {
           "rgba(255, 99, 132, 0.5)",
           "rgba(54, 162, 235, 0.5)",
           "rgba(153, 102, 255, 0.5)",
-          
         ],
         borderColor: [
           "rgb(75, 192, 192)",
           "rgb(255, 99, 132)",
           "rgb(54, 162, 235)",
           "rgb(153, 102, 255)",
-          
         ],
         borderWidth: 1,
       },
@@ -197,8 +267,6 @@ function Charts() {
       },
     ],
   };
-  
-  
 
   return (
     <div className="p-10">
@@ -216,21 +284,18 @@ function Charts() {
           <Pie options={pieOptions} data={pieData} />
         </div>
       </div>
-        <div className="cards">
-            <Cards/>
-            
-            <div className="generalInfo">
-                <div className="card2">
-                    <ChartWithDropdown/>
-                   
-                   
-                </div>
-                        
-            </div>
+      <div className="cards">
+        <Cards />
+
+        <div className="generalInfo">
+          <div className="card2">
+            <ChartWithDropdown />
+          </div>
         </div>
-        <div className="Table">
-            <Table/>
-        </div>
+      </div>
+      <div className="Table">
+        <Table tableData={tableData} />
+      </div>
       {/* Line Chart */}
       {/* <div className="w-full">
         <Line options={lineOptions} data={lineData} />

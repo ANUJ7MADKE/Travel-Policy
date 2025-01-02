@@ -85,6 +85,8 @@ const createApplication = async (req, res) => {
     // Construct the application data object
     const applicationData = {
       applicantName,
+      department,
+      institute,
       formData: JSON.parse(JSON.stringify(formData)),
       proofOfTravel: proofOfTravelBuffer,
       proofOfAccommodation: proofOfAccommodationBuffer,
@@ -113,8 +115,6 @@ const createApplication = async (req, res) => {
         },
       },
     });
-
-    console.log(hod);
 
     sendMail({
       emailId: hod.email,
