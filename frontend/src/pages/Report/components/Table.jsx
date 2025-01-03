@@ -21,7 +21,7 @@ const Table = ({ tableData }) => {
           </tr>
         </thead>
         <tbody>
-          {tableData.map((row) => (
+          {tableData?.map((row) => (
             <tr key={row.id}>
               <td style={{ padding: "10px", border: "1px solid #ddd" }}>{row.id}</td>
               <td style={{ padding: "10px", border: "1px solid #ddd" }}>{row.Stream}</td>

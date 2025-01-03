@@ -104,8 +104,7 @@ function Charts({ reportData }) {
       });
     }
   }
-
-  console.log(tableData);
+  
   // Line Chart Data and Options
   const lineOptions = {
     responsive: true,
