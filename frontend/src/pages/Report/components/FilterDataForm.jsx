@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Formik } from "formik";
 import { useSubmit, useRouteLoaderData, useNavigation } from "react-router-dom";
 import { filterDataFormFeilds } from "./FilterDataFormFeilds";
@@ -6,7 +6,7 @@ import * as yup from "yup";
 import Input from "../../ApplicationForm/Input";
 import axios from "axios";
 
-function FilterDataForm({ setReportData }) {
+function FilterDataForm({ setReportData, setLoading }) {
   const { role, user } = useRouteLoaderData("Validator-Root")?.data;
 
   const navigation = useNavigation();
@@ -75,6 +75,7 @@ function FilterDataForm({ setReportData }) {
   const handleSubmit = async (values, { setSubmitting, setErrors }) => {
     const { institute, department, year } = values;
     try {
+      setLoading(true);
       const queryParams = new URLSearchParams();
       if (institute) queryParams.append("institute", institute);
       if (department) queryParams.append("department", department);
@@ -97,9 +98,15 @@ function FilterDataForm({ setReportData }) {
         setErrors({ submit: "An unexpected error occurred" });
       }
     } finally {
+      setLoading(false);
       setSubmitting(false);
     }
   };
+
+  useEffect(() => {
+    // Trigger form submission on first render
+    handleSubmit(initialValuesSchema, { setSubmitting: () => {}, setErrors: () => {} });
+  }, []);
 
   return (
     <Formik

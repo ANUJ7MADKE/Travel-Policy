@@ -35,6 +35,10 @@ ChartJS.register(
 
 function Charts({ reportData }) {
   const { data, query } = reportData;
+  
+  if (data.length === 0) {
+    return <div className="text-center text-xl text-red-700 py-10">No Data Found</div>;
+  }
 
   const tableData = [];
   const groupedData = {};

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-
+import Loading from "../../components/Loading";
 import Charts from "../Report/components/charts";
 import FilterDataForm from "./components/FilterDataForm";
 
@@ -8,12 +8,12 @@ function Report() {
     data: [],
     query: {},
   });
-  console.log(reportData);
+  const [loading, setLoading] = useState(false);
   return (
     <main className="flex flex-col p-6">
       <div className="min-w-min bg-white shadow rounded-lg p-6">
-        <FilterDataForm setReportData={setReportData} />
-        <Charts reportData={reportData} />
+        <FilterDataForm setReportData={setReportData} setLoading={setLoading} />
+        {loading ? <Loading /> : <Charts reportData={reportData} />}
       </div>
     </main>
   );
