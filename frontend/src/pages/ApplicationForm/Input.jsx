@@ -45,6 +45,8 @@ function Input({
           className={`${
             section.label === "Expense Details"
               ? "grid grid-cols-1" // Apply single column grid when the label is "Expense Details"
+              : section.label === "Travel Polciy Report"
+              ? "grid grid-cols-2" // Apply two-column grid when the label is "Travel Polciy Report"
               : "grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3" // Apply multi-column grid for other labels
           } gap-4`}
         >

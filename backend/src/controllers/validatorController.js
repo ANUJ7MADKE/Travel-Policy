@@ -272,7 +272,7 @@ const getApplicantNames = async (req, res) => {
 };
 
 const getReportData = async (req, res) => {
-  const { institute, department, year } = req.query;
+  const { institute, department, year, applicationType } = req.query;
   const {
     id: profileId,
     designation,
@@ -299,6 +299,10 @@ const getReportData = async (req, res) => {
         gte: new Date(`${year}-01-01`),
         lt: new Date(`${year}-12-31`),
       };
+    }
+
+    if (applicationType) {
+      whereClause.applicationType = applicationType;
     }
 
     const applications = await prisma.application.findMany({

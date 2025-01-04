@@ -36,6 +36,20 @@ const filterDataFormFeilds = [
           .notRequired("Department selection is notRequired"),
       },
       {
+        label: "Select Application Type",
+        name: "applicationType",
+        type: "dropdown",
+        options: {
+          "": [
+            { label: "Student Applications", value: "STUDENT" },
+            { label: "Faculty Applicationstional", value: "FACULTY" },
+          ],
+        },
+        validation: yup
+          .string()
+          .notRequired("Department selection is notRequired"),
+      },
+      {
         label: "Select Year",
         name: "year",
         type: "dropdown",

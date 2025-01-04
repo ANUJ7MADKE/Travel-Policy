@@ -154,6 +154,7 @@ const createApplication = async (req, res) => {
     const newApplication = await prisma.application.create({
       data: {
         ...applicationData,
+        applicationType: applicant.designation === "STUDENT" ? "STUDENT" : "FACULTY",
         applicant: {
           connect: { profileId: applicantId },
         },
