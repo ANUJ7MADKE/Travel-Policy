@@ -8,14 +8,16 @@ const createApplication = async (req, res) => {
     designation: applicantDesignation,
     department,
     institute,
-    role
+    role,
   } = req.user;
 
   const formData = req.body;
 
   try {
     if (role !== "applicant") {
-      return res.status(403).send({ message: "Forbidden" });
+      return res
+        .status(403)
+        .send({ message: "Forbidden, Sign In as Applicant" });
     }
 
     const applicant = await prisma.user.findUnique({
@@ -28,37 +30,73 @@ const createApplication = async (req, res) => {
 
     const applicantName = applicant.userName;
 
-    let hod, hoi, vc = null
+    let primarySupervisor,
+      anotherSupervisor,
+      hod,
+      hoi,
+      vc = null;
 
-    if (["FACULTY"].includes(applicant.designation)) {
-      hod = await prisma.user.findFirst({
-        where: { department, designation: "HOD", institute },
-      });
-      if (!hod) {
-        return res.status(404).send({ message: "HOD not found" });
-      }
-    }
+    switch (applicant.designation) {
+      case "STUDENT":
+        primarySupervisor = await prisma.user.findUnique({
+          where: {
+            email: formData.primarySupervisorEmail,
+            department,
+            designation: "FACULTY",
+            institute,
+          },
+        });
+        if (!primarySupervisor) {
+          return res.status(404).send({ message: "Faculty not found (Incorrect Primary Supervisor Email)" });
+        }
+        anotherSupervisor = await prisma.user.findUnique({
+          where: {
+            email: formData.anotherSupervisorEmail,
+            department: formData.anotherSupervisorDepartment,
+            designation: "FACULTY",
+            institute,
+          },
+        });
+        if (!anotherSupervisor && formData.anotherSupervisorEmail) {
+          return res.status(404).send({ message: "Another Supervisor not found" });
+        }
+        break;
 
-    if (["HOD"].includes(applicant.designation)) {
-      hoi = await prisma.user.findFirst({
-        where: { designation: "HOI", institute },
-      });
-      if (!hoi) {
-        return res.status(404).send({ message: "HOI not found" });
-      }
-    }
+      case "FACULTY":
+        hod = await prisma.user.findFirst({
+          where: { department, designation: "HOD", institute },
+        });
+        if (!hod) {
+          return res.status(404).send({ message: "HOD not found" });
+        }
+        break;
 
-    if (["HOI"].includes(applicant.designation)) {
-      vc = await prisma.user.findFirst({
-        where: { designation: "VC" },
-      });
-      if (!vc) {
-        return res.status(404).send({ message: "VC not found" });
-      }
+      case "HOD":
+        hoi = await prisma.user.findFirst({
+          where: { designation: "HOI", institute },
+        });
+        if (!hoi) {
+          return res.status(404).send({ message: "HOI not found" });
+        }
+        break;
+
+      case "HOI":
+        vc = await prisma.user.findFirst({
+          where: { designation: "VC" },
+        });
+        if (!vc) {
+          return res.status(404).send({ message: "VC not found" });
+        }
+        break;
+
+      default:
+        break;
     }
 
     // Compile the validators list with available supervisors, FDC coordinator, HOD, and HOI
     const validators = [
+      primarySupervisor && { profileId: primarySupervisor?.profileId },
+      anotherSupervisor && { profileId: anotherSupervisor?.profileId },
       hod && { profileId: hod?.profileId },
       hoi && { profileId: hoi?.profileId },
       vc && { profileId: vc?.profileId },
@@ -98,6 +136,9 @@ const createApplication = async (req, res) => {
       proofOfAccommodation: proofOfAccommodationBuffer,
       proofOfAttendance: proofOfAttendanceBuffer,
       ...expenseProofs, // Add dynamically generated expense proof fields
+      facultyValidation: ["STUDENT"].includes(applicant.designation)
+        ? "PENDING"
+        : undefined,
       hodValidation: ["FACULTY"].includes(applicant.designation)
         ? "PENDING"
         : undefined,
@@ -122,13 +163,13 @@ const createApplication = async (req, res) => {
       },
     });
 
-    sendMail({
-      emailId: hod.email,
-      link: `http://localhost:5173/validator/dashboard/pending/${newApplication.applicationId}`,
-      type: "validator",
-      status: null,
-      designation: null
-    });
+    // sendMail({
+    //   emailId: hod.email,
+    //   link: `http://localhost:5173/validator/dashboard/pending/${newApplication.applicationId}`,
+    //   type: "validator",
+    //   status: null,
+    //   designation: null,
+    // });
 
     res.status(201).send({
       message: "Application created successfully",

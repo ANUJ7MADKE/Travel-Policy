@@ -14,6 +14,7 @@ function Form({ prefilledData, applicantDesignation }) {
   let designation;
 
   const applicant = useRouteLoaderData("Applicant-Root");
+  console.log(applicant);
 
   if (applicantDesignation) {
     designation = applicantDesignation;
@@ -21,7 +22,7 @@ function Form({ prefilledData, applicantDesignation }) {
     designation = applicant?.data?.user?.designation; //Faculty or Student
   }
 
-  if (designation === "Student") {
+  if (designation === "STUDENT") {
     toBeFormFeilds = studentFormFeilds;
   } else {
     toBeFormFeilds = facultyFormFeilds;

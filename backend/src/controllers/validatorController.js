@@ -1,3 +1,4 @@
+import { validatorDesignations } from "../config/designations.js";
 import prisma from "../config/prismaConfig.js";
 import sendMail from "../services/sendMail.js";
 
@@ -6,7 +7,7 @@ const applicationAction = async (req, res) => {
 
   try {
     const { applicationId, action, rejectionFeedback, toVC } = req.body; // actions = 'accepted' or 'rejected'
-    
+
     if (role !== "validator") {
       return res.status(403).send("Forbidden, Sign in as a validator");
     }
@@ -16,6 +17,11 @@ const applicationAction = async (req, res) => {
       include: {
         toValidateApplications: {
           where: { applicationId },
+          include: {
+            validators: {
+              select: { profileId: true, designation: true },
+            },
+          }
         },
       },
     });
@@ -32,10 +38,10 @@ const applicationAction = async (req, res) => {
 
     const applicant = await prisma.user.findFirst({
       where: { profileId: application.applicantId },
-      select: { designation: true, institute: true, email: true },
     });
 
     const applicantDesignation = applicant.designation;
+    const applicantDepartment = applicant.department;
     const applicantInstitute = applicant.institute;
     const applicantEmail = applicant.email;
 
@@ -46,11 +52,40 @@ const applicationAction = async (req, res) => {
     }
 
     const validationData = {};
-    let hoi,
+    let hod,
+      hoi,
       vc,
       accounts = null;
 
     switch (validator.designation) {
+      case "FACULTY":
+        if (application.facultyValidation != "PENDING") {
+          return res
+            .status(400)
+            .send("Already performed an action, can't change status again");
+        }
+        validationData.facultyValidation = validationStatus;
+        if (validationStatus === "ACCEPTED") {
+          validationData.hodValidation = "PENDING";
+          hod = await prisma.user.findFirst({
+            where: { designation: "HOD", department: applicantDepartment, institute: applicantInstitute },
+          });
+          sendMail({
+            emailId: hod.email,
+            link: `http://localhost:5173/validator/dashboard/pending/${applicationId}`,
+            type: "validator",
+            status: null,
+            designation: null,
+          });
+        }
+        sendMail({
+          emailId: applicantEmail,
+          link: `http://localhost:5173/applicant/dashboard/${validationStatus}/${applicationId}`,
+          type: "applicant",
+          status: validationStatus,
+          designation: "FACULTY",
+        });
+        break;
       case "HOD":
         if (application.hodValidation != "PENDING") {
           return res
@@ -90,6 +125,12 @@ const applicationAction = async (req, res) => {
 
         if (validationStatus === "ACCEPTED") {
           if (JSON.parse(toVC)) {
+            if (applicantDesignation !== "STUDENT") {
+              return {
+                status: 400,
+                message: "Students Applications cannot be forwared for VC validation",
+              }
+            };
             validationData.vcValidation = "PENDING";
             vc = await prisma.user.findFirst({
               where: { designation: "VC" },
@@ -170,7 +211,10 @@ const applicationAction = async (req, res) => {
         return res.status(400).send("Invalid validator designation");
     }
 
+    console.log(hod)
+
     const validators = [
+      hod && { profileId: hod?.profileId },
       hoi && { profileId: hoi?.profileId },
       vc && { profileId: vc?.profileId },
       accounts && { profileId: accounts?.profileId },
@@ -238,7 +282,10 @@ const getReportData = async (req, res) => {
   } = req.user;
 
   try {
-    if ((ogDepartment && department !== ogDepartment) || (ogInstitute && institute !== ogInstitute)) {
+    if (
+      (ogDepartment && department !== ogDepartment) ||
+      (ogInstitute && institute !== ogInstitute)
+    ) {
       return res.status(403).send("Forbidden");
     }
 
@@ -257,10 +304,10 @@ const getReportData = async (req, res) => {
     const applications = await prisma.application.findMany({
       where: whereClause,
       select: {
-      _count: true,
-      formData: true,
-      institute: true,
-      department: true,
+        _count: true,
+        formData: true,
+        institute: true,
+        department: true,
       },
     });
 

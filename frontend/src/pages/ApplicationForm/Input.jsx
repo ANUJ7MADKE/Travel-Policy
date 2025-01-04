@@ -20,7 +20,6 @@ function Input({
   const [showMiniFrom, setShowMiniForm] = useState(false);
   const [pdfIsVisible, setPdfIsVisible] = useState(false);
   const [fileUrl, setFileUrl] = useState(null);
-  console.log(values);
 
   return formFeilds.map((section, sectionIndex) => {
     if (

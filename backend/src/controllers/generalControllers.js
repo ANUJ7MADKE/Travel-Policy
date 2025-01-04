@@ -89,6 +89,7 @@ const getApplicationsByStatus = async (req, res) => {
         applicantId: userId,
         ...(status === "PENDING" && {
           OR: [
+            { facultyValidation: "PENDING" },
             { hodValidation: "PENDING" },
             { hoiValidation: "PENDING" },
             { vcValidation: "PENDING" },
@@ -97,6 +98,7 @@ const getApplicationsByStatus = async (req, res) => {
         }),
         ...(status === "ACCEPTED" && {
           AND: [
+            { OR: [{ facultyValidation: "ACCEPTED" }, { facultyValidation: null }] },
             { OR: [{ hodValidation: "ACCEPTED" }, { hodValidation: null }] },
             { OR: [{ hoiValidation: "ACCEPTED" }, { hoiValidation: null }] },
             { OR: [{ vcValidation: "ACCEPTED" }, { vcValidation: null }] },
@@ -110,6 +112,7 @@ const getApplicationsByStatus = async (req, res) => {
         }),
         ...(status === "REJECTED" && {
           OR: [
+            { facultyValidation: "REJECTED" },
             { hodValidation: "REJECTED" },
             { hoiValidation: "REJECTED" },
             { vcValidation: "REJECTED" },
