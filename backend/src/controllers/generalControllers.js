@@ -8,16 +8,11 @@ import {
 const dataRoot = async (req, res) => {
   try {
     const user = req.user; // Contains all user info (id, designation, department, etc.)
-    const userId = user.id;
-    const userDesignation = user.designation;
-    const role = user.role;
+    const { id: profileId, email, designation, department, role } = user;
 
-    if (
-      applicantDesignations.includes(userDesignation) &&
-      role === "applicant"
-    ) {
-      const applicant = await prisma.applicant.findUnique({
-        where: { profileId: userId },
+    if (applicantDesignations.includes(designation) && role === "applicant") {
+      const applicant = await prisma.user.findUnique({
+        where: { profileId },
       });
 
       if (!applicant) {
@@ -34,11 +29,11 @@ const dataRoot = async (req, res) => {
         role: "Applicant",
       });
     } else if (
-      validatorDesignations.includes(userDesignation) &&
+      validatorDesignations.includes(designation) &&
       role === "validator"
     ) {
-      const validator = await prisma.validator.findUnique({
-        where: { profileId: userId },
+      const validator = await prisma.user.findUnique({
+        where: { profileId },
       });
 
       if (!validator) {
@@ -86,7 +81,10 @@ const getApplicationsByStatus = async (req, res) => {
     let applications, totalApplications;
 
     // Filter conditions for Student and Faculty
-    if (applicantDesignations.includes(user.designation) && user.role === "applicant") {
+    if (
+      applicantDesignations.includes(user.designation) &&
+      user.role === "applicant"
+    ) {
       const baseWhere = {
         applicantId: userId,
         ...(status === "PENDING" && {
@@ -144,7 +142,10 @@ const getApplicationsByStatus = async (req, res) => {
       });
 
       // Filter conditions for Validators (Supervisor, HOD, HOI, FDCcoordinator)
-    } else if (validatorDesignations.includes(user.designation) && user.role === "validator") {
+    } else if (
+      validatorDesignations.includes(user.designation) &&
+      user.role === "validator"
+    ) {
       const validationField = `${user.designation.toLowerCase()}Validation`;
 
       const baseWhere = {
@@ -231,12 +232,17 @@ const getApplicationData = async (req, res) => {
         validators: {
           select: {
             profileId: true,
-          }
+          },
         },
       },
     });
 
-    if (applicationFull.applicantId !== user.id && !applicationFull.validators.some(validator => validator.profileId === user.id)) {
+    if (
+      applicationFull.applicantId !== user.id &&
+      !applicationFull.validators.some(
+        (validator) => validator.profileId === user.id
+      )
+    ) {
       return res.status(403).json({
         message: "Unauthorized",
         data: null,
@@ -253,7 +259,10 @@ const getApplicationData = async (req, res) => {
     let currentStatus;
 
     // Check if the user is an applicant or a validator
-    if (applicantDesignations.includes(user.designation) && user.role === "applicant") {
+    if (
+      applicantDesignations.includes(user.designation) &&
+      user.role === "applicant"
+    ) {
       if (
         applicationFull.hodValidation === "PENDING" ||
         applicationFull.hoiValidation === "PENDING" ||
@@ -271,7 +280,10 @@ const getApplicationData = async (req, res) => {
       } else {
         currentStatus = "ACCEPTED";
       }
-    } else if (validatorDesignations.includes(user.designation) && user.role === "validator") {
+    } else if (
+      validatorDesignations.includes(user.designation) &&
+      user.role === "validator"
+    ) {
       const validationField = `${user.designation.toLowerCase()}Validation`;
 
       if (applicationFull[validationField] === "ACCEPTED") {
@@ -352,7 +364,10 @@ const getFile = async (req, res) => {
 
     let myApplication;
 
-    if (applicantDesignations.includes(user.designation) && user.role === "applicant") {
+    if (
+      applicantDesignations.includes(user.designation) &&
+      user.role === "applicant"
+    ) {
       myApplication = await prisma.applicant.findUnique({
         where: {
           profileId: userId,
@@ -366,7 +381,10 @@ const getFile = async (req, res) => {
           },
         },
       });
-    } else if (validatorDesignations.includes(user.designation) && user.role === "validator") {
+    } else if (
+      validatorDesignations.includes(user.designation) &&
+      user.role === "validator"
+    ) {
       myApplication = await prisma.validator.findUnique({
         where: {
           profileId: userId,
