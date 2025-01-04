@@ -4,20 +4,26 @@ import sendMail from "../services/sendMail.js";
 const createApplication = async (req, res) => {
   const {
     id: applicantId,
+    email,
     designation: applicantDesignation,
     department,
     institute,
+    role
   } = req.user;
 
   const formData = req.body;
 
   try {
-    const applicant = await prisma.applicant.findUnique({
+    if (role !== "applicant") {
+      return res.status(403).send({ message: "Forbidden" });
+    }
+
+    const applicant = await prisma.user.findUnique({
       where: { profileId: applicantId },
     });
 
     if (!applicant) {
-      return res.status(404).send({ message: "Not an Applicant" });
+      return res.status(404).send({ message: "User not Found" });
     }
 
     const applicantName = applicant.userName;
@@ -25,7 +31,7 @@ const createApplication = async (req, res) => {
     let hod, hoi, vc = null
 
     if (["FACULTY"].includes(applicant.designation)) {
-      hod = await prisma.validator.findFirst({
+      hod = await prisma.user.findFirst({
         where: { department, designation: "HOD", institute },
       });
       if (!hod) {
@@ -34,7 +40,7 @@ const createApplication = async (req, res) => {
     }
 
     if (["HOD"].includes(applicant.designation)) {
-      hoi = await prisma.validator.findFirst({
+      hoi = await prisma.user.findFirst({
         where: { designation: "HOI", institute },
       });
       if (!hoi) {
@@ -43,7 +49,7 @@ const createApplication = async (req, res) => {
     }
 
     if (["HOI"].includes(applicant.designation)) {
-      vc = await prisma.validator.findFirst({
+      vc = await prisma.user.findFirst({
         where: { designation: "VC" },
       });
       if (!vc) {

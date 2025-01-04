@@ -6,11 +6,15 @@ const applicationAction = async (req, res) => {
 
   try {
     const { applicationId, action, rejectionFeedback, toVC } = req.body; // actions = 'accepted' or 'rejected'
+    
+    if (role !== "validator") {
+      return res.status(403).send("Forbidden, Sign in as a validator");
+    }
 
-    const validator = await prisma.validator.findFirst({
+    const validator = await prisma.user.findFirst({
       where: { profileId },
       include: {
-        applications: {
+        toValidateApplications: {
           where: { applicationId },
         },
       },
@@ -20,13 +24,13 @@ const applicationAction = async (req, res) => {
       return res.status(404).send("Validator doesn't exist");
     }
 
-    const application = validator.applications[0];
+    const application = validator.toValidateApplications[0];
 
     if (!application) {
       return res.status(404).send("Application not available");
     }
 
-    const applicant = await prisma.applicant.findFirst({
+    const applicant = await prisma.user.findFirst({
       where: { profileId: application.applicantId },
       select: { designation: true, institute: true, email: true },
     });
@@ -56,7 +60,7 @@ const applicationAction = async (req, res) => {
         validationData.hodValidation = validationStatus;
         if (validationStatus === "ACCEPTED") {
           validationData.hoiValidation = "PENDING";
-          hoi = await prisma.validator.findFirst({
+          hoi = await prisma.user.findFirst({
             where: { designation: "HOI", institute: applicantInstitute },
           });
 
@@ -87,7 +91,7 @@ const applicationAction = async (req, res) => {
         if (validationStatus === "ACCEPTED") {
           if (JSON.parse(toVC)) {
             validationData.vcValidation = "PENDING";
-            vc = await prisma.validator.findFirst({
+            vc = await prisma.user.findFirst({
               where: { designation: "VC" },
             });
             sendMail({
@@ -99,7 +103,7 @@ const applicationAction = async (req, res) => {
             });
           } else {
             validationData.accountsValidation = "PENDING";
-            accounts = await prisma.validator.findFirst({
+            accounts = await prisma.user.findFirst({
               where: { designation: "ACCOUNTS", institute: applicantInstitute },
             });
             sendMail({
@@ -128,7 +132,7 @@ const applicationAction = async (req, res) => {
         validationData.vcValidation = validationStatus;
         if (validationStatus === "ACCEPTED") {
           validationData.accountsValidation = "PENDING";
-          accounts = await prisma.validator.findFirst({
+          accounts = await prisma.user.findFirst({
             where: { designation: "ACCOUNTS", institute: applicantInstitute },
           });
           sendMail({
@@ -196,9 +200,13 @@ const applicationAction = async (req, res) => {
 };
 
 const getApplicantNames = async (req, res) => {
-  const profileId = req.user.id;
+  const { id: profileId, designation, department, institute, role } = req.user;
 
   try {
+    if (role !== "validator") {
+      return res.status(403).send("Forbidden");
+    }
+
     const applicants = await prisma.application.findMany({
       where: { validators: { some: { profileId } } },
       select: {

@@ -218,6 +218,7 @@ const getApplicationData = async (req, res) => {
         applicantId: true,
         applicantName: true,
         formData: true,
+        facultyValidation: true,
         hodValidation: true,
         hoiValidation: true,
         vcValidation: true,
@@ -264,6 +265,7 @@ const getApplicationData = async (req, res) => {
       user.role === "applicant"
     ) {
       if (
+        applicationFull.facultyValidation === "PENDING" ||
         applicationFull.hodValidation === "PENDING" ||
         applicationFull.hoiValidation === "PENDING" ||
         applicationFull.vcValidation === "PENDING" ||
@@ -271,6 +273,7 @@ const getApplicationData = async (req, res) => {
       ) {
         currentStatus = "PENDING";
       } else if (
+        applicationFull.facultyValidation === "REJECTED" ||
         applicationFull.supervisorValidation === "REJECTED" ||
         applicationFull.hodValidation === "REJECTED" ||
         applicationFull.hoiValidation === "REJECTED" ||
@@ -339,8 +342,6 @@ const getFile = async (req, res) => {
     if (!validFileNames.includes(fileName)) {
       return res.status(400).json({ error: "Invalid File request" });
     }
-
-    let applicationSelection = {};
 
     const fileSelection = {
       proofOfTravel: false,
