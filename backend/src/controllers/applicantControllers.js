@@ -174,7 +174,7 @@ const createApplication = async (req, res) => {
 
     res.status(201).send({
       message: "Application created successfully",
-      data: newApplication,
+      data: newApplication.applicantName,
     });
   } catch (error) {
     console.error("Error creating application:", error);

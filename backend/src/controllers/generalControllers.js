@@ -366,18 +366,18 @@ const getFile = async (req, res) => {
       fileSelection[fileName] = true;
     }
 
-    let myApplication;
+    let myApplication, myFile;
 
     if (
       applicantDesignations.includes(user.designation) &&
       user.role === "applicant"
     ) {
-      myApplication = await prisma.applicant.findUnique({
+      myApplication = await prisma.user.findUnique({
         where: {
           profileId: userId,
         },
         select: {
-          applications: {
+          appliedApplications: {
             where: {
               applicationId,
             },
@@ -385,16 +385,17 @@ const getFile = async (req, res) => {
           },
         },
       });
+      myFile = myApplication?.appliedApplications[0];
     } else if (
       validatorDesignations.includes(user.designation) &&
       user.role === "validator"
     ) {
-      myApplication = await prisma.validator.findUnique({
+      myApplication = await prisma.user.findUnique({
         where: {
           profileId: userId,
         },
         select: {
-          applications: {
+          toValidateApplications: {
             where: {
               applicationId,
             },
@@ -402,9 +403,8 @@ const getFile = async (req, res) => {
           },
         },
       });
+      myFile = myApplication?.toValidateApplications[0];
     }
-
-    const myFile = myApplication?.applications[0];
 
     if (!myFile) {
       return res.status(404).json({ error: "File not found" });
