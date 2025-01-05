@@ -305,8 +305,6 @@ const getReportData = async (req, res) => {
       whereClause.applicationType = applicationType;
     }
 
-    console.log(whereClause);
-
     const applications = await prisma.application.findMany({
       where: whereClause,
       select: {

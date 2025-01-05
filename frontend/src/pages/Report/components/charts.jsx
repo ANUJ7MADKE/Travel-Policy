@@ -19,6 +19,8 @@ import {
   Legend,
 } from "chart.js";
 import Table from "./Table";
+import ReportPDF from "./reportPDF";
+import { PDFDownloadLink, PDFViewer } from "@react-pdf/renderer";
 
 // Register chart components for all three types (Line, Bar, Pie)
 ChartJS.register(
@@ -303,6 +305,24 @@ function Charts({ reportData }) {
       {/* <div className="w-full">
         <Line options={lineOptions} data={lineData} />
       </div> */}
+      <PDFDownloadLink document={<ReportPDF tableData={tableData} />} fileName={`report_${query.institute || 'allInstitutes'}_${query.department || 'allDepartments'}_${query.year || 'allYears'}_${query.applicationType || 'allApplications'}.pdf`}>
+        {({ blob, url, loading, error }) =>
+          loading ? "Getting Your PDF Report Ready..." : (
+            <button
+              disabled={loading}
+              className="w-full flex items-center justify-center bg-gradient-to-r from-red-600 to-red-800 hover:from-red-800 hover:to-red-600 text-white font-semibold py-2 px-4 rounded-lg shadow-lg transform transition duration-300 ease-in-out disabled:bg-gray-400"
+              type="button"
+            >
+              Download PDF
+            </button>
+          )
+        }
+      </PDFDownloadLink>
+
+      <PDFViewer style={{ width: "70vw", height: "100vh" }}>
+        <ReportPDF tableData={tableData} />
+      </PDFViewer>
+
     </div>
   );
 }
