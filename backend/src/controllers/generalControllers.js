@@ -242,7 +242,7 @@ const getApplicationData = async (req, res) => {
     });
 
     if (
-      applicationFull.applicantId !== user.id &&
+      applicationFull?.applicantId !== user.id &&
       !applicationFull.validators.some(
         (validator) => validator.profileId === user.id
       )

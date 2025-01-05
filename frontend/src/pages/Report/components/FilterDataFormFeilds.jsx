@@ -42,7 +42,7 @@ const filterDataFormFeilds = [
         options: {
           "": [
             { label: "Student Applications", value: "STUDENT" },
-            { label: "Faculty Applicationstional", value: "FACULTY" },
+            { label: "Faculty Applications", value: "FACULTY" },
           ],
         },
         validation: yup

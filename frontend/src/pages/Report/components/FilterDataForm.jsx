@@ -73,13 +73,14 @@ function FilterDataForm({ setReportData, setLoading }) {
   const validationSchema = createValidationSchema(formFields);
 
   const handleSubmit = async (values, { setSubmitting, setErrors }) => {
-    const { institute, department, year } = values;
+    const { institute, department, year, applicationType } = values;
     try {
       setLoading(true);
       const queryParams = new URLSearchParams();
       if (institute) queryParams.append("institute", institute);
       if (department) queryParams.append("department", department);
       if (year) queryParams.append("year", year);
+      if (applicationType) queryParams.append("applicationType", applicationType);
 
       const res = await axios.get(
       `http://localhost:3000/validator/getReportData?${queryParams.toString()}`,
