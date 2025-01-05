@@ -99,7 +99,7 @@ function AllChartsPage() {
   };
 
   const barData = {
-    labels: [2020, 2021, 2022, 2023, 2024],
+    labels: [Jan, 4000, 2022, 2023, 2024],
     datasets: [
       {
         label: "Applications",

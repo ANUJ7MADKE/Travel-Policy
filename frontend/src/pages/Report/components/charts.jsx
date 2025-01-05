@@ -2,8 +2,6 @@ import React, { useState } from "react";
 import ChartWithDropdown from "./approved";
 import Cards from "./cards";
 import "./cards.css";
-import BasicTable from "./Table";
-import { Line } from "react-chartjs-2";
 import { Bar } from "react-chartjs-2";
 import { Pie } from "react-chartjs-2";
 import {
@@ -21,6 +19,7 @@ import {
 import Table from "./Table";
 import ReportPDF from "./reportPDF";
 import { PDFDownloadLink, PDFViewer } from "@react-pdf/renderer";
+import ApprovalVsRejectionTrends from "./map";
 
 // Register chart components for all three types (Line, Bar, Pie)
 ChartJS.register(
@@ -37,9 +36,13 @@ ChartJS.register(
 
 function Charts({ reportData }) {
   const { data, query } = reportData;
-  
+
   if (data.length === 0) {
-    return <div className="text-center text-xl text-red-700 py-10">No Data Found</div>;
+    return (
+      <div className="text-center text-xl text-red-700 py-10">
+        No Data Found
+      </div>
+    );
   }
 
   const tableData = [];
@@ -110,7 +113,7 @@ function Charts({ reportData }) {
       });
     }
   }
-  
+
   // Line Chart Data and Options
   const lineOptions = {
     responsive: true,
@@ -165,7 +168,7 @@ function Charts({ reportData }) {
       x: {
         title: {
           display: true,
-          text: "Year",
+          text: "Month",
         },
       },
       y: {
@@ -181,11 +184,25 @@ function Charts({ reportData }) {
   };
 
   const barData = {
-    labels: [2020, 2021, 2022, 2023, 2024],
+    labels: [
+      "Jan",
+      "Feb",
+      "Mar",
+      "April",
+      "May",
+      "June",
+      "July",
+      "Aug",
+      "Sep",
+      "Nov",
+      "Dec",
+    ],
     datasets: [
       {
         label: "Applications",
-        data: [1200, 1500, 1800, 2200, 200], // Updated data for number of applications
+        data: [
+          1200, 1500, 1800, 2200, 200, 800, 1235, 604, 2345, 2523, 3453, 6453,
+        ], // Updated data for number of applications
         backgroundColor: "rgba(75, 192, 192, 0.5)",
         borderColor: "rgb(75, 192, 192)",
         borderWidth: 1,
@@ -226,48 +243,31 @@ function Charts({ reportData }) {
     ],
   };
 
-  const chartOptions = {
+  const pie_Options = {
     responsive: true,
     plugins: {
       title: {
         display: true,
-        text: "Approved and Rejected Applications Over the Years",
-      },
-    },
-    scales: {
-      x: {
-        title: {
-          display: true,
-          text: "Year",
-        },
-      },
-      y: {
-        title: {
-          display: true,
-          text: "Number of Applications",
-        },
-        ticks: {
-          beginAtZero: true,
-        },
+        text: "Travel",
       },
     },
   };
-  const [selectedOption, setSelectedOption] = useState("approved");
-  const chartDataOptions = {
-    labels: [2020, 2021, 2022, 2023, 2024], // Years
+
+  const pie_Data = {
+    labels: ["Domestic", "International", "Local"],
     datasets: [
       {
-        label: "Approved Applications",
-        data: [800, 1100, 1300, 1600, 180], // Data for approved applications
-        backgroundColor: "rgba(54, 162, 235, 0.5)", // Blue color
-        borderColor: "rgb(54, 162, 235)",
-        borderWidth: 1,
-      },
-      {
-        label: "Rejected Applications",
-        data: [400, 400, 500, 600, 20], // Data for rejected applications
-        backgroundColor: "rgba(255, 99, 132, 0.5)", // Red color
-        borderColor: "rgb(255, 99, 132)",
+        data: [1200, 1500, 1800], // Updated data for number of applications
+        backgroundColor: [
+          "rgba(79, 246, 96, 0.5)",
+          "rgba(255, 99, 132, 0.5)",
+          "rgba(54, 162, 235, 0.5)",
+        ],
+        borderColor: [
+          "rgb(79, 246, 96)",
+          "rgb(255, 99, 132)",
+          "rgb(54, 162, 235)",
+        ],
         borderWidth: 1,
       },
     ],
@@ -298,31 +298,49 @@ function Charts({ reportData }) {
           </div>
         </div>
       </div>
-      <div className="Table">
-        <Table tableData={tableData} />
-      </div>
-      {/* Line Chart */}
-      {/* <div className="w-full">
+      <div className="h">
+        <div className="hhh">
+          <Pie options={pie_Options} data={pie_Data} />
+        </div>
+
+        <div className="hh">
+          <ApprovalVsRejectionTrends />
+        </div>
+
+        <div className="Table">
+          <Table tableData={tableData} />
+        </div>
+        {/* Line Chart */}
+        {/* <div className="w-full">
         <Line options={lineOptions} data={lineData} />
       </div> */}
-      <PDFDownloadLink document={<ReportPDF tableData={tableData} />} fileName={`report_${query.institute || 'allInstitutes'}_${query.department || 'allDepartments'}_${query.year || 'allYears'}_${query.applicationType || 'allApplications'}.pdf`}>
-        {({ blob, url, loading, error }) =>
-          loading ? "Getting Your PDF Report Ready..." : (
-            <button
-              disabled={loading}
-              className="w-full flex items-center justify-center bg-gradient-to-r from-red-600 to-red-800 hover:from-red-800 hover:to-red-600 text-white font-semibold py-2 px-4 rounded-lg shadow-lg transform transition duration-300 ease-in-out disabled:bg-gray-400"
-              type="button"
-            >
-              Download PDF
-            </button>
-          )
-        }
-      </PDFDownloadLink>
+        <PDFDownloadLink
+          document={<ReportPDF tableData={tableData} />}
+          fileName={`report_${query.institute || "allInstitutes"}_${
+            query.department || "allDepartments"
+          }_${query.year || "allYears"}_${
+            query.applicationType || "allApplications"
+          }.pdf`}
+        >
+          {({ blob, url, loading, error }) =>
+            loading ? (
+              "Getting Your PDF Report Ready..."
+            ) : (
+              <button
+                disabled={loading}
+                className="w-full flex items-center justify-center bg-gradient-to-r from-red-600 to-red-800 hover:from-red-800 hover:to-red-600 text-white font-semibold py-2 px-4 rounded-lg shadow-lg transform transition duration-300 ease-in-out disabled:bg-gray-400"
+                type="button"
+              >
+                Download PDF
+              </button>
+            )
+          }
+        </PDFDownloadLink>
 
-      <PDFViewer style={{ width: "70vw", height: "100vh" }}>
-        <ReportPDF tableData={tableData} />
-      </PDFViewer>
-
+        <PDFViewer style={{ width: "70vw", height: "100vh" }}>
+          <ReportPDF tableData={tableData} />
+        </PDFViewer>
+      </div>
     </div>
   );
 }
