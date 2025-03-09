@@ -53,3 +53,11 @@
 .motionCard{
 gap: 20px;
 }
+.h{
+    
+    display: flex;
+    flex-direction: row;
+    margin: 10px;
+    gap: 10px;
+
+}

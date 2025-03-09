@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ChartWithDropdown from "./approved";
 import Cards from "./cards";
 import "./cards.css";
-import { Bar } from "react-chartjs-2";
-import { Pie } from "react-chartjs-2";
+import { Bar, Pie } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -16,10 +15,11 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 import Table from "./Table";
-import ReportPDF from "./reportPDF";
 import { PDFDownloadLink, PDFViewer } from "@react-pdf/renderer";
 import ApprovalVsRejectionTrends from "./map";
+import ReportPDF from "./reportPDF";
 
 // Register chart components for all three types (Line, Bar, Pie)
 ChartJS.register(
@@ -31,13 +31,14 @@ ChartJS.register(
   ArcElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  ChartDataLabels
 );
 
 function Charts({ reportData }) {
   const { data, query } = reportData;
 
-  if (data.length === 0) {
+  if (!data) {
     return (
       <div className="text-center text-xl text-red-700 py-10">
         No Data Found
@@ -45,12 +46,14 @@ function Charts({ reportData }) {
     );
   }
 
+  const { acceptedApplications, rejectedApplications, pendingApplications } = data;
+
   const tableData = [];
   const groupedData = {};
-  if (data) {
-    for (const item of data) {
+  if (acceptedApplications) {
+    for (const item of acceptedApplications) {
       const { institute, department, formData } = item;
-      const { totalExpense, purposeOfTravel } = formData;
+      const { totalExpense } = formData;
 
       if (!groupedData[institute]) {
         groupedData[institute] = {};
@@ -60,7 +63,6 @@ function Charts({ reportData }) {
         if (!groupedData[institute][department]) {
           groupedData[institute][department] = {
             totalExpense: 0,
-            purposeOfTravel: purposeOfTravel || "Not Provided",
             applications: 0,
           };
         }
@@ -73,7 +75,6 @@ function Charts({ reportData }) {
         if (!groupedData[institute].applications) {
           groupedData[institute] = {
             totalExpense: 0,
-            purposeOfTravel: purposeOfTravel || "Not Provided",
             applications: 0,
           };
         }
@@ -113,6 +114,13 @@ function Charts({ reportData }) {
       });
     }
   }
+
+  const [chartImages, setChartImages] = useState({
+    barChart: null,
+    pieChart1: null,
+    pieChart2: null,
+    isLoading: false,
+  });
 
   // Line Chart Data and Options
   const lineOptions = {
@@ -273,23 +281,93 @@ function Charts({ reportData }) {
     ],
   };
 
+  const barChartRef = useRef();
+  const pieChartRef1 = useRef();
+  const pieChartRef2 = useRef();
+
+  const loadChartsInPdf = () => {
+    const barChartInstance = barChartRef.current;
+    const pieChartInstance1 = pieChartRef1.current;
+    const pieChartInstance2 = pieChartRef2.current;
+
+    if (barChartInstance) {
+      const barBase64Image = barChartInstance.toBase64Image();
+      setChartImages((prevImages) => ({
+        ...prevImages,
+        barChart: barBase64Image,
+      }));
+    }
+
+    if (pieChartInstance1) {
+      const pieBase64Image = pieChartInstance1.toBase64Image();
+      setChartImages((prevImages) => ({
+        ...prevImages,
+        pieChart1: pieBase64Image,
+      }));
+    }
+
+    if (pieChartInstance2) {
+      const pieBase64Image = pieChartInstance2.toBase64Image();
+      setChartImages((prevImages) => ({
+        ...prevImages,
+        pieChart2: pieBase64Image,
+      }));
+    }
+  };
+
+  useEffect(() => {
+    setChartImages((prevImages) => ({ ...prevImages, isLoading: true }));
+
+    const handleRender = () => {
+      loadChartsInPdf();
+      setChartImages((prevImages) => ({ ...prevImages, isLoading: false }));
+    };
+
+    const barChartInstance = barChartRef.current;
+    const pieChartInstance1 = pieChartRef1.current;
+    const pieChartInstance2 = pieChartRef2.current;
+
+    if (barChartInstance) {
+      barChartInstance.options.animation.onComplete = handleRender;
+    }
+
+    if (pieChartInstance1) {
+      pieChartInstance1.options.animation.onComplete = handleRender;
+    }
+
+    if (pieChartInstance2) {
+      pieChartInstance2.options.animation.onComplete = handleRender;
+    }
+
+    return () => {
+      if (barChartInstance) {
+        barChartInstance.options.animation.onComplete = null;
+      }
+      if (pieChartInstance1) {
+        pieChartInstance1.options.animation.onComplete = null;
+      }
+      if (pieChartInstance2) {
+        pieChartInstance2.options.animation.onComplete = null;
+      }
+    };
+  }, []);
+
   return (
     <div className="p-10">
       <h1 className="text-3xl mb-6">Travel Policy Report</h1>
 
       {/* Container for all three charts */}
-      <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-[2fr,1fr] gap-6">
-        {/* Bar Chart */}
+      {/* <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-[2fr,1fr] gap-6">
         <div className="w-full">
-          <Bar options={barOptions} data={barData} />
+          <Bar options={barOptions} data={barData} ref={barChartRef} />
         </div>
 
-        {/* Pie Chart */}
         <div className="w-full">
-          <Pie options={pieOptions} data={pieData} />
+          <Pie options={pieOptions} data={pieData} ref={pieChartRef1} />
         </div>
-      </div>
-      <div className="cards">
+      </div> */}
+
+      {/* <div className="cards">
         <Cards />
 
         <div className="generalInfo">
@@ -297,50 +375,64 @@ function Charts({ reportData }) {
             <ChartWithDropdown />
           </div>
         </div>
-      </div>
-      <div className="h">
-        <div className="hhh">
-          <Pie options={pie_Options} data={pie_Data} />
-        </div>
+      </div> */}
 
-        <div className="hh">
-          <ApprovalVsRejectionTrends />
-        </div>
+      {/* <div className="hh">
+            <ApprovalVsRejectionTrends />
+          </div> */}
 
-        <div className="Table">
+      {/* Line Chart */}
+      {/* <div className="w-full">
+      <Line options={lineOptions} data={lineData} />*/}
+
+      <div className="flex flex-col gap-10 items-center justify-center my-10">
+        <div className="w-full">
           <Table tableData={tableData} />
         </div>
-        {/* Line Chart */}
-        {/* <div className="w-full">
-        <Line options={lineOptions} data={lineData} />
-      </div> */}
-        <PDFDownloadLink
-          document={<ReportPDF tableData={tableData} />}
-          fileName={`report_${query.institute || "allInstitutes"}_${
-            query.department || "allDepartments"
-          }_${query.year || "allYears"}_${
-            query.applicationType || "allApplications"
-          }.pdf`}
-        >
-          {({ blob, url, loading, error }) =>
-            loading ? (
-              "Getting Your PDF Report Ready..."
-            ) : (
-              <button
-                disabled={loading}
-                className="w-full flex items-center justify-center bg-gradient-to-r from-red-600 to-red-800 hover:from-red-800 hover:to-red-600 text-white font-semibold py-2 px-4 rounded-lg shadow-lg transform transition duration-300 ease-in-out disabled:bg-gray-400"
-                type="button"
-              >
-                Download PDF
-              </button>
-            )
-          }
-        </PDFDownloadLink>
 
-        <PDFViewer style={{ width: "70vw", height: "100vh" }}>
-          <ReportPDF tableData={tableData} />
-        </PDFViewer>
+        <div>
+          <Pie options={pie_Options} data={pie_Data} ref={pieChartRef2} />
+        </div>
       </div>
+
+      {chartImages.isLoading ? (
+        <div className="text-center text-xl text-red-700 py-10">
+          Generating PDF Report...
+        </div>
+      ) : (
+        <div className="pdfreport">
+          <PDFDownloadLink
+            document={
+              <ReportPDF tableData={tableData} chartImages={chartImages} />
+            }
+            fileName={`report_${query.institute || "allInstitutes"}_${
+              query.department || "allDepartments"
+            }_${query.year || "allYears"}_${
+              query.applicationType || "allApplications"
+            }.pdf`}
+          >
+            {({ blob, url, loading, error }) =>
+              loading ? (
+                <div className="text-center text-xl text-red-700 py-10">
+                  Getting Your PDF Report Ready...
+                </div>
+              ) : (
+                <button
+                  disabled={loading}
+                  className="w-full flex items-center justify-center bg-gradient-to-r from-red-600 to-red-800 hover:from-red-800 hover:to-red-600 text-white font-semibold py-2 px-4 rounded-lg shadow-lg transform transition duration-300 ease-in-out disabled:bg-gray-400"
+                  type="button"
+                >
+                  Download PDF
+                </button>
+              )
+            }
+          </PDFDownloadLink>
+
+          <PDFViewer style={{ width: "70vw", height: "100vh" }}>
+            <ReportPDF tableData={tableData} chartImages={chartImages} />
+          </PDFViewer>
+        </div>
+      )}
     </div>
   );
 }
