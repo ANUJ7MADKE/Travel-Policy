@@ -1,17 +1,40 @@
 import React from "react";
 import { useTable } from "react-table";
-import { MdDeleteOutline } from "react-icons/md";
+import axios from "axios";
+import {
+  MdDangerous,
+  MdDeleteOutline,
+  MdEdit,
+  MdVerified,
+  MdWrongLocation,
+} from "react-icons/md";
 import PdfActions from "../../ApplicationView/PdfActions";
-import { useParams } from "react-router-dom";
+import { useParams, useRouteLoaderData } from "react-router-dom";
 
 const ExpenseTable = ({
   expenses,
   setPdfIsVisible,
   setFileUrl,
   deleteExpense,
+  editExpense,
   disabled,
 }) => {
   const applicationId = useParams().applicationId;
+  const { role } =
+    useRouteLoaderData("Applicant-Root")?.data ||
+    useRouteLoaderData("Validator-Root")?.data;
+
+  const handleExpenseAction = async (expense, action) => {
+    try {
+      await axios.put(
+        `${import.meta.env.VITE_APP_API_URL}/validator/expenseAction`,
+        { expense, action, applicationId },
+        { withCredentials: true }
+      );
+    } catch (error) {
+      console.error("Error performing expense action:", error);
+    }
+  };
 
   const columns = React.useMemo(() => {
     // Common columns
@@ -35,7 +58,7 @@ const ExpenseTable = ({
         Cell: ({ value, row }) => {
           if (disabled) {
             return (
-              <div className= "max-w-72 m-auto">
+              <div className="max-w-72 m-auto">
                 <PdfActions
                   fileName={"expenseProof" + row.id}
                   applicationId={applicationId}
@@ -45,7 +68,7 @@ const ExpenseTable = ({
           } else if (value && value.name) {
             return (
               <button
-                type='button'
+                type="button"
                 onClick={() => {
                   setPdfIsVisible(true);
                   setFileUrl(URL.createObjectURL(value));
@@ -64,17 +87,58 @@ const ExpenseTable = ({
     // Add the "Delete" column only if 'disabled' is false
     if (!disabled) {
       baseColumns.push({
-        Header: "Delete",
+        Header: "Actions",
         accessor: "actions",
         Cell: ({ row }) => (
-          <div className="text-center">
-            <button
-              type='button'
-              onClick={() => deleteExpense(row.original)}
-              className="bg-red-600 text-white py-2 px-3 rounded-lg hover:bg-red-700 transition-colors focus:outline-none"
-            >
-              <MdDeleteOutline />
-            </button>
+          row?.original?.proofStatus != "verified" ?(
+          <div className="flex justify-center space-x-7">
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={() => deleteExpense(row.original)}
+                className="bg-red-600 text-white py-2 px-3 rounded-lg hover:bg-red-700 transition-colors focus:outline-none"
+              >
+                <MdDeleteOutline />
+              </button>
+            </div>
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={() => editExpense(row.original)}
+                className="bg-blue-600 text-white py-2 px-3 rounded-lg hover:bg-blue-700 transition-colors focus:outline-none"
+              >
+                <MdEdit />
+              </button>
+            </div>
+          </div>) : <h1 className="text-green-600">Approved</h1>
+        ),
+      });
+    }
+
+    if (role === "Validator") {
+      baseColumns.push({
+        Header: "Approval",
+        accessor: "approval",
+        Cell: ({ row }) => (
+          <div className="flex justify-center space-x-7">
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={() => handleExpenseAction(row.original, "verified")}
+                className="bg-green-600 text-white py-2 px-3 rounded-lg hover:bg-green-700 transition-colors focus:outline-none"
+              >
+                <MdVerified />
+              </button>
+            </div>
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={() => handleExpenseAction(row.original, "rejected")}
+                className="bg-red-600 text-white py-2 px-3 rounded-lg hover:bg-red-700 transition-colors focus:outline-none"
+              >
+                <MdDangerous />
+              </button>
+            </div>
           </div>
         ),
       });

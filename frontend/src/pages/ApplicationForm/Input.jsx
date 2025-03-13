@@ -18,6 +18,7 @@ function Input({
   const applicationId = useParams().applicationId;
 
   const [showMiniFrom, setShowMiniForm] = useState(false);
+  const [expensesEditValues, setExpensesEditValues] = useState(null);
   const [pdfIsVisible, setPdfIsVisible] = useState(false);
   const [fileUrl, setFileUrl] = useState(null);
 
@@ -260,7 +261,7 @@ function Input({
                             <button
                               className="bg-red-700 text-white font-semibold py-3 px-8 rounded-lg shadow-md transform transition duration-300 hover:bg-red-800 hover:scale-105 active:scale-95"
                               type="button"
-                              onClick={() => setShowMiniForm(true)}
+                              onClick={() => {setShowMiniForm(true); setExpensesEditValues(null)}}
                             >
                               Add Expense
                             </button>
@@ -282,6 +283,17 @@ function Input({
                             newExpenses,
                           ])
                         }
+                        editExpense={(editedExpense) => {
+                          setFieldValue(
+                            formFeild.name,
+                            values[formFeild.name].map((expense) =>
+                              expense === expensesEditValues
+                                ? editedExpense
+                                : expense
+                            )
+                          );
+                        }}
+                        expenses={expensesEditValues}
                       />
                     )}
 
@@ -307,6 +319,7 @@ function Input({
                               )
                             )
                           }
+                          editExpense={(expenseValues) => {setShowMiniForm(true); setExpensesEditValues(expenseValues)}}
                           disabled={formFeild?.disabled}
                         />
                       </div>

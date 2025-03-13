@@ -247,6 +247,65 @@ const applicationAction = async (req, res) => {
   }
 };
 
+const expenseAction = async (req, res) => {
+  const { id: profileId, designation, department, institute, role } = req.user;
+
+  try {
+    const { applicationId, expense, action } = req.body;
+    
+    if (role !== "validator") {
+      return res.status(403).send("Forbidden, Sign in as a validator");
+    }
+
+    const validator = await prisma.user.findFirst({
+      where: { profileId },
+      include: {
+        toValidateApplications: {
+          where: { applicationId },
+          include: {
+            validators: {
+              select: { profileId: true, designation: true },
+            },
+          },
+        },
+      },
+    });
+
+    if (!validator) {
+      return res.status(404).send("Validator doesn't exist");
+    }
+
+    const application = validator.toValidateApplications[0];
+
+    if (!application) {
+      return res.status(404).send("Application not available");
+    }
+
+    const updatedFormData = {
+      ...application.formData,
+      expenses: JSON.stringify(JSON.parse(application.formData.expenses).map((singleExpense) =>
+      singleExpense.expenseId === expense.expenseId
+        ? { ...singleExpense, proofStatus: action }
+        : singleExpense
+      )),
+    };
+
+    const updatedApplication = await prisma.application.update({
+      where: {
+        applicationId
+      },
+      data: {
+        formData: updatedFormData
+      }
+    })
+
+    res.status(200).send(updatedApplication)
+    
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+}
+
 const getApplicantNames = async (req, res) => {
   const { id: profileId, designation, department, institute, role } = req.user;
 
@@ -353,4 +412,4 @@ const getReportData = async (req, res) => {
   }
 };
 
-export { applicationAction, getApplicantNames, getReportData };
+export { applicationAction, expenseAction, getApplicantNames, getReportData };

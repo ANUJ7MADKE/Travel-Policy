@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Modal from "../../../components/Modal/Modal"; // Ensure your Modal is correctly imported
 
 // Validation function (manually written)
@@ -41,7 +41,9 @@ const validateForm = (values) => {
   return errors;
 };
 
-const ExpenseForm = ({ onClose, setExpenses }) => {
+const ExpenseForm = ({ onClose, setExpenses, editExpense, expenses = null }) => {
+  const fileInputRef = useRef(null);
+
   const [values, setValues] = useState({
     expenseCategory: "",
     expenseName: "",
@@ -55,6 +57,19 @@ const ExpenseForm = ({ onClose, setExpenses }) => {
     expenseAmount: false,
     expenseProof: false,
   });
+
+  useEffect(() => {
+    if (expenses) {
+      // If the expenses object contains a File, set it to the input
+      if (expenses.expenseProof) {
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(expenses.expenseProof); // Add the file from expenses to DataTransfer
+        fileInputRef.current.files = dataTransfer.files; // Set files to the input
+      }
+
+      setValues(expenses); // Set the rest of the form data
+    }
+  }, [expenses]);
 
   // Handle form input changes with error checking on each keystroke
   const handleChange = (e) => {
@@ -101,18 +116,29 @@ const ExpenseForm = ({ onClose, setExpenses }) => {
 
     // If no errors, proceed with submission
     if (Object.keys(validationErrors).length === 0) {
-      setExpenses({
-        expenseCategory: values.expenseCategory,
-        expenseName: values.expenseName,
-        expenseAmount: values.expenseAmount,
-        expenseProof: values.expenseProof,
-      });
+      if (expenses) {
+        editExpense({
+          expenseId: expenses.expenseId,
+          expenseCategory: values.expenseCategory,
+          expenseName: values.expenseName,
+          expenseAmount: values.expenseAmount,
+          expenseProof: values.expenseProof,
+        })
+      } else {
+        setExpenses({
+          expenseId: crypto.randomUUID(),
+          expenseCategory: values.expenseCategory,
+          expenseName: values.expenseName,
+          expenseAmount: values.expenseAmount,
+          expenseProof: values.expenseProof,
+        });
+      }
       onClose(); // Close the modal after submission
     }
   };
 
   return (
-    <Modal onClose={onClose} >
+    <Modal onClose={onClose}>
       <div className="space-y-4">
         {/* Expense Category */}
         <div className="space-y-1 bg-slate-50 p-3 rounded-md">
@@ -184,9 +210,10 @@ const ExpenseForm = ({ onClose, setExpenses }) => {
           </label>
           <input
             type="file"
+            ref={fileInputRef}
             name="expenseProof"
             id="expenseProof"
-            accept="image/jpeg, image/png, application/pdf"
+            accept="application/pdf"
             onChange={handleFileChange}
             onBlur={handleBlur}
             className="w-full px-3 py-2 border border-gray-300 rounded-md"
@@ -203,7 +230,7 @@ const ExpenseForm = ({ onClose, setExpenses }) => {
             onClick={handleSubmit} // Call handleSubmit manually
             className="bg-blue-600 text-white py-2 px-6 rounded-lg hover:bg-blue-700"
           >
-            Add Expense
+            {expenses ? "Update" : "Add"} Expense
           </button>
         </div>
       </div>
