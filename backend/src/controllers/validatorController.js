@@ -6,7 +6,7 @@ const applicationAction = async (req, res) => {
   const { id: profileId, designation, department, institute, role } = req.user;
 
   try {
-    const { applicationId, action, rejectionFeedback, toVC } = req.body; // actions = 'accepted' or 'rejected'
+    const { applicationId, action, rejectionFeedback, toVC, resubmission } = req.body; // actions = 'accepted' or 'rejected'
 
     if (role !== "validator") {
       return res.status(403).send("Forbidden, Sign in as a validator");
@@ -46,6 +46,7 @@ const applicationAction = async (req, res) => {
     const applicantEmail = applicant.email;
 
     const validationStatus = action.toUpperCase();
+    let resubmissionStatus = JSON.parse(resubmission) || false;
 
     if (validationStatus !== "ACCEPTED" && validationStatus !== "REJECTED") {
       return res.status(400).send("Invalid status");
@@ -234,6 +235,7 @@ const applicationAction = async (req, res) => {
       },
       data: {
         ...validationData,
+        resubmission: resubmissionStatus,
         validators: {
           connect: validators,
         },

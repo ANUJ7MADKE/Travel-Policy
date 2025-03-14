@@ -61,7 +61,7 @@ const ExpenseForm = ({ onClose, setExpenses, editExpense, expenses = null }) => 
   useEffect(() => {
     if (expenses) {
       // If the expenses object contains a File, set it to the input
-      if (expenses.expenseProof) {
+      if (expenses.expenseProof && expenses.expenseProof instanceof File) {
         const dataTransfer = new DataTransfer();
         dataTransfer.items.add(expenses.expenseProof); // Add the file from expenses to DataTransfer
         fileInputRef.current.files = dataTransfer.files; // Set files to the input

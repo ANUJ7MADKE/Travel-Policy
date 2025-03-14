@@ -5,8 +5,7 @@ import {
   MdDangerous,
   MdDeleteOutline,
   MdEdit,
-  MdVerified,
-  MdWrongLocation,
+  MdVerified
 } from "react-icons/md";
 import PdfActions from "../../ApplicationView/PdfActions";
 import { useParams, useRouteLoaderData } from "react-router-dom";
@@ -56,7 +55,7 @@ const ExpenseTable = ({
         Header: "Expense Proof",
         accessor: "expenseProof",
         Cell: ({ value, row }) => {
-          if (disabled) {
+          if (applicationId) {
             return (
               <div className="max-w-72 m-auto">
                 <PdfActions

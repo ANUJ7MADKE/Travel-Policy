@@ -1,3 +1,4 @@
+import { application } from "express";
 import prisma from "../config/prismaConfig.js";
 import sendMail from "../services/sendMail.js";
 
@@ -135,8 +136,6 @@ const createApplication = async (req, res) => {
       ).toFixed(2)
     );
 
-    console.log("Total Expense:", totalExpense);
-
     formData["totalExpense"] = totalExpense;
 
     // Construct the application data object
@@ -145,7 +144,7 @@ const createApplication = async (req, res) => {
       department,
       institute,
       totalExpense,
-      formData: JSON.parse(JSON.stringify(formData)),
+      formData,
       proofOfTravel: proofOfTravelBuffer,
       proofOfAccommodation: proofOfAccommodationBuffer,
       proofOfAttendance: proofOfAttendanceBuffer,
@@ -199,4 +198,115 @@ const createApplication = async (req, res) => {
   }
 };
 
-export { createApplication };
+const updateApplication = async (req, res) => {
+  const {
+    id: applicantId,
+    email,
+    designation: applicantDesignation,
+    department,
+    institute,
+    role,
+  } = req.user;
+
+  const formData = req.body;
+  const applicationId = formData.applicationId;
+  delete formData.applicationId;
+
+  try {
+    if (role !== "applicant") {
+      return res
+        .status(403)
+        .send({ message: "Forbidden, Sign In as Applicant" });
+    }
+
+    const applicant = await prisma.user.findUnique({
+      where: { profileId: applicantId },
+    });
+
+    if (!applicant) {
+      return res.status(404).send({ message: "User not Found" });
+    }
+
+    const {
+      proofOfTravel,
+      proofOfAccommodation,
+      proofOfAttendance,
+      ...otherFiles
+    } = req.files;
+
+    // Prepare file buffers for fixed fields
+    const proofOfTravelBuffer = proofOfTravel?.[0]?.buffer || null;
+    const proofOfAccommodationBuffer =
+      proofOfAccommodation?.[0]?.buffer || null;
+    const proofOfAttendanceBuffer = proofOfAttendance?.[0]?.buffer || null;
+
+    // Prepare an object to hold the expense proof buffers dynamically
+    const expenseProofs = {};
+
+    for (let i = 0; i < 10; i++) {
+      const expenseProofField = `expenses[${i}].expenseProof`;
+      if (otherFiles[expenseProofField]) {
+        expenseProofs[`expenseProof${i}`] =
+          otherFiles[expenseProofField][0].buffer;
+      }
+    }
+
+    const expenses = JSON.parse(formData.expenses);
+
+    const totalExpense = parseFloat(
+      expenses.reduce(
+        (total, { expenseAmount }) => total + +expenseAmount,
+        0
+      ).toFixed(2)
+    );
+
+    formData["totalExpense"] = totalExpense;
+
+    const application = await prisma.application.findUnique({
+      where: { applicationId },
+    });
+
+    const validationFields = [
+      "facultyValidation",
+      "hodValidation",
+      "hoiValidation",
+      "vcValidation",
+      "accountsValidation",
+    ];
+
+    console.log(expenseProofs)
+
+    const updatedData = {
+      totalExpense,
+      formData,
+      proofOfTravel: proofOfTravelBuffer,
+      proofOfAccommodation: proofOfAccommodationBuffer,
+      proofOfAttendance: proofOfAttendanceBuffer,
+      resubmission: false,
+      ...expenseProofs,
+    };
+
+    for (const field of validationFields) {
+      if (application[field] === "REJECTED") {
+        updatedData[field] = "PENDING";
+      }
+    }
+
+    const updatedApplication = await prisma.application.update({
+      where: { applicationId },
+      data: updatedData,
+    });
+
+    res.status(200).send({
+      message: "Application updated successfully",
+      data: updatedApplication.applicantName,
+    });
+  } catch (error) {
+    res.status(500).send({
+      message: "Error updating application",
+      error: error.message,
+    });
+  }
+}
+
+export { createApplication, updateApplication };

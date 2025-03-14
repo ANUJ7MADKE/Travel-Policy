@@ -6,6 +6,29 @@ import {
 
 const facultyFormFeilds = [
   {
+    label: "Application Type",
+    fields: [
+      {
+        label: "Select Application Type",
+        name: "formName",
+        type: "dropdown",
+        options: {
+          "": [
+            { label: "Travel Intimation Form", value: "Travel Intimation Form" },
+            { label: "Post Travel Form", value: "Post Travel Form" },
+          ],
+        },
+        validation: yup.string().notRequired("Application Type is notRequired"),
+      },
+      {
+        parent: { name: "formName", values: ["Travel Intimation Form"] },
+        label: "Advance Required",
+        name: "advanceRequired",
+        type: "checkbox",
+      }
+    ],
+  },
+  {
     label: "Cadre Or Individual Application",
     fields: [
       {

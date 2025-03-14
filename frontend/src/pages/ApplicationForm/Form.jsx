@@ -1,12 +1,18 @@
 import React from "react";
 import { Formik } from "formik";
 import Input from "./Input";
-import { useSubmit, useRouteLoaderData, useNavigation } from "react-router-dom";
+import { useSubmit, useRouteLoaderData, useNavigation, useParams } from "react-router-dom";
 import { studentFormFeilds, facultyFormFeilds } from "./FormFeilds";
 import * as yup from "yup";
 
-function Form({ prefilledData, applicantDesignation }) {
-  const submit = useSubmit();
+function Form({ prefilledData, applicantDesignation, resubmission = false }) {
+
+  const { role, user } =
+    useRouteLoaderData("Applicant-Root")?.data ||
+    useRouteLoaderData("Validator-Root")?.data;
+  const applicationId = useParams().applicationId || "";
+    
+  const submit = useSubmit("upsertApplicationAction");
   const navigation = useNavigation();
   const isSubmittingNav = navigation.state === "submitting";
   let formFeilds = [];
@@ -33,7 +39,7 @@ function Form({ prefilledData, applicantDesignation }) {
         ...section,
         fields: section?.fields?.map((field) => ({
           ...field,
-          disabled: true,
+          // disabled: true,
         })),
       };
     });
@@ -50,9 +56,11 @@ function Form({ prefilledData, applicantDesignation }) {
           if (field.type === "miniForm") {
             schema[field.name] = JSON.parse(prefilledData[field.name]);
           } else if (field.type === "checkbox") {
-            schema[field.name] = JSON.parse(prefilledData[field.name]);
+            schema[field.name] = JSON.parse(
+              prefilledData[field.name] || "false"
+            );
           } else if (field.type === "number") {
-              schema[field.name] = parseInt(prefilledData[field.name]); 
+            schema[field.name] = parseInt(prefilledData[field.name]);
           } else {
             schema[field.name] = prefilledData[field.name];
           }
@@ -111,6 +119,9 @@ function Form({ prefilledData, applicantDesignation }) {
       }
     }
 
+    formDataToSend.append("resubmission", resubmission);
+    formDataToSend.append("applicationId", applicationId);
+
     try {
       submit(formDataToSend, {
         method: "POST",
@@ -152,7 +163,7 @@ function Form({ prefilledData, applicantDesignation }) {
             setFieldValue={setFieldValue} // Pass setFieldValue for file handling
             formFeilds={formFeilds}
           />
-          {!prefilledData && (
+          {(resubmission || !prefilledData) && role != "Validator" && (
             <button
               type="submit"
               disabled={isSubmitting || isSubmittingNav}
