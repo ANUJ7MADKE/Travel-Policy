@@ -39,7 +39,7 @@ function Form({ prefilledData, applicantDesignation, resubmission = false }) {
         ...section,
         fields: section?.fields?.map((field) => ({
           ...field,
-          // disabled: true,
+          disabled: role === "Validator" ? true : (resubmission && field?.name == "expenses" ) ?  false : true,
         })),
       };
     });

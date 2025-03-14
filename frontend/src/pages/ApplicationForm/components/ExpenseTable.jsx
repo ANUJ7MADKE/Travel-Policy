@@ -30,6 +30,8 @@ const ExpenseTable = ({
         { expense, action, applicationId },
         { withCredentials: true }
       );
+      alert(`Proof ${action}`);
+      window.location.reload();
     } catch (error) {
       console.error("Error performing expense action:", error);
     }
@@ -84,7 +86,7 @@ const ExpenseTable = ({
     ];
 
     // Add the "Delete" column only if 'disabled' is false
-    if (!disabled) {
+    if (role === "Applicant" && !disabled) {
       baseColumns.push({
         Header: "Actions",
         accessor: "actions",
@@ -119,14 +121,14 @@ const ExpenseTable = ({
         Header: "Approval",
         accessor: "approval",
         Cell: ({ row }) => (
-          <div className="flex justify-center space-x-7">
+          <div className="flex justify-center items-center space-x-7">
             <div className="text-center">
               <button
                 type="button"
                 onClick={() => handleExpenseAction(row.original, "verified")}
                 className="bg-green-600 text-white py-2 px-3 rounded-lg hover:bg-green-700 transition-colors focus:outline-none"
               >
-                <MdVerified />
+                <MdVerified size= {row?.original?.proofStatus === "verified" ? 40: 15}/>
               </button>
             </div>
             <div className="text-center">
@@ -135,7 +137,7 @@ const ExpenseTable = ({
                 onClick={() => handleExpenseAction(row.original, "rejected")}
                 className="bg-red-600 text-white py-2 px-3 rounded-lg hover:bg-red-700 transition-colors focus:outline-none"
               >
-                <MdDangerous />
+                <MdDangerous size= {row?.original?.proofStatus === "rejected" ? 40: 15}/>
               </button>
             </div>
           </div>
