@@ -23,6 +23,8 @@ function ApplicationView() {
   const [rejectionFeedbackPopUp, setRejectionFeedbackPopUp] = useState(false);
   const [acceptChoicePopUp, setAcceptChoicePopUp] = useState(false);
 
+  const [formValues, setFormValues] = useState({});
+
   const applicationId = useParams().applicationId;
   const statusParam = useParams().status;
 
@@ -73,6 +75,10 @@ function ApplicationView() {
       //   console.log(key, value);
       // });
 
+      if (formValues && formValues?.expenses) {
+        formData.append("expenses", JSON.stringify(formValues.expenses));
+      }
+    
       submit(formData, {
         method: "PUT",
         encType: "multipart/form-data", // Specify the encoding type
@@ -136,6 +142,7 @@ function ApplicationView() {
         prefilledData={applicationDisplay?.formData}
         applicantDesignation={applicationDisplay?.applicant?.designation}
         resubmission={applicationDisplay?.resubmission || false}
+        onValuesChange={(values) => setFormValues(values)}
       />
 
       {rejectionFeedbackPopUp && (

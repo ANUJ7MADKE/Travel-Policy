@@ -14,7 +14,10 @@ const facultyFormFeilds = [
         type: "dropdown",
         options: {
           "": [
-            { label: "Travel Intimation Form", value: "Travel Intimation Form" },
+            {
+              label: "Travel Intimation Form",
+              value: "Travel Intimation Form",
+            },
             { label: "Post Travel Form", value: "Post Travel Form" },
           ],
         },
@@ -25,7 +28,18 @@ const facultyFormFeilds = [
         label: "Advance Required",
         name: "advanceRequired",
         type: "checkbox",
-      }
+      },
+      {
+        parent: { name: "formName", values: ["Post Travel Form"] },
+        label: "Intimation Application ID",
+        name: "intimationApplicationID",
+        type: "text",
+        validation: yup.string().when("formName", {
+          is: "Post Travel Form",
+          then: (schema) => schema.required("Application ID is required"),
+          otherwise: (schema) => schema.notRequired(),
+        }),
+      },
     ],
   },
   {

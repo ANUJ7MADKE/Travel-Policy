@@ -319,6 +319,16 @@ function Input({
                               )
                             )
                           }
+                          editStatus={(expense, status) =>{
+                            setFieldValue(
+                              formFeild.name,
+                              values[formFeild.name]?.map((toEdit) =>
+                                toEdit === expense
+                                  ? { ...toEdit, proofStatus: status }
+                                  : toEdit
+                              )
+                            )}
+                          }
                           editExpense={(expenseValues) => {setShowMiniForm(true); setExpensesEditValues(expenseValues)}}
                           disabled={formFeild?.disabled}
                         />

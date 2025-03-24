@@ -6,7 +6,7 @@ const applicationAction = async (req, res) => {
   const { id: profileId, designation, department, institute, role } = req.user;
 
   try {
-    const { applicationId, action, rejectionFeedback, toVC, resubmission } = req.body; // actions = 'accepted' or 'rejected'
+    const { applicationId, action, rejectionFeedback, toVC, resubmission, expenses } = req.body; // actions = 'accepted' or 'rejected'
 
     if (role !== "validator") {
       return res.status(403).send("Forbidden, Sign in as a validator");
@@ -229,6 +229,16 @@ const applicationAction = async (req, res) => {
       validationData.rejectionFeedback = rejectionFeedback;
     }
 
+    if (action === "ACCEPTED") {
+      validationData.rejectionFeedback = null;
+    } 
+
+    const newFormData = application.formData;
+
+    if (expenses) {
+      newFormData.expenses = expenses;
+    }
+
     const response = await prisma.application.update({
       where: {
         applicationId: applicationId,
@@ -239,6 +249,7 @@ const applicationAction = async (req, res) => {
         validators: {
           connect: validators,
         },
+        formData: newFormData,
       },
       select: { applicationId: true },
     });

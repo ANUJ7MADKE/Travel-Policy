@@ -6,13 +6,13 @@ const validateForm = (values) => {
   const errors = {};
 
   // Validate Expense Category
-  if (!values.expenseCategory) {
-    errors.expenseCategory = "Expense Category is required";
+  if (!values.expenseName) {
+    errors.expenseName = "Expense Category is required";
   }
 
   // Validate Expense Name
-  if (!values.expenseName) {
-    errors.expenseName = "Expense Name is required";
+  if (!values.expenseDetails) {
+    errors.expenseDetails = "Expense Name is required";
   }
 
   // Validate Expense Amount
@@ -45,15 +45,15 @@ const ExpenseForm = ({ onClose, setExpenses, editExpense, expenses = null }) => 
   const fileInputRef = useRef(null);
 
   const [values, setValues] = useState({
-    expenseCategory: "",
     expenseName: "",
+    expenseDetails: "",
     expenseAmount: "",
     expenseProof: null,
   });
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({
-    expenseCategory: false,
     expenseName: false,
+    expenseDetails: false,
     expenseAmount: false,
     expenseProof: false,
   });
@@ -119,16 +119,16 @@ const ExpenseForm = ({ onClose, setExpenses, editExpense, expenses = null }) => 
       if (expenses) {
         editExpense({
           expenseId: expenses.expenseId,
-          expenseCategory: values.expenseCategory,
           expenseName: values.expenseName,
+          expenseDetails: values.expenseDetails,
           expenseAmount: values.expenseAmount,
           expenseProof: values.expenseProof,
         })
       } else {
         setExpenses({
           expenseId: crypto.randomUUID(),
-          expenseCategory: values.expenseCategory,
           expenseName: values.expenseName,
+          expenseDetails: values.expenseDetails,
           expenseAmount: values.expenseAmount,
           expenseProof: values.expenseProof,
         });
@@ -142,13 +142,13 @@ const ExpenseForm = ({ onClose, setExpenses, editExpense, expenses = null }) => 
       <div className="space-y-4">
         {/* Expense Category */}
         <div className="space-y-1 bg-slate-50 p-3 rounded-md">
-          <label htmlFor="expenseCategory" className="block font-medium">
-            Expense Category
+          <label htmlFor="expenseName" className="block font-medium">
+            Expense Name
           </label>
           <select
-            name="expenseCategory"
-            id="expenseCategory"
-            value={values.expenseCategory}
+            name="expenseName"
+            id="expenseName"
+            value={values.expenseName}
             onChange={handleChange}
             onBlur={handleBlur}
             className="w-full px-3 py-2 border border-gray-300 rounded-md"
@@ -158,29 +158,31 @@ const ExpenseForm = ({ onClose, setExpenses, editExpense, expenses = null }) => 
             <option value="LODGING">Lodging</option>
             <option value="BOARDING">Boarding</option>
             <option value="LOCAL_CONVEYANCE">Local Conveyance</option>
+            <option value="TRANSPORTATION">Transportation</option>
+            <option value="REGISTRATION">Registration</option>
             <option value="MISCELLANEOUS">Miscellaneous</option>
           </select>
-          {errors.expenseCategory && (
-            <p className="text-red-500 text-sm">{errors.expenseCategory}</p>
+          {errors.expenseName && (
+            <p className="text-red-500 text-sm">{errors.expenseName}</p>
           )}
         </div>
 
         {/* Expense Name */}
         <div className="space-y-1 bg-slate-50 p-3 rounded-md">
-          <label htmlFor="expenseName" className="block font-medium">
-            Expense Name
+          <label htmlFor="expenseDetails" className="block font-medium">
+            Expense Details
           </label>
           <input
             type="text"
-            name="expenseName"
-            id="expenseName"
-            value={values.expenseName}
+            name="expenseDetails"
+            id="expenseDetails"
+            value={values.expenseDetails}
             onChange={handleChange}
             onBlur={handleBlur}
             className="w-full px-3 py-2 border border-gray-300 rounded-md"
           />
-          {errors.expenseName && (
-            <p className="text-red-500 text-sm">{errors.expenseName}</p>
+          {errors.expenseDetails && (
+            <p className="text-red-500 text-sm">{errors.expenseDetails}</p>
           )}
         </div>
 

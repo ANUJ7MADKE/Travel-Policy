@@ -16,6 +16,7 @@ const ExpenseTable = ({
   setFileUrl,
   deleteExpense,
   editExpense,
+  editStatus,
   disabled,
 }) => {
   const applicationId = useParams().applicationId;
@@ -23,30 +24,30 @@ const ExpenseTable = ({
     useRouteLoaderData("Applicant-Root")?.data ||
     useRouteLoaderData("Validator-Root")?.data;
 
-  const handleExpenseAction = async (expense, action) => {
-    try {
-      await axios.put(
-        `${import.meta.env.VITE_APP_API_URL}/validator/expenseAction`,
-        { expense, action, applicationId },
-        { withCredentials: true }
-      );
-      alert(`Proof ${action}`);
-      window.location.reload();
-    } catch (error) {
-      console.error("Error performing expense action:", error);
-    }
-  };
+  // const handleExpenseAction = async (expense, action) => {
+  //   try {
+  //     await axios.put(
+  //       `${import.meta.env.VITE_APP_API_URL}/validator/expenseAction`,
+  //       { expense, action, applicationId },
+  //       { withCredentials: true }
+  //     );
+  //     alert(`Proof ${action}`);
+  //     window.location.reload();
+  //   } catch (error) {
+  //     console.error("Error performing expense action:", error);
+  //   }
+  // };
 
   const columns = React.useMemo(() => {
     // Common columns
     const baseColumns = [
       {
-        Header: "Expense Category",
-        accessor: "expenseCategory",
-      },
-      {
         Header: "Expense Name",
         accessor: "expenseName",
+      },
+      {
+        Header: "Expense Details",
+        accessor: "expenseDetails",
       },
       {
         Header: "Amount",
@@ -125,7 +126,7 @@ const ExpenseTable = ({
             <div className="text-center">
               <button
                 type="button"
-                onClick={() => handleExpenseAction(row.original, "verified")}
+                onClick={() => editStatus(row.original, "verified")}
                 className="bg-green-600 text-white py-2 px-3 rounded-lg hover:bg-green-700 transition-colors focus:outline-none"
               >
                 <MdVerified size= {row?.original?.proofStatus === "verified" ? 40: 15}/>
@@ -134,7 +135,7 @@ const ExpenseTable = ({
             <div className="text-center">
               <button
                 type="button"
-                onClick={() => handleExpenseAction(row.original, "rejected")}
+                onClick={() => editStatus(row.original, "rejected")}
                 className="bg-red-600 text-white py-2 px-3 rounded-lg hover:bg-red-700 transition-colors focus:outline-none"
               >
                 <MdDangerous size= {row?.original?.proofStatus === "rejected" ? 40: 15}/>

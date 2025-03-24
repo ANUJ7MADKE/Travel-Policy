@@ -1,17 +1,26 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Formik } from "formik";
 import Input from "./Input";
-import { useSubmit, useRouteLoaderData, useNavigation, useParams } from "react-router-dom";
+import {
+  useSubmit,
+  useRouteLoaderData,
+  useNavigation,
+  useParams,
+} from "react-router-dom";
 import { studentFormFeilds, facultyFormFeilds } from "./FormFeilds";
 import * as yup from "yup";
 
-function Form({ prefilledData, applicantDesignation, resubmission = false }) {
-
+function Form({
+  prefilledData,
+  applicantDesignation,
+  resubmission = false,
+  onValuesChange,
+}) {
   const { role, user } =
     useRouteLoaderData("Applicant-Root")?.data ||
     useRouteLoaderData("Validator-Root")?.data;
   const applicationId = useParams().applicationId || "";
-    
+
   const submit = useSubmit("upsertApplicationAction");
   const navigation = useNavigation();
   const isSubmittingNav = navigation.state === "submitting";
@@ -39,7 +48,12 @@ function Form({ prefilledData, applicantDesignation, resubmission = false }) {
         ...section,
         fields: section?.fields?.map((field) => ({
           ...field,
-          disabled: role === "Validator" ? true : (resubmission && field?.name == "expenses" ) ?  false : true,
+          disabled:
+            role === "Validator"
+              ? true
+              : resubmission && field?.name == "expenses"
+              ? false
+              : true,
         })),
       };
     });
@@ -149,31 +163,40 @@ function Form({ prefilledData, applicantDesignation, resubmission = false }) {
         handleSubmit,
         setFieldValue, // Use setFieldValue for file handling
         isSubmitting,
-      }) => (
-        <form
-          onSubmit={handleSubmit}
-          className="p-2 my-4 overflow-y-auto bg-transparent"
-        >
-          <Input
-            values={values}
-            errors={errors}
-            touched={touched}
-            handleChange={handleChange}
-            handleBlur={handleBlur}
-            setFieldValue={setFieldValue} // Pass setFieldValue for file handling
-            formFeilds={formFeilds}
-          />
-          {(resubmission || !prefilledData) && role != "Validator" && (
-            <button
-              type="submit"
-              disabled={isSubmitting || isSubmittingNav}
-              className="w-full flex items-center justify-center bg-gradient-to-r from-red-600 to-red-800 hover:from-red-800 hover:to-red-600 text-white font-semibold py-2 px-4 rounded-lg shadow-lg transform transition duration-300 ease-in-out disabled:bg-gray-400"
-            >
-              {isSubmitting || isSubmittingNav ? "Submitting" : "Submit"}
-            </button>
-          )}
-        </form>
-      )}
+      }) => {
+        // Notify parent about values change
+        useEffect(() => {
+          if (onValuesChange) {
+            onValuesChange(values);
+          }
+        }, [values, onValuesChange]);
+
+        return (
+          <form
+            onSubmit={handleSubmit}
+            className="p-2 my-4 overflow-y-auto bg-transparent"
+          >
+            <Input
+              values={values}
+              errors={errors}
+              touched={touched}
+              handleChange={handleChange}
+              handleBlur={handleBlur}
+              setFieldValue={setFieldValue} // Pass setFieldValue for file handling
+              formFeilds={formFeilds}
+            />
+            {(resubmission || !prefilledData) && role != "Validator" && (
+              <button
+                type="submit"
+                disabled={isSubmitting || isSubmittingNav}
+                className="w-full flex items-center justify-center bg-gradient-to-r from-red-600 to-red-800 hover:from-red-800 hover:to-red-600 text-white font-semibold py-2 px-4 rounded-lg shadow-lg transform transition duration-300 ease-in-out disabled:bg-gray-400"
+              >
+                {isSubmitting || isSubmittingNav ? "Submitting" : "Submit"}
+              </button>
+            )}
+          </form>
+        );
+      }}
     </Formik>
   );
 }
