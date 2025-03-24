@@ -18,7 +18,9 @@ const facultyFormFeilds = [
               label: "Travel Intimation Form",
               value: "Travel Intimation Form",
             },
-            { label: "Post Travel Form", value: "Post Travel Form" },
+            { label: "Post Travel Form", 
+              value: "Post Travel Form" 
+            },
           ],
         },
         validation: yup.string().notRequired("Application Type is notRequired"),

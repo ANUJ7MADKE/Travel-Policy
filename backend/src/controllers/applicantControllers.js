@@ -14,11 +14,45 @@ const createApplication = async (req, res) => {
 
   const formData = req.body;
 
+  console.log(formData);
+
   try {
     if (role !== "applicant") {
       return res
         .status(403)
         .send({ message: "Forbidden, Sign In as Applicant" });
+    }
+
+    // check for the formName
+    // if form name is "Travel Intimation Form", then do nothing
+    // if form name is "Post Travel Form" then get the "intimationApplicationID" from the form and check if an application with that id exists if not then return an error
+    // then check if that form dosent have any validation pending or rejected
+    // if it has then return an error
+    // if not then create the application
+
+    const formName = formData.formName;
+    if (!formName){
+      return res.status(400).send({ message: "Form Name is required" });
+    }
+
+    if (formName === "Post Travel Form") {
+      const intimationApplicationID = formData.intimationApplicationID;
+      if (intimationApplicationID === null) {
+        return res.status(400).send({ message: "Intimation Application ID is required" });
+      }
+
+      const intimationApplication = await prisma.application.findUnique({
+        where: { applicationId: intimationApplicationID },
+      });
+
+      if (!intimationApplication) {
+        return res.status(404).send({ message: "Intimation Application not found" });
+      }
+
+      if (intimationApplication.facultyValidation === "PENDING" || intimationApplication.facultyValidation === "REJECTED" || intimationApplication.hodValidation === "PENDING" || intimationApplication.hodValidation === "REJECTED" || intimationApplication.hoiValidation === "PENDING" || intimationApplication.hoiValidation === "REJECTED" || intimationApplication.vcValidation === "PENDING" || intimationApplication.vcValidation === "REJECTED" || intimationApplication.accountsValidation === "PENDING" || intimationApplication.accountsValidation === "REJECTED") {
+        return res.status(400).send({ message: "Intimation Application has pending validations" });
+      }
+
     }
 
     const applicant = await prisma.user.findUnique({
@@ -174,6 +208,7 @@ const createApplication = async (req, res) => {
         validators: {
           connect: validators,
         },
+        formName: formData.formName,
       },
     });
 
