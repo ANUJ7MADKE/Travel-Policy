@@ -14,13 +14,19 @@ const createApplication = async (req, res) => {
 
   const formData = req.body;
 
-  console.log(formData);
-
   try {
     if (role !== "applicant") {
       return res
         .status(403)
         .send({ message: "Forbidden, Sign In as Applicant" });
+    }
+
+    const applicant = await prisma.user.findUnique({
+      where: { profileId: applicantId },
+    });
+
+    if (!applicant) {
+      return res.status(404).send({ message: "User not Found" });
     }
 
     // check for the formName
@@ -42,25 +48,48 @@ const createApplication = async (req, res) => {
       }
 
       const intimationApplication = await prisma.application.findUnique({
-        where: { applicationId: intimationApplicationID },
+        where: { 
+          applicationId: intimationApplicationID,
+          applicantId: applicantId,
+         },
       });
 
       if (!intimationApplication) {
         return res.status(404).send({ message: "Intimation Application not found" });
       }
 
-      if (intimationApplication.facultyValidation === "PENDING" || intimationApplication.facultyValidation === "REJECTED" || intimationApplication.hodValidation === "PENDING" || intimationApplication.hodValidation === "REJECTED" || intimationApplication.hoiValidation === "PENDING" || intimationApplication.hoiValidation === "REJECTED" || intimationApplication.vcValidation === "PENDING" || intimationApplication.vcValidation === "REJECTED" || intimationApplication.accountsValidation === "PENDING" || intimationApplication.accountsValidation === "REJECTED") {
-        return res.status(400).send({ message: "Intimation Application has pending validations" });
+      if ( intimationApplication["formName"] !== "Travel Intimation Form") {
+        return res.status(400).send({ message: "Intimation Application ID is not of a Travel Intimation Form" });
       }
 
-    }
+      const validationFields = [
+        "facultyValidation",
+        "hodValidation",
+        "hoiValidation",
+        "vcValidation",
+        "accountsValidation",
+      ];
 
-    const applicant = await prisma.user.findUnique({
-      where: { profileId: applicantId },
-    });
+      const hasRejectedValidations = validationFields.some(
+        (field) => intimationApplication[field] === "REJECTED"
+      );
 
-    if (!applicant) {
-      return res.status(404).send({ message: "User not Found" });
+      if (hasRejectedValidations) {
+        return res
+          .status(400)
+          .send({ message: "Intimation Application has rejected validations" });
+      }
+
+      const hasPendingValidations = validationFields.some(
+        (field) => intimationApplication[field] === "PENDING"
+      );
+
+      if (hasPendingValidations) {
+        return res
+          .status(400)
+          .send({ message: "Intimation Application has pending validations" });
+      }
+
     }
 
     const applicantName = applicant.userName;
