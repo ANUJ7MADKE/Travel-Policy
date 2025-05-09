@@ -12,7 +12,7 @@ export default defineConfig({
       '/verify-validator': process.env.VITE_APP_API_URL,
       '/submit': process.env.VITE_APP_API_URL,
     },
-    allowedHosts: ["https://travel-policy-frontend.onrender.com/"],
+    allowedHosts: ["travel-policy-frontend.onrender.com"],
     host: true,
     port: 5173,
   },
