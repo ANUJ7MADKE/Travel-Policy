@@ -6,7 +6,14 @@ const applicationAction = async (req, res) => {
   const { id: profileId, designation, department, institute, role } = req.user;
 
   try {
-    const { applicationId, action, rejectionFeedback, toVC, resubmission, expenses } = req.body; // actions = 'accepted' or 'rejected'
+    const {
+      applicationId,
+      action,
+      rejectionFeedback,
+      toVC,
+      resubmission,
+      expenses,
+    } = req.body; // actions = 'accepted' or 'rejected'
 
     if (role !== "validator") {
       return res.status(403).send("Forbidden, Sign in as a validator");
@@ -130,7 +137,7 @@ const applicationAction = async (req, res) => {
 
         if (validationStatus === "ACCEPTED") {
           if (JSON.parse(toVC)) {
-            if (applicantDesignation !== "STUDENT") {
+            if (applicantDesignation === "STUDENT") {
               return {
                 status: 400,
                 message:
@@ -139,7 +146,9 @@ const applicationAction = async (req, res) => {
             }
             validationData.vcValidation = "PENDING";
             vc = await prisma.user.findFirst({
-              where: { designation: "VC" },
+              where: {
+                designation: "VC",
+              },
             });
             sendMail({
               emailId: vc.email,
@@ -217,7 +226,6 @@ const applicationAction = async (req, res) => {
         return res.status(400).send("Invalid validator designation");
     }
 
-
     const validators = [
       hod && { profileId: hod?.profileId },
       hoi && { profileId: hoi?.profileId },
@@ -231,7 +239,7 @@ const applicationAction = async (req, res) => {
 
     if (action === "ACCEPTED") {
       validationData.rejectionFeedback = null;
-    } 
+    }
 
     const newFormData = application.formData;
 
@@ -265,7 +273,7 @@ const expenseAction = async (req, res) => {
 
   try {
     const { applicationId, expense, action } = req.body;
-    
+
     if (role !== "validator") {
       return res.status(403).send("Forbidden, Sign in as a validator");
     }
@@ -296,28 +304,29 @@ const expenseAction = async (req, res) => {
 
     const updatedFormData = {
       ...application.formData,
-      expenses: JSON.stringify(JSON.parse(application.formData.expenses).map((singleExpense) =>
-      singleExpense.expenseId === expense.expenseId
-        ? { ...singleExpense, proofStatus: action }
-        : singleExpense
-      )),
+      expenses: JSON.stringify(
+        JSON.parse(application.formData.expenses).map((singleExpense) =>
+          singleExpense.expenseId === expense.expenseId
+            ? { ...singleExpense, proofStatus: action }
+            : singleExpense
+        )
+      ),
     };
 
     const updatedApplication = await prisma.application.update({
       where: {
-        applicationId
+        applicationId,
       },
       data: {
-        formData: updatedFormData
-      }
-    })
+        formData: updatedFormData,
+      },
+    });
 
-    res.status(200).send(updatedApplication)
-    
+    res.status(200).send(updatedApplication);
   } catch (error) {
     res.status(500).send(error.message);
   }
-}
+};
 
 const getApplicantNames = async (req, res) => {
   const { id: profileId, designation, department, institute, role } = req.user;

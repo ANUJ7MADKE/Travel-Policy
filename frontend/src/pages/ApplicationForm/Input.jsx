@@ -244,7 +244,7 @@ function Input({
                             0
                           )
                           .toFixed(2)}`}
-                        {values[formFeild.name]
+                        {/* {values[formFeild.name]
                           ?.reduce(
                             (total, rec) =>
                               total + parseFloat(rec.expenseAmount || 0),
@@ -252,7 +252,7 @@ function Input({
                           )
                           .toFixed(2) > 10000 && (
                           <p className="text-red-600">Warning: Limit Exceded</p>
-                        )}
+                        )} */}
                       </label>
 
                       {!formFeild?.disabled &&

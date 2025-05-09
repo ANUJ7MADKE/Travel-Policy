@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useTable } from "react-table";
 import axios from "axios";
 import {
@@ -20,6 +20,7 @@ const ExpenseTable = ({
   disabled,
 }) => {
   const applicationId = useParams().applicationId;
+  const applicationStatus = useParams().status;
   const { role } =
     useRouteLoaderData("Applicant-Root")?.data ||
     useRouteLoaderData("Validator-Root")?.data;
@@ -121,28 +122,80 @@ const ExpenseTable = ({
       baseColumns.push({
         Header: "Approval",
         accessor: "approval",
-        Cell: ({ row }) => (
-          <div className="flex justify-center items-center space-x-7">
-            <div className="text-center">
-              <button
-                type="button"
-                onClick={() => editStatus(row.original, "verified")}
-                className="bg-green-600 text-white py-2 px-3 rounded-lg hover:bg-green-700 transition-colors focus:outline-none"
-              >
-                <MdVerified size= {row?.original?.proofStatus === "verified" ? 40: 15}/>
-              </button>
+        Cell: ({ row }) => {
+          const isVerified = row?.original?.proofStatus === "verified";
+          const isRejected = row?.original?.proofStatus === "rejected";
+          const status = isVerified ? "verified" : isRejected ? "rejected" : "pending";
+          const [hoverSide, setHoverSide] = useState(null);
+          
+          return (
+            <div className="flex flex-col items-center justify-center py-2">
+              <div className="relative flex items-center w-36 sm:w-48 cursor-pointer my-5 group">
+                {/* Status indicator text */}
+                <div className="absolute -top-5 left-0 w-full flex justify-between text-xs font-medium">
+                  <span className={`${status === "verified" ? "text-green-600 font-bold" : "text-gray-500"}`}>Approved</span>
+                  <span className={`${status === "pending" ? "text-gray-600 font-bold" : "text-gray-500"}`}>Pending</span>
+                  <span className={`${status === "rejected" ? "text-red-600 font-bold" : "text-gray-500"}`}>Rejected</span>
+                </div>
+                
+                {/* Track background with hover effect */}
+                <div className={`w-full h-8 sm:h-10 rounded-full bg-gradient-to-r from-green-600 via-gray-300 to-red-600 p-1 group-hover:shadow-md transition-all duration-300 relative overflow-hidden`}>
+                  {/* Hover indicators */}
+                  {hoverSide === 'left' && (
+                    <div className="absolute inset-y-0 left-0 w-1/2 bg-green-300 bg-opacity-30 rounded-l-full pointer-events-none z-0"></div>
+                  )}
+                  {hoverSide === 'right' && (
+                    <div className="absolute inset-y-0 right-0 w-1/2 bg-red-300 bg-opacity-30 rounded-r-full pointer-events-none z-0"></div>
+                  )}
+                  
+                  {/* Sliding knob */}
+                  <div 
+                    className={`absolute h-6 sm:h-8 w-10 sm:w-12 bg-white rounded-full shadow-lg transition-all duration-300 flex items-center justify-center transform ${
+                      status === "verified" ? "left-1" : 
+                      status === "rejected" ? "right-1" : 
+                      "left-1/2 -translate-x-1/2"
+                    } group-hover:shadow-xl z-10`}
+                  >
+                    {status === "verified" && <MdVerified className="text-green-600" size={18} />}
+                    {status === "rejected" && <MdDangerous className="text-red-600" size={18} />}
+                    {status === "pending" && <span className="text-sm text-gray-600 font-medium">?</span>}
+                  </div>
+                </div>
+                
+                {/* Clickable buttons overlaid on top */}
+                <button
+                  type="button"
+                  onClick={() => editStatus(row.original, "verified")}
+                  onMouseEnter={() => setHoverSide('left')}
+                  onMouseLeave={() => setHoverSide(null)}
+                  className="absolute left-0 w-1/2 h-full opacity-0 z-20"
+                  aria-label="Approve"
+                  disabled={applicationStatus != "pending"}
+                />
+                <button
+                  type="button"
+                  onClick={() => editStatus(row.original, "rejected")}
+                  onMouseEnter={() => setHoverSide('right')}
+                  onMouseLeave={() => setHoverSide(null)}
+                  className="absolute right-0 w-1/2 h-full opacity-0 z-20"
+                  aria-label="Reject"
+                  disabled={applicationStatus != "pending"}
+                />
+              </div>
+              
+              {/* Status text */}
+              <p className={`text-xs ${
+                status === "verified" ? "text-green-600 font-medium" : 
+                status === "rejected" ? "text-red-600 font-medium" : 
+                "text-gray-500"
+              }`}>
+                {status === "verified" ? "Expense Approved" : 
+                 status === "rejected" ? "Expense Rejected" : 
+                 "Click to change status"}
+              </p>
             </div>
-            <div className="text-center">
-              <button
-                type="button"
-                onClick={() => editStatus(row.original, "rejected")}
-                className="bg-red-600 text-white py-2 px-3 rounded-lg hover:bg-red-700 transition-colors focus:outline-none"
-              >
-                <MdDangerous size= {row?.original?.proofStatus === "rejected" ? 40: 15}/>
-              </button>
-            </div>
-          </div>
-        ),
+          );
+        },
       });
     }
 
