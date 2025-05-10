@@ -1,4 +1,5 @@
-import { json, redirect,  } from 'react-router-dom';
+import { json, redirect } from 'react-router-dom';
+import { toastSuccess, toastError, toastSecurityAlert } from '../utils/toast';
 
 export async function upsertApplicationAction({ request }) {
   const formData = await request.formData();
@@ -28,13 +29,19 @@ export async function upsertApplicationAction({ request }) {
 
     if (!res.ok) {
       const errorData = await res.text();
-      alert(errorData)
+      
+      // Check for field tampering attempt
+      if (errorData.includes("Forbidden: Field") && errorData.includes("Tampering detected")) {
+        toastSecurityAlert("SECURITY ALERT: Your submission was blocked because form tampering was detected. Disabled fields cannot be modified. This incident has been logged.");
+      } else {
+        toastError(errorData);
+      }
+      
       return json({ message: errorData }, { status: res.status });
     }
     
-    alert("Application Submitted Succesfully")
+    toastSuccess("Application Submitted Successfully");
     return redirect("../dashboard/pending");
-
   } catch (error) {
     console.error('Fetch error:', error);
     return json({ message: error.message || 'An unexpected error occurred' }, { status: error.status || 500 });
